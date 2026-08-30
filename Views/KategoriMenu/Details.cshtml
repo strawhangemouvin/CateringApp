@@ -1,0 +1,42 @@
+@model CateringApp.Models.Entity.KategoriMenu
+@{
+    ViewData["Title"] = "Detail Kategori Menu";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-outline card-info">
+            <div class="card-header">
+                <h3 class="card-title">Informasi Detail Kategori</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 30%;">ID Kategori</th>
+                        <td>@Model.KategoriId</td>
+                    </tr>
+                    <tr>
+                        <th>Nama Kategori</th>
+                        <td>@Model.NamaKategori</td>
+                    </tr>
+                    <tr>
+                        <th>Deskripsi</th>
+                        <td>@(Model.Deskripsi ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Dibuat Pada</th>
+                        <td>@(Model.CreatedAt?.ToString("dd MMM yyyy HH:mm:ss") ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Diubah Pada</th>
+                        <td>@(Model.UpdatedAt?.ToString("dd MMM yyyy HH:mm:ss") ?? "-")</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="@Url.Action("Edit", new { id = Model.KategoriId })" class="btn btn-warning text-white font-weight-bold">Ubah</a>
+                <a href="@Url.Action("Index")" class="btn btn-default">Kembali</a>
+            </div>
+        </div>
+    </div>
+</div>

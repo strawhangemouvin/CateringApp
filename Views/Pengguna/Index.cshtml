@@ -1,0 +1,124 @@
+@model IEnumerable<CateringApp.Models.Entity.Pengguna>
+@{
+    ViewData["Title"] = "Kelola Pengguna";
+}
+
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Daftar Pengguna / Akun</h3>
+        <div class="card-tools">
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Tambah Pengguna Baru
+            </a>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <!-- Search and filters -->
+        <form method="get" class="row mb-3">
+            <div class="col-md-3 mb-2">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama/username..." value="@ViewBag.Search" />
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-2">
+                <select name="peranId" class="form-control" onchange="this.form.submit()" asp-items="ViewBag.PeranId">
+                    <option value="">-- Semua Peran --</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <select name="sort" class="form-control" onchange="this.form.submit()">
+                    <option value="terbaru" selected="@(ViewBag.Sort == "terbaru")">Terbaru</option>
+                    <option value="terlama" selected="@(ViewBag.Sort == "terlama")">Terlama</option>
+                    <option value="A-Z" selected="@(ViewBag.Sort == "A-Z")">Nama A-Z</option>
+                    <option value="Z-A" selected="@(ViewBag.Sort == "Z-A")">Nama Z-A</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 mb-2">
+                <select name="size" class="form-control" onchange="this.form.submit()">
+                    <option value="5" selected="@(ViewBag.PageSize == 5)">5 per hal</option>
+                    <option value="10" selected="@(ViewBag.PageSize == 10)">10 per hal</option>
+                    <option value="20" selected="@(ViewBag.PageSize == 20)">20 per hal</option>
+                </select>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID Pengguna</th>
+                        <th>Username</th>
+                        <th>Nama Lengkap</th>
+                        <th>Email</th>
+                        <th>Peran</th>
+                        <th>Nomor Telepon</th>
+                        <th class="text-center" style="width: 200px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.PenggunaId</td>
+                                <td>@item.Username</td>
+                                <td>@item.NamaLengkap</td>
+                                <td>@item.Email</td>
+                                <td>
+                                    <span class="badge @(item.Peran?.NamaPeran == "Pemilik Toko" ? "badge-danger" : (item.Peran?.NamaPeran == "Karyawan" ? "badge-warning" : "badge-success"))">
+                                        @item.Peran?.NamaPeran
+                                    </span>
+                                </td>
+                                <td>@(item.NomorTelepon ?? "-")</td>
+                                <td class="text-center" style="white-space: nowrap;">
+                                    <a href="@Url.Action("Details", new { id = item.PenggunaId })" class="btn btn-info btn-xs"><i class="fas fa-eye"></i> Detail</a>
+                                    <a href="@Url.Action("Edit", new { id = item.PenggunaId })" class="btn btn-warning btn-xs"><i class="fas fa-edit"></i> Ubah</a>
+                                    <a href="@Url.Action("Delete", new { id = item.PenggunaId })" class="btn btn-danger btn-xs" onclick="return confirm('Hapus pengguna ini?');"><i class="fas fa-trash"></i> Hapus</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">Tidak ada pengguna ditemukan.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Pager -->
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
+            <div>
+                Showing @(ViewBag.TotalRecords == 0 ? 0 : ((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) to @Math.Min((int)ViewBag.CurrentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalRecords) of @ViewBag.TotalRecords entries
+            </div>
+            
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, peranId = ViewBag.SelectedPeran, sort = ViewBag.Sort, page = ViewBag.CurrentPage - 1, size = ViewBag.PageSize })">Prev</a>
+                    </li>
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, peranId = ViewBag.SelectedPeran, sort = ViewBag.Sort, page = i, size = ViewBag.PageSize })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages || ViewBag.TotalPages == 0 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, peranId = ViewBag.SelectedPeran, sort = ViewBag.Sort, page = ViewBag.CurrentPage + 1, size = ViewBag.PageSize })">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</div>

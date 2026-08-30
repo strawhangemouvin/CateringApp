@@ -1,0 +1,88 @@
+@model IEnumerable<CateringApp.Models.Entity.Pesanan>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Daftar Pesanan";
+    var session = HttpContextAccessor.HttpContext?.Session;
+    string? role = session?.GetString("Role");
+}
+
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Data Transaksi Pesanan</h3>
+        <div class="card-tools">
+            @if (role == "User")
+            {
+                <a href="@Url.Action("Create", "Pesanan")" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Pesan Menu Baru
+                </a>
+            }
+        </div>
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>No. Pesanan</th>
+                    <th>Pelanggan</th>
+                    <th>Tgl Kirim</th>
+                    <th>Total</th>
+                    <th>Status Pesanan</th>
+                    <th>Status Bayar</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NomorPesanan</td>
+                        <td>@item.Pengguna?.NamaLengkap</td>
+                        <td>@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
+                        <td>Rp @item.TotalBayar.ToString("N0")</td>
+                        <td><span class="badge badge-info">@item.StatusPesanan</span></td>
+                        <td>
+                            @if (item.Pembayaran != null)
+                            {
+                                <span class="badge @(item.Pembayaran.StatusVerifikasi == "Valid" ? "badge-success" : "badge-warning")">
+                                    @item.Pembayaran.StatusVerifikasi
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Belum Bayar</span>
+                            }
+                        </td>
+                        <td class="text-center" style="white-space: nowrap;">
+                            <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-info btn-xs">
+                                <i class="fas fa-eye"></i> Detail
+                            </a>
+                            
+                            @if (role == "User")
+                            {
+                                if (item.Pembayaran == null)
+                                {
+                                    <a href="@Url.Action("Bayar", "Pesanan", new { id = item.PesananId })" class="btn btn-success btn-xs">
+                                        <i class="fas fa-upload"></i> Upload Bayar
+                                    </a>
+                                }
+                                
+                                if (item.StatusPesanan == "Pending")
+                                {
+                                    <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-danger btn-xs" onclick="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                                        <i class="fas fa-times"></i> Batalkan
+                                    </a>
+                                }
+                            }
+                            else if (role == "Pemilik Toko")
+                            {
+                                <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-danger btn-xs" onclick="return confirm('Apakah Anda yakin ingin menghapus/membatalkan pesanan ini?');">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,122 @@
+@{
+    Layout = "~/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Selamat Datang di CateringApp";
+}
+
+<!-- Hero Section -->
+<div class="jumbotron jumbotron-fluid text-white text-center position-relative mb-0" style="background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1470&auto=format&fit=crop') no-repeat center center; background-size: cover; padding: 120px 0;">
+    <div class="container py-4">
+        <h1 class="display-3 font-weight-bold mb-3">Cita Rasa Terbaik Untuk Momen Spesial Anda</h1>
+        <p class="lead mb-5" style="font-size: 1.35rem; max-width: 800px; margin: 0 auto;">Penyedia catering premium dengan menu khas Nusantara yang higienis, lezat, dan disiapkan oleh koki profesional.</p>
+        <div>
+            <a href="@Url.Action("Register", "Account")" class="btn btn-brand-primary btn-lg px-5 py-3 mr-3 shadow-lg"><i class="fas fa-user-plus mr-2"></i> Daftar Sekarang</a>
+            <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg px-5 py-3 text-dark font-weight-bold shadow-lg"><i class="fas fa-sign-in-alt mr-2"></i> Masuk Sesi</a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="font-weight-bold text-dark">Mengapa Memilih Kami?</h2>
+            <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Kami berdedikasi menyajikan layanan dan rasa terbaik demi kelancaran acara berharga Anda.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
+                    <div class="mb-3 text-danger"><i class="fas fa-award fa-3x"></i></div>
+                    <h5 class="font-weight-bold text-dark mb-2">Bahan Berkualitas</h5>
+                    <p class="text-muted mb-0">Seluruh masakan diolah dari bahan baku segar, halal, dan bebas bahan pengawet sintetis.</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
+                    <div class="mb-3 text-danger"><i class="fas fa-heart fa-3x"></i></div>
+                    <h5 class="font-weight-bold text-dark mb-2">Cita Rasa Nusantara</h5>
+                    <p class="text-muted mb-0">Resep bumbu tradisional warisan leluhur yang disesuaikan secara pas untuk lidah Indonesia.</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
+                    <div class="mb-3 text-danger"><i class="fas fa-truck-fast fa-3x"></i></div>
+                    <h5 class="font-weight-bold text-dark mb-2">Pengiriman Tepat Waktu</h5>
+                    <p class="text-muted mb-0">Kurir khusus kami siap mengantarkan hidangan hangat Anda tepat sesuai jadwal kesepakatan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Catering Services Showcase -->
+<div class="py-5" style="background-color: #f7f5f0;">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="font-weight-bold text-dark">Layanan Catering Kami</h2>
+            <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Sesuaikan paket konsumsi dengan konsep dan jumlah tamu acara Anda.</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Nasi Kotak" />
+                    <div class="card-body text-center">
+                        <h5 class="font-weight-bold">Nasi Kotak / Box</h5>
+                        <p class="text-muted" style="font-size: 0.9rem;">Sajian praktis untuk seminar, rapat, maupun makan siang kantor harian.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Prasmanan" />
+                    <div class="card-body text-center">
+                        <h5 class="font-weight-bold">Prasmanan / Buffet</h5>
+                        <p class="text-muted" style="font-size: 0.9rem;">Layanan prasmanan lengkap dengan alat pemanas makanan untuk hajatan besar.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Tumpengan" />
+                    <div class="card-body text-center">
+                        <h5 class="font-weight-bold">Nasi Tumpeng</h5>
+                        <p class="text-muted" style="font-size: 0.9rem;">Simbol rasa syukur untuk syukuran rumah baru, ulang tahun, hingga peresmian.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1558961309-dbdf71799f54?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Snack Box" />
+                    <div class="card-body text-center">
+                        <h5 class="font-weight-bold">Snack Box</h5>
+                        <p class="text-muted" style="font-size: 0.9rem;">Berbagai kue tradisional basah dan kering premium sebagai kudapan pendukung.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonial Section -->
+<div class="py-5 bg-white text-dark">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="font-weight-bold">Apa Kata Pelanggan?</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 bg-light p-4 rounded-lg">
+                    <p class="font-italic text-secondary mb-3">"Makanan prasmanan yang diantarkan sangat memuaskan! Rasa rendang dan sup kimlonya luar biasa, para tamu undangan pernikahan kami banyak memuji rasanya. Terima kasih CateringApp!"</p>
+                    <h6 class="font-weight-bold mb-0 text-dark">Ibu Sarah Wijaya</h6>
+                    <small class="text-muted">Penyelenggara Pernikahan</small>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 bg-light p-4 rounded-lg">
+                    <p class="font-italic text-secondary mb-3">"Pemesanan 100 box nasi ayam bakar dikirim tepat waktu, makanan masih hangat dan rapi. Sangat rekomen untuk event kantor dadakan karena respon admin yang cepat."</p>
+                    <h6 class="font-weight-bold mb-0 text-dark">Bapak Rian Hidayat</h6>
+                    <small class="text-muted">HR Manager, PT Tekno Mandiri</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

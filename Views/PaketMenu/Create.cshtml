@@ -1,0 +1,53 @@
+@model CateringApp.Models.Entity.PaketMenu
+@{
+    ViewData["Title"] = "Tambah Paket Menu";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Form Tambah Paket</h3>
+            </div>
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="KategoriId">Kategori Menu</label>
+                        <select asp-for="KategoriId" class="form-control" asp-items="ViewBag.KategoriId">
+                            <option value="">-- Pilih Kategori --</option>
+                        </select>
+                        <span asp-validation-for="KategoriId" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="NamaPaket">Nama Paket</label>
+                        <input asp-for="NamaPaket" class="form-control" placeholder="Masukkan nama paket menu" />
+                        <span asp-validation-for="NamaPaket" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Harga">Harga (Rp)</label>
+                        <input asp-for="Harga" type="number" class="form-control" placeholder="Masukkan harga paket" />
+                        <span asp-validation-for="Harga" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="DeskripsiMenu">Deskripsi / Detail Menu</label>
+                        <textarea asp-for="DeskripsiMenu" class="form-control" rows="3" placeholder="Contoh: Nasi, Ayam Goreng, Sambal, Kerupuk"></textarea>
+                        <span asp-validation-for="DeskripsiMenu" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FileGambar">Foto / Gambar Menu</label>
+                        <input type="file" name="FileGambar" id="FileGambar" class="form-control-file" accept="image/*" />
+                        <small class="form-text text-muted">Format: JPG, JPEG, PNG. Maksimal 2MB.</small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

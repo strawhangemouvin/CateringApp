@@ -1,0 +1,71 @@
+@model CateringApp.Models.Entity.PaketMenu
+@{
+    ViewData["Title"] = "Detail Paket Menu";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-outline card-info">
+            <div class="card-header">
+                <h3 class="card-title">Informasi Detail Paket Menu</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 30%;">ID Paket</th>
+                        <td>@Model.PaketId</td>
+                    </tr>
+                    <tr>
+                        <th>Kategori</th>
+                        <td><span class="badge badge-info">@Model.Kategori?.NamaKategori</span></td>
+                    </tr>
+                    <tr>
+                        <th>Nama Paket</th>
+                        <td>@Model.NamaPaket</td>
+                    </tr>
+                    <tr>
+                        <th>Harga</th>
+                        <td>Rp @Model.Harga.ToString("N0")</td>
+                    </tr>
+                    <tr>
+                        <th>Detail Menu</th>
+                        <td>@(Model.DeskripsiMenu ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Dibuat Pada</th>
+                        <td>@(Model.CreatedAt?.ToString("dd MMM yyyy HH:mm:ss") ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Diubah Pada</th>
+                        <td>@(Model.UpdatedAt?.ToString("dd MMM yyyy HH:mm:ss") ?? "-")</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="@Url.Action("Edit", new { id = Model.PaketId })" class="btn btn-warning text-white font-weight-bold">Ubah</a>
+                <a href="@Url.Action("Index")" class="btn btn-default">Kembali</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card card-outline card-secondary">
+            <div class="card-header">
+                <h3 class="card-title">Foto / Gambar Menu</h3>
+            </div>
+            <div class="card-body text-center">
+                @if (!string.IsNullOrEmpty(Model.Gambar))
+                {
+                    <img src="@Model.Gambar" class="img-fluid img-thumbnail rounded" style="max-height: 300px;" alt="@Model.NamaPaket" />
+                }
+                else
+                {
+                    <div class="py-5 text-muted">
+                        <i class="fas fa-image fa-5x mb-3"></i>
+                        <p>Belum ada foto untuk paket menu ini.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

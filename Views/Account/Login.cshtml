@@ -1,0 +1,55 @@
+@model CateringApp.Models.ViewModel.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Masuk Sesi - CateringApp";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-lg" style="background-color: #ffffff;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="text-danger mb-2"><i class="fas fa-utensils fa-3x"></i></div>
+                        <h3 class="font-weight-bold text-dark">Selamat Datang</h3>
+                        <p class="text-muted">Masuk ke akun CateringApp Anda</p>
+                    </div>
+                    
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small text-center"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Username" class="font-weight-bold">Username</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-user text-muted"></i></span>
+                                </div>
+                                <input asp-for="Username" class="form-control border-left-0 bg-light" placeholder="Masukkan username" />
+                            </div>
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label asp-for="Password" class="font-weight-bold">Password</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-lock text-muted"></i></span>
+                                </div>
+                                <input asp-for="Password" type="password" class="form-control border-left-0 bg-light" placeholder="Masukkan password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-brand-primary btn-block py-2 mb-3">Masuk</button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0 small text-muted">
+                            Belum punya akun? <a href="@Url.Action("Register", "Account")" class="text-danger font-weight-bold">Daftar Akun Baru</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

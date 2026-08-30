@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#20B2AA" />
+  <circle cx="200" cy="100" r="80" fill="#FFF" opacity="0.15" />
+  <path d="M160,120 L240,120 L225,150 L175,150 Z" fill="#D2B48C" />
+  <path d="M150,110 Q150,80 180,80 Q200,60 220,80 Q250,80 250,110 Z" fill="#FFF" />
+  <circle cx="200" cy="75" r="8" fill="#FF4500" />
+  <text x="200" y="180" font-family="'Outfit', sans-serif" font-size="14" font-weight="bold" fill="#FFF" text-anchor="middle">Snack Box / Kue</text>
+</svg>

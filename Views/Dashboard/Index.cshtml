@@ -1,0 +1,276 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model CateringApp.Models.ViewModel.DashboardViewModel
+@{
+    var session = HttpContextAccessor.HttpContext?.Session;
+    string? role = session?.GetString("Role");
+    ViewData["Title"] = "Dashboard " + (role == "Pemilik Toko" ? "Owner" : "Operasional");
+}
+
+@if (role == "Pemilik Toko")
+{
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner"><h3>@Model.TotalPesanan</h3><p>Total Pesanan</p></div>
+                <div class="icon"><i class="fas fa-shopping-bag"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner"><h3>Rp @Model.TotalPendapatan.ToString("N0")</h3><p>Omset Selesai</p></div>
+                <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner"><h3>@Model.PesananPending</h3><p>Pesanan Pending</p></div>
+                <div class="icon"><i class="fas fa-clock"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner"><h3>@Model.TotalPelanggan</h3><p>Pelanggan Aktif</p></div>
+                <div class="icon"><i class="fas fa-users"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Card -->
+    <div class="row">
+        <div class="col-12 col-md-12">
+            <div class="card card-outline card-success">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Grafik Omset & Pesanan (7 Hari Terakhir)</h3>
+                </div>
+                <div class="card-body">
+                    <div class="position-relative mb-4">
+                        <canvas id="omsetChart" style="min-height: 280px; height: 280px; max-height: 280px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-primary card-outline">
+        <div class="card-header"><h3 class="card-title">5 Pesanan Terbaru</h3></div>
+        <div class="card-body p-0">
+            <table class="table table-striped table-valign-middle">
+                <thead>
+                    <tr>
+                        <th>No. Pesanan</th>
+                        <th>Pelanggan</th>
+                        <th>Tgl Kirim</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.PesananTerbaru)
+                    {
+                        <tr>
+                            <td>@item.NomorPesanan</td>
+                            <td>@item.Pengguna?.NamaLengkap</td>
+                            <td>@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
+                            <td>Rp @item.TotalBayar.ToString("N0")</td>
+                            <td>
+                                <span class="badge @(item.StatusPesanan == "Selesai" ? "badge-success" : (item.StatusPesanan == "Diproses" ? "badge-info" : "badge-warning"))">
+                                    @item.StatusPesanan
+                                </span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-default btn-xs">Detail</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (role == "Karyawan")
+{
+    <div class="row">
+        <div class="col-lg-4 col-12">
+            <div class="small-box bg-warning">
+                <div class="inner"><h3>@Model.PesananPending</h3><p>Pesanan Pending (Belum Bayar/Verifikasi)</p></div>
+                <div class="icon"><i class="fas fa-clock"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-12">
+            <div class="small-box bg-info">
+                <div class="inner"><h3>@Model.PesananDiproses</h3><p>Antrean Dapur (Sedang Diproses)</p></div>
+                <div class="icon"><i class="fas fa-utensils"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-12">
+            <div class="small-box bg-primary">
+                <div class="inner"><h3>@Model.JadwalPengiriman.Count</h3><p>Jadwal Pengiriman Aktif</p></div>
+                <div class="icon"><i class="fas fa-truck"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Delivery Schedule -->
+        <div class="col-md-7">
+            <div class="card card-info card-outline">
+                <div class="card-header"><h3 class="card-title">Jadwal Antrean Pengiriman (Kitchen Queue)</h3></div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-striped table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>No. Pesanan</th>
+                                <th>Pelanggan</th>
+                                <th>Tgl Pengiriman</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.JadwalPengiriman.Any())
+                            {
+                                foreach (var item in Model.JadwalPengiriman)
+                                {
+                                    <tr>
+                                        <td>@item.NomorPesanan</td>
+                                        <td>@item.Pengguna?.NamaLengkap</td>
+                                        <td>@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            <span class="badge @(item.StatusPesanan == "Dikirim" ? "badge-primary" : "badge-info")">
+                                                @item.StatusPesanan
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-default btn-xs">Detail / Update</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center">Tidak ada jadwal pengiriman aktif.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Pending -->
+        <div class="col-md-5">
+            <div class="card card-warning card-outline">
+                <div class="card-header"><h3 class="card-title">Butuh Verifikasi Pembayaran</h3></div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>No. Pesanan</th>
+                                <th>Pelanggan</th>
+                                <th>Metode</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PesananButuhVerifikasi.Any())
+                            {
+                                foreach (var item in Model.PesananButuhVerifikasi)
+                                {
+                                    <tr>
+                                        <td>@item.NomorPesanan</td>
+                                        <td>@item.Pengguna?.NamaLengkap</td>
+                                        <td>@item.Pembayaran?.MetodePembayaran</td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-warning btn-xs text-bold">Verifikasi</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center">Semua pembayaran telah diverifikasi.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @if (role == "Pemilik Toko")
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            $(document).ready(function () {
+                var ctx = document.getElementById('omsetChart').getContext('2d');
+                
+                var labels = @Json.Serialize(Model.DailyOmset.Select(x => x.Tanggal));
+                var omsetData = @Json.Serialize(Model.DailyOmset.Select(x => x.Omset));
+                var pesananData = @Json.Serialize(Model.DailyOmset.Select(x => x.JumlahPesanan));
+
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Omset Selesai (Rp)',
+                                data: omsetData,
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Jumlah Pesanan',
+                                data: pesananData,
+                                borderColor: 'rgba(23, 162, 184, 1)',
+                                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                                borderWidth: 3,
+                                borderDash: [5, 5],
+                                fill: false,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Rp ' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                ticks: {
+                                    stepSize: 1,
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    }
+}

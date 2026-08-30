@@ -1,0 +1,35 @@
+@model CateringApp.Models.Entity.KategoriMenu
+@{
+    ViewData["Title"] = "Ubah Kategori Menu";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title text-white">Form Ubah Kategori</h3>
+            </div>
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="KategoriId" />
+                <input type="hidden" asp-for="CreatedAt" />
+                
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="NamaKategori">Nama Kategori</label>
+                        <input asp-for="NamaKategori" class="form-control" placeholder="Masukkan nama kategori" />
+                        <span asp-validation-for="NamaKategori" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Deskripsi">Deskripsi</label>
+                        <textarea asp-for="Deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi"></textarea>
+                        <span asp-validation-for="Deskripsi" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-warning text-white font-weight-bold">Simpan Perubahan</button>
+                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

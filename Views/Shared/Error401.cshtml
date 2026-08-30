@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "401 - Tidak Diotorisasi";
+}
+<div class="error-page mt-5">
+    <h2 class="headline text-warning">401</h2>
+    <div class="error-content">
+        <h3><i class="fas fa-lock text-warning"></i> Tidak Diotorisasi.</h3>
+        <p>
+            Anda harus masuk (login) terlebih dahulu untuk dapat mengakses halaman ini.
+            Silakan masuk melalui <a href="@Url.Action("Login", "Account")">Halaman Login</a>.
+        </p>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+@model CateringApp.Models.Entity.Pengguna
+@{
+    ViewData["Title"] = "Tambah Pengguna Baru";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Form Tambah Pengguna</h3>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="PeranId">Peran / Role</label>
+                        <select asp-for="PeranId" class="form-control" asp-items="ViewBag.PeranId">
+                            <option value="">-- Pilih Peran --</option>
+                        </select>
+                        <span asp-validation-for="PeranId" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="NamaLengkap">Nama Lengkap</label>
+                        <input asp-for="NamaLengkap" class="form-control" placeholder="Masukkan nama lengkap" />
+                        <span asp-validation-for="NamaLengkap" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Username">Username</label>
+                        <input asp-for="Username" class="form-control" placeholder="Masukkan username" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="PasswordHash">Password</label>
+                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Masukkan password" />
+                        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Masukkan email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="NomorTelepon">Nomor Telepon</label>
+                        <input asp-for="NomorTelepon" class="form-control" placeholder="Masukkan nomor telepon" />
+                        <span asp-validation-for="NomorTelepon" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Alamat">Alamat Lengkap</label>
+                        <textarea asp-for="Alamat" class="form-control" rows="2" placeholder="Masukkan alamat lengkap"></textarea>
+                        <span asp-validation-for="Alamat" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
