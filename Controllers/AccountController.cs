@@ -1,8 +1,13 @@
 using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Context;
+using CateringApp.Services.Interface;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Linq;
 
 namespace CateringApp.Controllers;
 
@@ -10,17 +15,43 @@ public class AccountController : Controller
 {
     private readonly CateringDbContext _context;
     private readonly IPasswordHasher<Pengguna> _passwordHasher;
+    private readonly IJwtTokenService _jwtTokenService;
+    private readonly IMemoryCache _cache;
+    private readonly IEmailService _emailService;
 
-    public AccountController(CateringDbContext context, IPasswordHasher<Pengguna> passwordHasher)
+    public AccountController(
+        CateringDbContext context, 
+        IPasswordHasher<Pengguna> passwordHasher, 
+        IJwtTokenService jwtTokenService,
+        IMemoryCache cache,
+        IEmailService emailService)
     {
         _context = context;
         _passwordHasher = passwordHasher;
+        _jwtTokenService = jwtTokenService;
+        _cache = cache;
+        _emailService = emailService;
     }
 
     public IActionResult Login()
     {
-        if (HttpContext.Session.GetInt32("UserId") != null)
-            return RedirectToAction("Index", "Dashboard");
+        var token = Request.Cookies["JwtToken"];
+        if (!string.IsNullOrEmpty(token))
+        {
+            try
+            {
+                var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(token);
+                var role = jwtToken.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value 
+                           ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+                return RedirectToAction("Index", "Dashboard");
+            }
+            catch
+            {
+                Response.Cookies.Delete("JwtToken");
+            }
+        }
         return View();
     }
 
@@ -42,6 +73,19 @@ public class AccountController : Controller
                 var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, inputPassword);
                 if (verificationResult == PasswordVerificationResult.Success)
                 {
+                    // Generate JWT Token
+                    string token = _jwtTokenService.GenerateToken(user);
+
+                    // Save JWT Token in Cookie
+                    Response.Cookies.Append("JwtToken", token, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddHours(2)
+                    });
+
+                    // Sync Session for MVC Razor Views compatibility
                     HttpContext.Session.SetInt32("UserId", user.PenggunaId);
                     HttpContext.Session.SetString("Username", user.Username);
                     HttpContext.Session.SetString("Nama", user.NamaLengkap);
@@ -54,14 +98,7 @@ public class AccountController : Controller
                     };
                     HttpContext.Session.SetString("Role", role);
 
-                    if (role == "Pemilik Toko" || role == "Karyawan")
-                    {
-                        return RedirectToAction("Index", "Dashboard");
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Pesanan");
-                    }
+                    return RedirectToAction("Index", "Dashboard");
                 }
             }
             ModelState.AddModelError("", "Username atau Password tidak valid.");
@@ -106,6 +143,7 @@ public class AccountController : Controller
 
     public IActionResult Logout()
     {
+        Response.Cookies.Delete("JwtToken");
         HttpContext.Session.Clear();
         TempData["Success"] = "Anda telah berhasil logout.";
         return RedirectToAction("Login");
@@ -115,24 +153,48 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
     {
         if (ModelState.IsValid)
         {
-            var user = _context.Penggunas.FirstOrDefault(u => u.Email.ToLower() == model.Email.ToLower() && u.DeletedAt == null);
+            var user = _context.Penggunas.FirstOrDefault(u => u.Email.ToLower() == model.Email.Trim().ToLower() && u.DeletedAt == null);
             if (user != null)
             {
-                TempData["Success"] = $"Link reset ditemukan. Silakan klik link berikut untuk reset: /Account/ResetPassword?email={model.Email}";
-                return RedirectToAction("Login");
+                // Generate 6-digit random OTP
+                var otpCode = new Random().Next(100000, 999999).ToString();
+                var cacheKey = $"OTP_{model.Email.Trim().ToLower()}";
+                
+                // Store OTP in cache for 15 minutes
+                _cache.Set(cacheKey, otpCode, TimeSpan.FromMinutes(15));
+
+                // Send real email via SMTP
+                bool emailSent = await _emailService.SendOtpEmailAsync(model.Email.Trim(), otpCode, user.NamaLengkap);
+
+                if (emailSent)
+                {
+                    TempData["Success"] = $"Kode verifikasi OTP telah dikirimkan ke email {model.Email}. Silakan periksa kotak masuk (inbox/spam) Anda.";
+                }
+                else
+                {
+                    TempData["Success"] = $"Kode verifikasi OTP Anda adalah: {otpCode}. (Catatan: Password SMTP belum diisi di appsettings.json, sistem otomatis menampilkan kode di sini).";
+                    TempData["OtpDemo"] = otpCode;
+                }
+
+                return RedirectToAction("ResetPassword", new { email = model.Email.Trim() });
             }
-            ModelState.AddModelError("", "Email tidak terdaftar.");
+            ModelState.AddModelError("", "Email tidak ditemukan atau akun sudah tidak aktif.");
         }
         return View(model);
     }
 
     public IActionResult ResetPassword(string email)
     {
-        var model = new ResetPasswordViewModel { Email = email };
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return RedirectToAction("ForgotPassword");
+        }
+
+        var model = new ResetPasswordViewModel { Email = email.Trim() };
         return View(model);
     }
 
@@ -142,17 +204,28 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            var user = _context.Penggunas.FirstOrDefault(u => u.Email.ToLower() == model.Email.ToLower() && u.DeletedAt == null);
+            var cacheKey = $"OTP_{model.Email.Trim().ToLower()}";
+
+            if (!_cache.TryGetValue(cacheKey, out string? validOtp) || validOtp != model.KodeOtp.Trim())
+            {
+                ModelState.AddModelError("KodeOtp", "Kode OTP salah atau sudah kadaluarsa. Silakan minta kode baru.");
+                return View(model);
+            }
+
+            var user = _context.Penggunas.FirstOrDefault(u => u.Email.ToLower() == model.Email.Trim().ToLower() && u.DeletedAt == null);
             if (user != null)
             {
                 user.PasswordHash = _passwordHasher.HashPassword(user, model.Password.Trim());
                 user.UpdatedAt = DateTime.Now;
                 _context.SaveChanges();
 
-                TempData["Success"] = "Password berhasil diubah. Silakan login kembali.";
+                // Clear verified OTP from cache
+                _cache.Remove(cacheKey);
+
+                TempData["Success"] = "Password baru berhasil disimpan. Silakan login kembali.";
                 return RedirectToAction("Login");
             }
-            ModelState.AddModelError("", "User dengan email tersebut tidak ditemukan.");
+            ModelState.AddModelError("", "Akun dengan email tersebut tidak ditemukan.");
         }
         return View(model);
     }

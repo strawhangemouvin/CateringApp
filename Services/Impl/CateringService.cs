@@ -50,6 +50,95 @@ public class CateringService : ICateringService
         };
     }
 
+    public CustomerDashboardViewModel GetCustomerDashboardSummary(int penggunaId)
+    {
+        return new CustomerDashboardViewModel
+        {
+            TotalPesanan = _context.Pesanans.Count(x => x.PenggunaId == penggunaId && x.DeletedAt == null),
+            TotalBelanja = _context.Pesanans
+                .Where(x => x.PenggunaId == penggunaId && x.DeletedAt == null && x.StatusPesanan == "Selesai")
+                .Sum(x => (decimal?)x.TotalBayar) ?? 0,
+            PesananAktif = _context.Pesanans
+                .Count(x => x.PenggunaId == penggunaId && x.DeletedAt == null && (x.StatusPesanan == "Pending" || x.StatusPesanan == "Diproses" || x.StatusPesanan == "Dikirim")),
+            PesananTerbaru = _context.Pesanans
+                .Include(p => p.Pembayaran)
+                .Where(x => x.PenggunaId == penggunaId && x.DeletedAt == null)
+                .OrderByDescending(x => x.TanggalPesan)
+                .Take(5)
+                .ToList()
+        };
+    }
+
+    public PesananPagedResult GetPagedPesananList(int? penggunaId, string? search, string? status, int? kategoriId, DateTime? tanggal, string? sort, int page, int size)
+    {
+        var query = _context.Pesanans
+            .Include(p => p.Pengguna)
+            .Include(p => p.Pembayaran)
+            .Include(p => p.DetailPesanans)
+                .ThenInclude(dp => dp.Paket)
+            .Where(p => p.DeletedAt == null);
+
+        if (penggunaId.HasValue)
+        {
+            query = query.Where(p => p.PenggunaId == penggunaId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            string s = search.ToLower();
+            query = query.Where(p => p.NomorPesanan.ToLower().Contains(s)
+                                  || (p.Pengguna != null && p.Pengguna.NamaLengkap.ToLower().Contains(s)));
+        }
+
+        if (!string.IsNullOrEmpty(status))
+        {
+            query = query.Where(p => p.StatusPesanan == status);
+        }
+
+        if (tanggal.HasValue)
+        {
+            query = query.Where(p => p.TanggalPesan.Date == tanggal.Value.Date);
+        }
+
+        if (kategoriId.HasValue)
+        {
+            query = query.Where(p => p.DetailPesanans.Any(dp => dp.Paket != null && dp.Paket.KategoriId == kategoriId.Value));
+        }
+
+        switch (sort)
+        {
+            case "terlama":
+                query = query.OrderBy(p => p.TanggalPesan);
+                break;
+            case "A-Z":
+                query = query.OrderBy(p => p.NomorPesanan);
+                break;
+            case "Z-A":
+                query = query.OrderByDescending(p => p.NomorPesanan);
+                break;
+            case "terbaru":
+            default:
+                query = query.OrderByDescending(p => p.TanggalPesan);
+                break;
+        }
+
+        int totalRecords = query.Count();
+        int totalPages = (int)Math.Ceiling((double)totalRecords / size);
+        int finalPage = Math.Max(1, Math.Min(page, totalPages == 0 ? 1 : totalPages));
+
+        var items = query
+            .Skip((finalPage - 1) * size)
+            .Take(size)
+            .ToList();
+
+        return new PesananPagedResult
+        {
+            Items = items,
+            TotalRecords = totalRecords,
+            TotalPages = totalPages
+        };
+    }
+
     public List<PaketMenu> GetAllPaket() =>
         _context.PaketMenus.Include(p => p.Kategori).Where(x => x.DeletedAt == null).ToList();
 
@@ -142,6 +231,55 @@ public class CateringService : ICateringService
                 UpdatedAt = DateTime.Now
             };
             _context.DetailPesanans.Add(detail);
+            _context.SaveChanges();
+
+            transaction.Commit();
+            return pesanan.PesananId;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+
+    public int BuatPesananDariKeranjang(int penggunaId, List<CartItem> cartItems, CheckoutViewModel model)
+    {
+        using var transaction = _context.Database.BeginTransaction();
+        try
+        {
+            decimal totalBayar = cartItems.Sum(item => item.Subtotal);
+
+            var pesanan = new Pesanan
+            {
+                PenggunaId = penggunaId,
+                NomorPesanan = "ORD-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                TanggalPesan = DateTime.Now,
+                TanggalPengiriman = model.TanggalPengiriman,
+                AlamatPengiriman = model.AlamatPengiriman,
+                TotalBayar = totalBayar,
+                StatusPesanan = "Pending",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+            _context.Pesanans.Add(pesanan);
+            _context.SaveChanges();
+
+            foreach (var item in cartItems)
+            {
+                var detail = new DetailPesanan
+                {
+                    PesananId = pesanan.PesananId,
+                    PaketId = item.PaketId,
+                    Jumlah = item.Jumlah,
+                    HargaSatuan = item.Harga,
+                    Subtotal = item.Subtotal,
+                    Catatan = item.Catatan,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+                _context.DetailPesanans.Add(detail);
+            }
             _context.SaveChanges();
 
             transaction.Commit();

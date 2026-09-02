@@ -20,13 +20,26 @@ public class PesananController : Controller
         _env = env;
     }
 
-    public IActionResult Index()
+    public IActionResult Index(string? search, string? status, int? kategoriId, System.DateTime? tanggal, string? sort, int page = 1, int size = 5)
     {
         string? role = HttpContext.Session.GetString("Role");
         int? userId = (role == "Pemilik Toko" || role == "Karyawan") ? null : HttpContext.Session.GetInt32("UserId");
 
-        var list = _service.GetAllPesanan(userId);
-        return View(list);
+        var pagedResult = _service.GetPagedPesananList(userId, search, status, kategoriId, tanggal, sort, page, size);
+
+        ViewBag.Search = search;
+        ViewBag.Status = status;
+        ViewBag.SelectedKategoriId = kategoriId;
+        ViewBag.Tanggal = tanggal?.ToString("yyyy-MM-dd");
+        ViewBag.Sort = sort ?? "terbaru";
+        ViewBag.CurrentPage = page;
+        ViewBag.PageSize = size;
+        ViewBag.TotalPages = pagedResult.TotalPages;
+        ViewBag.TotalRecords = pagedResult.TotalRecords;
+
+        ViewBag.KategoriList = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", kategoriId);
+
+        return View(pagedResult.Items);
     }
 
     public IActionResult Create(int? paketId = null)

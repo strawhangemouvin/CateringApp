@@ -18,6 +18,7 @@ builder.Services.AddDbContext<CateringDbContext>(options =>
 builder.Services.AddScoped<ICateringService, CateringService>();
 builder.Services.AddScoped<IPasswordHasher<Pengguna>, PasswordHasher<Pengguna>>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // 3. JWT Authentication Configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -44,7 +45,8 @@ builder.Services.AddAuthentication(options =>
 // 4. IHttpContextAccessor (Perbaikan Error)
 builder.Services.AddHttpContextAccessor();
 
-// 5. Session Configuration
+// 5. Session & Memory Cache Configuration
+builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

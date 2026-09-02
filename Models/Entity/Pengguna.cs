@@ -26,8 +26,8 @@ public class Pengguna
     public string Email { get; set; } = string.Empty;
 
     [Column("nomor_telepon")]
-    [MaxLength(13, ErrorMessage = "Nomor telepon tidak boleh lebih dari 13 digit.")]
-    [RegularExpression(@"^[0-9]+$", ErrorMessage = "Nomor telepon hanya boleh berisi angka.")]
+    [MaxLength(15, ErrorMessage = "Nomor telepon tidak boleh lebih dari 15 digit.")]
+    [RegularExpression(@"^(0|62|\+62)[0-9]{8,12}$", ErrorMessage = "Nomor telepon harus diawali 0, 62, atau +62 dan terdiri dari 9-15 digit.")]
     public string? NomorTelepon { get; set; }
 
     [Column("alamat")]

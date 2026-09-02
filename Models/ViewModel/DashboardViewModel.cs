@@ -21,3 +21,11 @@ public class DailyOmsetViewModel
     public decimal Omset { get; set; }
     public int JumlahPesanan { get; set; }
 }
+
+public class CustomerDashboardViewModel
+{
+    public int TotalPesanan { get; set; }
+    public decimal TotalBelanja { get; set; }
+    public int PesananAktif { get; set; }
+    public List<Pesanan> PesananTerbaru { get; set; } = new();
+}

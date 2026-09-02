@@ -6,6 +6,8 @@ namespace CateringApp.Services.Interface;
 public interface ICateringService
 {
     DashboardViewModel GetDashboardSummary();
+    CustomerDashboardViewModel GetCustomerDashboardSummary(int penggunaId);
+    PesananPagedResult GetPagedPesananList(int? penggunaId, string? search, string? status, int? kategoriId, DateTime? tanggal, string? sort, int page, int size);
     
     // Paket Menu CRUD
     List<PaketMenu> GetAllPaket();
@@ -33,6 +35,7 @@ public interface ICateringService
     List<Pesanan> GetAllPesanan(int? penggunaId = null);
     Pesanan? GetPesananById(int id);
     int BuatPesanan(int penggunaId, PemesananViewModel model);
+    int BuatPesananDariKeranjang(int penggunaId, List<CartItem> cartItems, CheckoutViewModel model);
     void UpdateStatusPesanan(int pesananId, string status);
     void SoftDeletePesanan(int id);
 
