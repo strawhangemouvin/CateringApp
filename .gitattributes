@@ -63,5 +63,4 @@
 #*.RTF   diff=astextplain
 
 
-# Paksa file HTML agar dideteksi sebagai C#
 *.html linguist-language=C#
