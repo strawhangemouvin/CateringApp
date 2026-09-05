@@ -1,4 +1,4 @@
-using CateringApp.Models.DTO;
+﻿using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Context;
@@ -23,23 +23,24 @@ namespace CateringApp.Controllers.Api
         private readonly IPasswordHasher<Pengguna> _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IMemoryCache _cache;
+        private readonly IEmailService _emailService;
 
-        // Static dictionary backup in case IMemoryCache instance is evicted or rotated
         private static readonly ConcurrentDictionary<int, string> _refreshTokens = new();
 
         public AuthApiController(
             CateringDbContext context,
             IPasswordHasher<Pengguna> passwordHasher,
             IJwtTokenService jwtTokenService,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            IEmailService emailService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _cache = cache;
+            _emailService = emailService;
         }
 
-        // 1. POST: api/auth/login
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginViewModel model)
         {
@@ -83,7 +84,6 @@ namespace CateringApp.Controllers.Api
             var accessToken = _jwtTokenService.GenerateToken(user);
             var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
-            // Save RefreshToken to cache and static dictionary
             var cacheKey = $"RefreshToken_{user.PenggunaId}";
             _cache.Set(cacheKey, refreshToken, TimeSpan.FromDays(7));
             _refreshTokens[user.PenggunaId] = refreshToken;
@@ -115,7 +115,92 @@ namespace CateringApp.Controllers.Api
             });
         }
 
-        // 2. POST: api/auth/refresh-token (Nilai Tambah / Refresh Token)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterApiDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    statusCode = 400,
+                    status = "fail",
+                    message = "Validasi data registrasi gagal.",
+                    errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                });
+            }
+
+            try
+            {
+                
+                var usernameExists = await _context.Penggunas
+                    .AnyAsync(u => u.Username.ToLower() == model.Username.Trim().ToLower() && u.DeletedAt == null);
+
+                if (usernameExists)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = $"Username '{model.Username}' sudah digunakan. Silakan pilih username lain."
+                    });
+                }
+
+                var emailExists = await _context.Penggunas
+                    .AnyAsync(u => u.Email.ToLower() == model.Email.Trim().ToLower() && u.DeletedAt == null);
+
+                if (emailExists)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = $"Email '{model.Email}' sudah terdaftar. Silakan gunakan email lain."
+                    });
+                }
+
+                var newUser = new Pengguna
+                {
+                    PeranId = 2, 
+                    NamaLengkap = model.NamaLengkap.Trim(),
+                    Username = model.Username.Trim(),
+                    Email = model.Email.Trim(),
+                    NomorTelepon = model.NomorTelepon.Trim(),
+                    Alamat = model.Alamat.Trim(),
+                    CreatedAt = DateTime.Now
+                };
+
+                newUser.PasswordHash = _passwordHasher.HashPassword(newUser, model.Password.Trim());
+
+                _context.Penggunas.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    statusCode = 200,
+                    status = "success",
+                    message = "Registrasi akun berhasil. Silakan login.",
+                    data = new
+                    {
+                        newUser.PenggunaId,
+                        newUser.Username,
+                        newUser.Email,
+                        newUser.NamaLengkap,
+                        newUser.NomorTelepon,
+                        newUser.Alamat
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    statusCode = 500,
+                    status = "error",
+                    message = "Gagal memproses registrasi: " + ex.Message
+                });
+            }
+        }
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto model)
         {
@@ -129,7 +214,6 @@ namespace CateringApp.Controllers.Api
                 });
             }
 
-            // Extract claims from token safely using JwtSecurityTokenHandler
             var tokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken? jwtToken = null;
 
@@ -155,7 +239,6 @@ namespace CateringApp.Controllers.Api
                 });
             }
 
-            // Extract user identifiers from claims
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId" || c.Type == "nameid" || c.Type.EndsWith("nameidentifier"))?.Value;
             var usernameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "unique_name" || c.Type == "sub" || c.Type.EndsWith("name"))?.Value;
 
@@ -180,7 +263,6 @@ namespace CateringApp.Controllers.Api
                 });
             }
 
-            // Verify stored refresh token from Cache or static memory backup
             var cacheKey = $"RefreshToken_{user.PenggunaId}";
             bool isTokenValid = false;
 
@@ -194,7 +276,7 @@ namespace CateringApp.Controllers.Api
             }
             else if (!string.IsNullOrWhiteSpace(model.RefreshToken) && model.RefreshToken.Length >= 20)
             {
-                // Fallback for valid token format if server was freshly restarted
+                
                 isTokenValid = true;
             }
 
@@ -208,11 +290,9 @@ namespace CateringApp.Controllers.Api
                 });
             }
 
-            // Generate new token pair (Access Token & Rotated Refresh Token)
             var newAccessToken = _jwtTokenService.GenerateToken(user);
             var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
 
-            // Rotate stored refresh token
             _cache.Set(cacheKey, newRefreshToken, TimeSpan.FromDays(7));
             _refreshTokens[user.PenggunaId] = newRefreshToken;
 
@@ -228,7 +308,6 @@ namespace CateringApp.Controllers.Api
             });
         }
 
-        // 3. GET: api/auth/profile
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("profile")]
         public IActionResult GetProfile()

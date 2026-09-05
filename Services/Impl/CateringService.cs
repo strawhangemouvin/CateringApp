@@ -20,8 +20,14 @@ public class CateringService : ICateringService
 
     public DashboardViewModel GetDashboardSummary()
     {
+        var latestOrderDate = _context.Pesanans
+            .Where(x => x.DeletedAt == null)
+            .Max(x => (DateTime?)(x.TanggalPengiriman > x.TanggalPesan ? x.TanggalPengiriman : x.TanggalPesan))?.Date ?? DateTime.Today;
+
+        var referenceDate = latestOrderDate > DateTime.Today ? latestOrderDate : DateTime.Today;
+
         var last7Days = Enumerable.Range(0, 7)
-            .Select(i => DateTime.Today.AddDays(-i))
+            .Select(i => referenceDate.AddDays(-i))
             .Reverse()
             .ToList();
 
@@ -29,10 +35,10 @@ public class CateringService : ICateringService
         {
             Tanggal = date.ToString("dd MMM"),
             Omset = _context.Pesanans
-                .Where(x => x.DeletedAt == null && x.StatusPesanan == "Selesai" && x.TanggalPesan.Date == date.Date)
+                .Where(x => x.DeletedAt == null && x.StatusPesanan == "Selesai" && (x.TanggalPengiriman.Date == date.Date || x.TanggalPesan.Date == date.Date))
                 .Sum(x => (decimal?)x.TotalBayar) ?? 0,
             JumlahPesanan = _context.Pesanans
-                .Where(x => x.DeletedAt == null && x.TanggalPesan.Date == date.Date)
+                .Where(x => x.DeletedAt == null && (x.TanggalPengiriman.Date == date.Date || x.TanggalPesan.Date == date.Date))
                 .Count()
         }).ToList();
 
@@ -42,7 +48,7 @@ public class CateringService : ICateringService
             TotalPendapatan = _context.Pesanans.Where(x => x.DeletedAt == null && x.StatusPesanan == "Selesai").Sum(x => (decimal?)x.TotalBayar) ?? 0,
             PesananPending = _context.Pesanans.Count(x => x.DeletedAt == null && x.StatusPesanan == "Pending"),
             PesananDiproses = _context.Pesanans.Count(x => x.DeletedAt == null && x.StatusPesanan == "Diproses"),
-            TotalPelanggan = _context.Penggunas.Count(x => x.PeranId == 3 && x.DeletedAt == null), // Role ID 3 = User
+            TotalPelanggan = _context.Penggunas.Count(x => x.PeranId == 3 && x.DeletedAt == null), 
             PesananTerbaru = _context.Pesanans.Include(p => p.Pengguna).Where(x => x.DeletedAt == null).OrderByDescending(x => x.TanggalPesan).Take(5).ToList(),
             JadwalPengiriman = _context.Pesanans.Include(p => p.Pengguna).Where(x => x.DeletedAt == null && (x.StatusPesanan == "Diproses" || x.StatusPesanan == "Dikirim")).OrderBy(x => x.TanggalPengiriman).Take(10).ToList(),
             PesananButuhVerifikasi = _context.Pesanans.Include(p => p.Pengguna).Include(p => p.Pembayaran).Where(x => x.DeletedAt == null && x.Pembayaran != null && x.Pembayaran.StatusVerifikasi == "Menunggu Verifikasi").OrderByDescending(x => x.Pembayaran!.TanggalBayar).ToList(),
@@ -358,7 +364,32 @@ public class CateringService : ICateringService
         }
     }
 
-    // Kategori Menu CRUD
+    public void AjukanRefund(int pesananId, string bank, string noRekening, string atasNama)
+    {
+        var pesanan = _context.Pesanans.Find(pesananId);
+        if (pesanan != null)
+        {
+            pesanan.StatusPesanan = "Menunggu Refund";
+            pesanan.RefundNamaBank = bank;
+            pesanan.RefundNoRekening = noRekening;
+            pesanan.RefundAtasNama = atasNama;
+            pesanan.UpdatedAt = DateTime.Now;
+            _context.SaveChanges();
+        }
+    }
+
+    public void KonfirmasiRefund(int pesananId, string buktiTfPath)
+    {
+        var pesanan = _context.Pesanans.Find(pesananId);
+        if (pesanan != null)
+        {
+            pesanan.StatusPesanan = "Refund Selesai";
+            pesanan.RefundBuktiTf = buktiTfPath;
+            pesanan.UpdatedAt = DateTime.Now;
+            _context.SaveChanges();
+        }
+    }
+
     public List<KategoriMenu> GetAllKategori() =>
         _context.KategoriMenus.Where(x => x.DeletedAt == null).ToList();
 
@@ -395,7 +426,6 @@ public class CateringService : ICateringService
         }
     }
 
-    // Pengguna CRUD
     public List<Pengguna> GetAllPengguna() =>
         _context.Penggunas.Include(u => u.Peran).Where(x => x.DeletedAt == null).ToList();
 

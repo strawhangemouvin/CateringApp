@@ -1,4 +1,4 @@
-using CateringApp.Models.Entity;
+﻿using CateringApp.Models.Entity;
 using System.Security.Claims;
 
 namespace CateringApp.Services.Interface

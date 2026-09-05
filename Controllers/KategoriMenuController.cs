@@ -1,4 +1,4 @@
-using CateringApp.Filters;
+﻿using CateringApp.Filters;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +21,12 @@ namespace CateringApp.Controllers
         {
             var list = _service.GetAllKategori();
 
-            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 string s = search.ToLower();
                 list = list.Where(c => c.NamaKategori.ToLower().Contains(s) || (c.Deskripsi != null && c.Deskripsi.ToLower().Contains(s))).ToList();
             }
 
-            // Sort
             sort = string.IsNullOrEmpty(sort) ? "terbaru" : sort;
             list = sort switch
             {
@@ -38,7 +36,6 @@ namespace CateringApp.Controllers
                 _ => list.OrderByDescending(c => c.CreatedAt ?? DateTime.MinValue).ThenByDescending(c => c.KategoriId).ToList(),
             };
 
-            // Pagination
             int total = list.Count;
             var pagedList = list.Skip((page - 1) * size).Take(size).ToList();
 

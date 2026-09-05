@@ -1,4 +1,4 @@
-using CateringApp.Models.Entity;
+﻿using CateringApp.Models.Entity;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
@@ -11,18 +11,16 @@ namespace CateringApp.Services.Context
         {
             context.Database.EnsureCreated();
 
-            // 1. Seed Peran
             if (!context.Perans.Any())
             {
                 context.Perans.AddRange(
-                    new Peran { NamaPeran = "Pemilik Toko" }, // ID 1
-                    new Peran { NamaPeran = "Karyawan" },     // ID 2
-                    new Peran { NamaPeran = "User" }          // ID 3
+                    new Peran { NamaPeran = "Pemilik Toko" }, 
+                    new Peran { NamaPeran = "Karyawan" },     
+                    new Peran { NamaPeran = "User" }          
                 );
                 context.SaveChanges();
             }
 
-            // Get role IDs
             var ownerRole = context.Perans.FirstOrDefault(p => p.NamaPeran == "Pemilik Toko");
             var employeeRole = context.Perans.FirstOrDefault(p => p.NamaPeran == "Karyawan");
             var userRole = context.Perans.FirstOrDefault(p => p.NamaPeran == "User");
@@ -31,12 +29,10 @@ namespace CateringApp.Services.Context
             int employeeRoleId = employeeRole?.PeranId ?? 2;
             int userRoleId = userRole?.PeranId ?? 3;
 
-            // 2. Seed Pengguna (min 20 data)
             if (!context.Penggunas.Any())
             {
                 var hasher = new PasswordHasher<Pengguna>();
 
-                // 1 Pemilik Toko
                 var owner = new Pengguna
                 {
                     PeranId = ownerRoleId,
@@ -51,7 +47,6 @@ namespace CateringApp.Services.Context
                 owner.PasswordHash = hasher.HashPassword(owner, "owner123");
                 context.Penggunas.Add(owner);
 
-                // 1 Karyawan
                 var employee = new Pengguna
                 {
                     PeranId = employeeRoleId,
@@ -66,7 +61,6 @@ namespace CateringApp.Services.Context
                 employee.PasswordHash = hasher.HashPassword(employee, "karyawan123");
                 context.Penggunas.Add(employee);
 
-                // 1 Budi Pratama (User)
                 var budi = new Pengguna
                 {
                     PeranId = userRoleId,
@@ -81,7 +75,6 @@ namespace CateringApp.Services.Context
                 budi.PasswordHash = hasher.HashPassword(budi, "user123");
                 context.Penggunas.Add(budi);
 
-                // 17 Pelanggan Tambahan (untuk memenuhi minimal 20 pengguna)
                 for (int i = 1; i <= 17; i++)
                 {
                     var userSeed = new Pengguna
@@ -102,7 +95,7 @@ namespace CateringApp.Services.Context
             }
             else
             {
-                // Migrate any existing plain text passwords (length < 30)
+                
                 var plainTextUsers = context.Penggunas.Where(u => u.PasswordHash.Length < 30).ToList();
                 if (plainTextUsers.Any())
                 {
@@ -115,7 +108,6 @@ namespace CateringApp.Services.Context
                 }
             }
 
-            // 3. Seed KategoriMenu (min 20 data)
             if (!context.KategoriMenus.Any())
             {
                 string[] categories = {
@@ -138,7 +130,6 @@ namespace CateringApp.Services.Context
                 context.SaveChanges();
             }
 
-            // 4. Seed PaketMenu (min 20 data)
             if (!context.PaketMenus.Any())
             {
                 var categories = context.KategoriMenus.ToList();
@@ -167,7 +158,6 @@ namespace CateringApp.Services.Context
                 context.SaveChanges();
             }
 
-            // 5. Seed Pesanan, DetailPesanan, Pembayaran (min 20 data)
             if (!context.Pesanans.Any())
             {
                 var users = context.Penggunas.Where(u => u.PeranId == userRoleId).ToList();
@@ -182,7 +172,7 @@ namespace CateringApp.Services.Context
 
                     var status = i % 3 == 0 ? "Selesai" : (i % 3 == 1 ? "Diproses" : "Pending");
                     var tanggalPesan = DateTime.Now.AddDays(-i);
-                    var tanggalKirim = DateTime.Now.AddDays(-i + 2); // default delivery
+                    var tanggalKirim = DateTime.Now.AddDays(-i + 2); 
 
                     var pesanan = new Pesanan
                     {
@@ -197,7 +187,7 @@ namespace CateringApp.Services.Context
                         UpdatedAt = tanggalPesan
                     };
                     context.Pesanans.Add(pesanan);
-                    context.SaveChanges(); // Save to generate PesananId
+                    context.SaveChanges(); 
 
                     var detail = new DetailPesanan
                     {
@@ -212,7 +202,6 @@ namespace CateringApp.Services.Context
                     };
                     context.DetailPesanans.Add(detail);
 
-                    // payments for all orders except the first 2 (leave those "Belum Bayar")
                     if (i > 2)
                     {
                         var pembayaran = new Pembayaran

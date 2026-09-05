@@ -1,4 +1,4 @@
-using CateringApp.Models.DTO;
+﻿using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Context;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CateringApp.Controllers.Api
 {
     [Route("api/menu")]
+    [Route("api/products")]
     [ApiController]
     public class MenuApiController : ControllerBase
     {
@@ -17,20 +18,39 @@ namespace CateringApp.Controllers.Api
             _context = context;
         }
 
-        // 1. GET: api/menu
-        // Supports filtering by keyword, category, and sorting
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? search,
             [FromQuery] int? kategoriId,
-            [FromQuery] string? sortBy = "terbaru")
+            [FromQuery] int? category,
+            [FromQuery] string? status,
+            [FromQuery] string? sort,
+            [FromQuery] string? sortBy = "terbaru",
+            [FromQuery] int page = 1,
+            [FromQuery] int limit = 10)
         {
             try
             {
+                
+                if (page < 1) page = 1;
+                if (limit < 1) limit = 10;
+                if (limit > 100) limit = 100;
+
                 var query = _context.PaketMenus
                     .Include(m => m.Kategori)
                     .Where(m => m.DeletedAt == null)
                     .AsQueryable();
+
+                var selectedCategory = category ?? kategoriId;
+                if (selectedCategory.HasValue && selectedCategory.Value > 0)
+                {
+                    query = query.Where(m => m.KategoriId == selectedCategory.Value);
+                }
+
+                if (!string.IsNullOrWhiteSpace(status) && status.Equals("active", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(m => m.DeletedAt == null);
+                }
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
@@ -39,39 +59,50 @@ namespace CateringApp.Controllers.Api
                                              (m.DeskripsiMenu != null && m.DeskripsiMenu.ToLower().Contains(keyword)));
                 }
 
-                if (kategoriId.HasValue && kategoriId.Value > 0)
+                var sortingParam = (!string.IsNullOrWhiteSpace(sort) ? sort : sortBy)?.ToLower();
+                query = sortingParam switch
                 {
-                    query = query.Where(m => m.KategoriId == kategoriId.Value);
-                }
-
-                query = sortBy?.ToLower() switch
-                {
-                    "termurah" => query.OrderBy(m => m.Harga),
-                    "termahal" => query.OrderByDescending(m => m.Harga),
-                    "az" => query.OrderBy(m => m.NamaPaket),
-                    "za" => query.OrderByDescending(m => m.NamaPaket),
+                    "name" or "az" => query.OrderBy(m => m.NamaPaket),
+                    "name_desc" or "za" => query.OrderByDescending(m => m.NamaPaket),
+                    "price" or "price_asc" or "termurah" => query.OrderBy(m => m.Harga),
+                    "price_desc" or "termahal" => query.OrderByDescending(m => m.Harga),
                     _ => query.OrderByDescending(m => m.CreatedAt ?? DateTime.MinValue)
                 };
 
-                var data = await query.Select(m => new
-                {
-                    m.PaketId,
-                    m.KategoriId,
-                    NamaKategori = m.Kategori != null ? m.Kategori.NamaKategori : "-",
-                    m.NamaPaket,
-                    m.Harga,
-                    m.DeskripsiMenu,
-                    m.Gambar,
-                    m.CreatedAt,
-                    m.UpdatedAt
-                }).ToListAsync();
+                var totalItems = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)limit);
+
+                var data = await query
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .Select(m => new
+                    {
+                        m.PaketId,
+                        m.KategoriId,
+                        NamaKategori = m.Kategori != null ? m.Kategori.NamaKategori : "-",
+                        m.NamaPaket,
+                        m.Harga,
+                        m.DeskripsiMenu,
+                        m.Gambar,
+                        Status = m.DeletedAt == null ? "active" : "inactive",
+                        m.CreatedAt,
+                        m.UpdatedAt
+                    }).ToListAsync();
 
                 return Ok(new
                 {
                     statusCode = 200,
                     status = "success",
-                    message = "Data menu berhasil diambil.",
-                    total = data.Count,
+                    message = "Data produk/menu berhasil diambil.",
+                    pagination = new
+                    {
+                        currentPage = page,
+                        limit = limit,
+                        totalItems = totalItems,
+                        totalPages = totalPages,
+                        hasNextPage = page < totalPages,
+                        hasPreviousPage = page > 1
+                    },
                     data = data
                 });
             }
@@ -86,7 +117,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 2. GET: api/menu/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -136,7 +166,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 3. POST: api/menu
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateMenuDto model)
         {
@@ -162,6 +191,19 @@ namespace CateringApp.Controllers.Api
                         statusCode = 400,
                         status = "fail",
                         message = "Kategori yang dipilih tidak valid atau sudah dihapus."
+                    });
+                }
+
+                var isDuplicateName = await _context.PaketMenus
+                    .AnyAsync(m => m.NamaPaket.ToLower() == model.NamaPaket.Trim().ToLower() && m.DeletedAt == null);
+
+                if (isDuplicateName)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = $"Nama paket menu '{model.NamaPaket}' sudah digunakan. Gunakan nama lain."
                     });
                 }
 
@@ -206,7 +248,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 4. PUT: api/menu/{id} (Full Update)
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMenuDto model)
         {
@@ -248,6 +289,19 @@ namespace CateringApp.Controllers.Api
                     });
                 }
 
+                var isDuplicateName = await _context.PaketMenus
+                    .AnyAsync(m => m.PaketId != id && m.NamaPaket.ToLower() == model.NamaPaket.Trim().ToLower() && m.DeletedAt == null);
+
+                if (isDuplicateName)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = $"Nama paket menu '{model.NamaPaket}' sudah digunakan oleh menu lain. Gunakan nama lain."
+                    });
+                }
+
                 existingMenu.KategoriId = model.KategoriId;
                 existingMenu.NamaPaket = model.NamaPaket.Trim();
                 existingMenu.Harga = model.Harga;
@@ -279,7 +333,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 5. PATCH: api/menu/{id} (Partial Update)
         [HttpPatch("{id}")]
         public async Task<IActionResult> PartialUpdate(int id, [FromBody] PatchMenuDto model)
         {
@@ -366,7 +419,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 6. DELETE: api/menu/{id} (Soft Delete)
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CateringApp.Models.Entity;
@@ -39,6 +39,18 @@ public class Pesanan
 
     [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
+
+    [Column("refund_nama_bank")]
+    public string? RefundNamaBank { get; set; }
+
+    [Column("refund_no_rekening")]
+    public string? RefundNoRekening { get; set; }
+
+    [Column("refund_atas_nama")]
+    public string? RefundAtasNama { get; set; }
+
+    [Column("refund_bukti_tf")]
+    public string? RefundBuktiTf { get; set; }
 
     public virtual Pengguna? Pengguna { get; set; }
     public virtual ICollection<DetailPesanan> DetailPesanans { get; set; } = new List<DetailPesanan>();

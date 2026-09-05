@@ -1,4 +1,4 @@
-namespace CateringApp.Models.ViewModel
+﻿namespace CateringApp.Models.ViewModel
 {
     public class CartItem
     {

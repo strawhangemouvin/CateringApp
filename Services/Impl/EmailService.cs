@@ -1,4 +1,4 @@
-using CateringApp.Services.Interface;
+﻿using CateringApp.Services.Interface;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -48,7 +48,7 @@ namespace CateringApp.Services.Impl
                 smtpClient.EnableSsl = enableSsl;
                 smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
                 smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtpClient.Timeout = 10000; // 10 seconds timeout
+                smtpClient.Timeout = 10000; 
 
                 await smtpClient.SendMailAsync(mailMessage);
                 _logger.LogInformation($"Email berhasil dikirim ke {toEmail}.");

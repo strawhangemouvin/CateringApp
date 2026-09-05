@@ -1,4 +1,4 @@
-using CateringApp.Models.Entity;
+﻿using CateringApp.Models.Entity;
 using CateringApp.Services.Interface;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -78,7 +78,7 @@ namespace CateringApp.Services.Impl
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-                ValidateLifetime = false // Ignore expiration date to extract claims
+                ValidateLifetime = false 
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

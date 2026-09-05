@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +28,7 @@ namespace CateringApp.Filters
 
             if (string.IsNullOrEmpty(token))
             {
-                // No token found in Cookie, redirect to Login
+                
                 context.Result = new RedirectToActionResult("Login", "Account", null);
                 return;
             }
@@ -55,11 +55,9 @@ namespace CateringApp.Filters
                     ClockSkew = TimeSpan.Zero
                 };
 
-                // Validate the JWT Token
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
                 var jwtToken = (JwtSecurityToken)validatedToken;
 
-                // Extract Claims
                 var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value 
                                   ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value 
                                   ?? string.Empty;
@@ -74,14 +72,13 @@ namespace CateringApp.Filters
 
                 if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(roleClaim) || userIdClaim == string.Empty || roleClaim == "User")
                 {
-                    // Check if it's actually valid
+                    
                     if (string.IsNullOrEmpty(userIdClaim) || string.IsNullOrEmpty(roleClaim))
                     {
                         throw new Exception("Klaim penting tidak ditemukan dalam token.");
                     }
                 }
 
-                // Restore/sync standard session cache for views/layouts compatibility
                 var session = httpContext.Session;
                 if (session.GetInt32("UserId") == null)
                 {
@@ -91,12 +88,11 @@ namespace CateringApp.Filters
                     session.SetString("Role", roleClaim);
                 }
 
-                // Enforce Role authorization if roles are specified
                 if (_roles != null && _roles.Length > 0)
                 {
                     if (!_roles.Any(r => r.Equals(roleClaim, StringComparison.OrdinalIgnoreCase)))
                     {
-                        // Redirect to Access Denied page
+                        
                         context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                         return;
                     }
@@ -104,7 +100,7 @@ namespace CateringApp.Filters
             }
             catch (Exception)
             {
-                // Token invalid, expired, or validation failed -> Clear Cookie & Session, then redirect to Login
+                
                 httpContext.Response.Cookies.Delete("JwtToken");
                 httpContext.Session.Clear();
                 context.Result = new RedirectToActionResult("Login", "Account", null);

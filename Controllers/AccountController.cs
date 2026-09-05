@@ -1,10 +1,11 @@
-using CateringApp.Models.Entity;
+﻿using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Context;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Linq;
@@ -65,6 +66,7 @@ public class AccountController : Controller
             string inputPassword = model.Password.Trim();
 
             var user = _context.Penggunas
+                .Include(u => u.Peran)
                 .FirstOrDefault(u => u.Username.ToLower() == inputUsername.ToLower()
                                   && u.DeletedAt == null);
 
@@ -73,10 +75,9 @@ public class AccountController : Controller
                 var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, inputPassword);
                 if (verificationResult == PasswordVerificationResult.Success)
                 {
-                    // Generate JWT Token
+                    
                     string token = _jwtTokenService.GenerateToken(user);
 
-                    // Save JWT Token in Cookie
                     Response.Cookies.Append("JwtToken", token, new CookieOptions
                     {
                         HttpOnly = true,
@@ -85,16 +86,18 @@ public class AccountController : Controller
                         Expires = DateTimeOffset.UtcNow.AddHours(2)
                     });
 
-                    // Sync Session for MVC Razor Views compatibility
                     HttpContext.Session.SetInt32("UserId", user.PenggunaId);
                     HttpContext.Session.SetString("Username", user.Username);
                     HttpContext.Session.SetString("Nama", user.NamaLengkap);
 
-                    string role = user.PeranId switch
+                    string roleName = user.Peran?.NamaPeran ?? string.Empty;
+                    string role = roleName switch
                     {
-                        1 => "Pemilik Toko",
-                        2 => "Karyawan",
-                        _ => "User"
+                        "Pemilik Toko" => "Pemilik Toko",
+                        "Admin" => "Pemilik Toko",
+                        "Karyawan" => "Karyawan",
+                        "Pelanggan" => "User",
+                        _ => (user.PeranId == 1 ? "Pemilik Toko" : (user.PeranId == 2 ? "Karyawan" : "User"))
                     };
                     HttpContext.Session.SetString("Role", role);
 
@@ -114,20 +117,29 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
-            if (_context.Penggunas.Any(u => u.Username == model.Username))
+            if (_context.Penggunas.Any(u => u.Username.ToLower() == model.Username.Trim().ToLower() && u.DeletedAt == null))
             {
                 ModelState.AddModelError("Username", "Username sudah digunakan.");
                 return View(model);
             }
 
+            if (_context.Penggunas.Any(u => u.Email.ToLower() == model.Email.Trim().ToLower() && u.DeletedAt == null))
+            {
+                ModelState.AddModelError("Email", "Email sudah terdaftar.");
+                return View(model);
+            }
+
+            var customerRole = _context.Perans.FirstOrDefault(p => p.NamaPeran == "Pelanggan" || p.NamaPeran == "User");
+            int customerRoleId = customerRole?.PeranId ?? 2;
+
             var user = new Pengguna
             {
-                PeranId = 3,
-                NamaLengkap = model.NamaLengkap,
-                Username = model.Username,
-                Email = model.Email,
-                NomorTelepon = model.NomorTelepon,
-                Alamat = model.Alamat,
+                PeranId = customerRoleId,
+                NamaLengkap = model.NamaLengkap.Trim(),
+                Username = model.Username.Trim(),
+                Email = model.Email.Trim(),
+                NomorTelepon = model.NomorTelepon.Trim(),
+                Alamat = model.Alamat.Trim(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
@@ -136,6 +148,7 @@ public class AccountController : Controller
             _context.Penggunas.Add(user);
             _context.SaveChanges();
 
+            TempData["Success"] = "Pendaftaran akun berhasil! Silakan login.";
             return RedirectToAction("Login");
         }
         return View(model);
@@ -160,14 +173,12 @@ public class AccountController : Controller
             var user = _context.Penggunas.FirstOrDefault(u => u.Email.ToLower() == model.Email.Trim().ToLower() && u.DeletedAt == null);
             if (user != null)
             {
-                // Generate 6-digit random OTP
+                
                 var otpCode = new Random().Next(100000, 999999).ToString();
                 var cacheKey = $"OTP_{model.Email.Trim().ToLower()}";
                 
-                // Store OTP in cache for 15 minutes
                 _cache.Set(cacheKey, otpCode, TimeSpan.FromMinutes(15));
 
-                // Send real email via SMTP
                 bool emailSent = await _emailService.SendOtpEmailAsync(model.Email.Trim(), otpCode, user.NamaLengkap);
 
                 if (emailSent)
@@ -219,7 +230,6 @@ public class AccountController : Controller
                 user.UpdatedAt = DateTime.Now;
                 _context.SaveChanges();
 
-                // Clear verified OTP from cache
                 _cache.Remove(cacheKey);
 
                 TempData["Success"] = "Password baru berhasil disimpan. Silakan login kembali.";

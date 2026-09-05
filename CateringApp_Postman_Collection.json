@@ -1,0 +1,542 @@
+{
+	"info": {
+		"_postman_id": "c8e821df-6b82-411a-821f-819203810283",
+		"name": "CateringApp REST API Collection",
+		"description": "Koleksi Postman Lengkap untuk Pengujian Seluruh Endpoint REST API CateringApp (Auth, Menu, Kategori, Pesanan, Pembayaran, Pengguna, Upload File Gambar & PDF).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:44356",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login (Dapatkan Token & Refresh Token)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"user123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Register Akun Pelanggan Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"namaLengkap\": \"Ahmad Fajar\",\n  \"username\": \"ahmad_fajar\",\n  \"email\": \"ahmadfajar@gmail.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"nomorTelepon\": \"081234567890\",\n  \"alamat\": \"Jl. Mawar Melati No. 15, Jakarta\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"PASTE_ACCESS_TOKEN_DI_SINI\",\n  \"refreshToken\": \"PASTE_REFRESH_TOKEN_DI_SINI\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh-token",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "refresh-token"]
+						}
+					}
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Paket Menu",
+			"item": [
+				{
+					"name": "GET All Menu (Filter & Sort)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/menu?search=&kategoriId=&sortBy=terbaru",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu"],
+							"query": [
+								{ "key": "search", "value": "" },
+								{ "key": "kategoriId", "value": "" },
+								{ "key": "sortBy", "value": "terbaru" }
+							]
+						}
+					}
+				},
+				{
+					"name": "GET Menu by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/menu/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu", "1"]
+						}
+					}
+				},
+				{
+					"name": "POST Create Menu Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"kategoriId\": 1,\n  \"namaPaket\": \"Nasi Tumpeng Mini Selera\",\n  \"harga\": 38000,\n  \"deskripsiMenu\": \"Nasi kuning gurih, ayam suwir pedas, perkedel, abon sapi, lalapan\",\n  \"gambar\": \"/images/tumpeng-mini.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/menu",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu"]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Menu",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"kategoriId\": 1,\n  \"namaPaket\": \"Nasi Tumpeng Mini Spesial Komplit\",\n  \"harga\": 42000,\n  \"deskripsiMenu\": \"Nasi kuning bumbu rempah, ayam goreng lengkuas, telur balado, sambal goreng ati\",\n  \"gambar\": \"/images/tumpeng-komplit.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/menu/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu", "1"]
+						}
+					}
+				},
+				{
+					"name": "PATCH Update Menu Sebagian (Harga Saja)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"harga\": 32000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/menu/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu", "1"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Menu (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/menu/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "menu", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Kategori Menu",
+			"item": [
+				{
+					"name": "GET All Kategori",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/kategori",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "kategori"]
+						}
+					}
+				},
+				{
+					"name": "POST Create Kategori Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"namaKategori\": \"Snack Box Tradisional\",\n  \"deskripsi\": \"Koleksi kue dan jajanan pasar premium untuk berbagai acara.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/kategori",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "kategori"]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Kategori",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"namaKategori\": \"Snack Box & Pastry\",\n  \"deskripsi\": \"Aneka kue manis, gurih, dan pastry lezat.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/kategori/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "kategori", "1"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Kategori (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/kategori/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "kategori", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Pesanan & Order",
+			"item": [
+				{
+					"name": "GET All Pesanan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pesanan",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pesanan"]
+						}
+					}
+				},
+				{
+					"name": "GET Pesanan by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pesanan/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pesanan", "1"]
+						}
+					}
+				},
+				{
+					"name": "POST Create Pesanan Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"penggunaId\": 2,\n  \"tanggalPengiriman\": \"2026-09-10T10:00:00\",\n  \"alamatPengiriman\": \"Gedung Graha Mandiri Lt. 8, Jl. Sudirman No. 50, Jakarta\",\n  \"items\": [\n    {\n      \"paketId\": 1,\n      \"jumlah\": 25,\n      \"catatan\": \"Sambal dipisah, tidak pedas\"\n    },\n    {\n      \"paketId\": 2,\n      \"jumlah\": 10,\n      \"catatan\": \"Kemas rapi\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pesanan",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pesanan"]
+						}
+					}
+				},
+				{
+					"name": "PATCH Update Status Pesanan",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statusPesanan\": \"Diproses\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pesanan/1/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pesanan", "1", "status"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Pembayaran",
+			"item": [
+				{
+					"name": "GET All Pembayaran",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pembayaran",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pembayaran"]
+						}
+					}
+				},
+				{
+					"name": "POST Submit Pembayaran",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pesananId\": 1,\n  \"metodePembayaran\": \"Transfer Bank\",\n  \"buktiTransfer\": \"/uploads/PAY_1_bukti.pdf\",\n  \"tanggalBayar\": \"2026-09-05T12:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pembayaran",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pembayaran"]
+						}
+					}
+				},
+				{
+					"name": "PUT Verifikasi Pembayaran",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"statusVerifikasi\": \"Valid\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pembayaran/1/verifikasi",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pembayaran", "1", "verifikasi"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Pengguna",
+			"item": [
+				{
+					"name": "GET All Pengguna",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pengguna",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pengguna"]
+						}
+					}
+				},
+				{
+					"name": "POST Create Pengguna",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"peranId\": 2,\n  \"namaLengkap\": \"Siti Rahma\",\n  \"username\": \"siti_rahma\",\n  \"email\": \"siti.rahma@gmail.com\",\n  \"password\": \"user123\",\n  \"nomorTelepon\": \"085712345678\",\n  \"alamat\": \"Jl. Anggrek No. 22, Bandung\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pengguna",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pengguna"]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Pengguna",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"peranId\": 2,\n  \"namaLengkap\": \"Siti Rahmawati\",\n  \"email\": \"siti.rahmawati@gmail.com\",\n  \"nomorTelepon\": \"085712345678\",\n  \"alamat\": \"Jl. Anggrek Indah No. 25, Bandung\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pengguna/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pengguna", "2"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Pengguna (Soft Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pengguna/2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "pengguna", "2"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Upload File (Gambar & PDF)",
+			"item": [
+				{
+					"name": "POST Upload File (Gambar / PDF)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "upload"]
+						}
+					}
+				},
+				{
+					"name": "POST Upload Bukti Bayar Pesanan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "metodePembayaran",
+									"value": "Transfer Bank",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/upload/bukti-bayar/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "upload", "bukti-bayar", "1"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

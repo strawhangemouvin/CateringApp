@@ -108,10 +108,15 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
 
+                        @{
+                            string currentController = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
+                            string currentAction = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+                        }
+
                         @if (role == "Pemilik Toko" || role == "Karyawan")
                         {
                             <li class="nav-item">
-                                <a href="@Url.Action("Index", "Dashboard")" class="nav-link">
+                                <a href="@Url.Action("Index", "Dashboard")" class="nav-link @(currentController == "Dashboard" ? "active" : "")">
                                     <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard @(role == "Pemilik Toko" ? "Owner" : "Operasional")</p>
                                 </a>
                             </li>
@@ -120,12 +125,12 @@
                         @if (role == "Pemilik Toko")
                         {
                             <li class="nav-item">
-                                <a href="@Url.Action("Index", "KategoriMenu")" class="nav-link">
+                                <a href="@Url.Action("Index", "KategoriMenu")" class="nav-link @(currentController == "KategoriMenu" ? "active" : "")">
                                     <i class="nav-icon fas fa-list"></i><p>Kelola Kategori Menu</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="@Url.Action("Index", "Pengguna")" class="nav-link">
+                                <a href="@Url.Action("Index", "Pengguna")" class="nav-link @(currentController == "Pengguna" ? "active" : "")">
                                     <i class="nav-icon fas fa-users-cog"></i><p>Kelola Pengguna</p>
                                 </a>
                             </li>
@@ -134,7 +139,7 @@
                         @if (role == "Pemilik Toko" || role == "Karyawan")
                         {
                             <li class="nav-item">
-                                <a href="@Url.Action("Index", "PaketMenu")" class="nav-link">
+                                <a href="@Url.Action("Index", "PaketMenu")" class="nav-link @(currentController == "PaketMenu" ? "active" : "")">
                                     <i class="nav-icon fas fa-utensils"></i><p>Kelola Paket Menu</p>
                                 </a>
                             </li>
@@ -143,19 +148,19 @@
                         @if (role == "User")
                         {
                             <li class="nav-item">
-                                <a href="@Url.Action("Index", "Dashboard")" class="nav-link">
+                                <a href="@Url.Action("Index", "Dashboard")" class="nav-link @(currentController == "Dashboard" ? "active" : "")">
                                     <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard Pelanggan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="@Url.Action("Katalog", "Pesanan")" class="nav-link">
+                                <a href="@Url.Action("Katalog", "Pesanan")" class="nav-link @(currentController == "Pesanan" && currentAction == "Katalog" ? "active" : "")">
                                     <i class="nav-icon fas fa-book-open"></i><p>Katalog Menu</p>
                                 </a>
                             </li>
                         }
 
                         <li class="nav-item">
-                            <a href="@Url.Action("Index", "Pesanan")" class="nav-link">
+                            <a href="@Url.Action("Index", "Pesanan")" class="nav-link @(currentController == "Pesanan" && currentAction != "Katalog" ? "active" : "")">
                                 <i class="nav-icon fas fa-shopping-cart"></i><p>@(role == "Pemilik Toko" || role == "Karyawan" ? "Kelola Semua Pesanan" : "Pesanan Saya")</p>
                             </a>
                         </li>

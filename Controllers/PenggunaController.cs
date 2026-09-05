@@ -1,4 +1,4 @@
-using CateringApp.Filters;
+﻿using CateringApp.Filters;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -22,20 +22,17 @@ namespace CateringApp.Controllers
         {
             var list = _service.GetAllPengguna();
 
-            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 string s = search.ToLower();
                 list = list.Where(u => u.NamaLengkap.ToLower().Contains(s) || u.Username.ToLower().Contains(s) || u.Email.ToLower().Contains(s)).ToList();
             }
 
-            // Filter
             if (peranId.HasValue)
             {
                 list = list.Where(u => u.PeranId == peranId.Value).ToList();
             }
 
-            // Sort
             sort = string.IsNullOrEmpty(sort) ? "terbaru" : sort;
             list = sort switch
             {
@@ -45,7 +42,6 @@ namespace CateringApp.Controllers
                 _ => list.OrderByDescending(u => u.CreatedAt ?? DateTime.MinValue).ThenByDescending(u => u.PenggunaId).ToList(),
             };
 
-            // Pagination
             int total = list.Count;
             var pagedList = list.Skip((page - 1) * size).Take(size).ToList();
 

@@ -1,4 +1,4 @@
-using CateringApp.Filters;
+﻿using CateringApp.Filters;
 using CateringApp.Helpers;
 using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
@@ -20,14 +20,12 @@ namespace CateringApp.Controllers
             _service = service;
         }
 
-        // View Cart
         public IActionResult Index()
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
             return View(cart);
         }
 
-        // Add Item to Cart
         [HttpPost]
         public IActionResult Add(int paketId, int jumlah = 1, string? catatan = null)
         {
@@ -66,7 +64,6 @@ namespace CateringApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // Remove Item from Cart
         public IActionResult Remove(int id)
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
@@ -81,7 +78,6 @@ namespace CateringApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // Update Item Quantity
         [HttpPost]
         public IActionResult UpdateQuantity(int id, int qty)
         {
@@ -104,7 +100,6 @@ namespace CateringApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // Update Item Note
         [HttpPost]
         public IActionResult UpdateCatatan(int id, string catatan)
         {
@@ -119,7 +114,6 @@ namespace CateringApp.Controllers
             return Json(new { success = true });
         }
 
-        // Checkout View
         public IActionResult Checkout()
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
@@ -135,14 +129,13 @@ namespace CateringApp.Controllers
             var model = new CheckoutViewModel
             {
                 AlamatPengiriman = user?.Alamat ?? string.Empty,
-                TanggalPengiriman = DateTime.Today.AddDays(2) // Default delivery is 2 days from now
+                TanggalPengiriman = DateTime.Today.AddDays(2) 
             };
 
             ViewBag.Cart = cart;
             return View(model);
         }
 
-        // Process Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Checkout(CheckoutViewModel model)
@@ -159,7 +152,6 @@ namespace CateringApp.Controllers
                 int userId = HttpContext.Session.GetInt32("UserId")!.Value;
                 int pesananId = _service.BuatPesananDariKeranjang(userId, cart, model);
 
-                // Clear the cart
                 HttpContext.Session.Remove("Cart");
 
                 TempData["Success"] = "Pesanan berhasil dibuat. Silakan unggah bukti pembayaran.";

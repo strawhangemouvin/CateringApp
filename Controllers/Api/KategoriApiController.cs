@@ -1,4 +1,4 @@
-using CateringApp.Models.DTO;
+﻿using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Context;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +17,6 @@ namespace CateringApp.Controllers.Api
             _context = context;
         }
 
-        // 1. GET: api/kategori
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -57,7 +56,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 2. GET: api/kategori/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -106,7 +104,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 3. POST: api/kategori
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateKategoriDto model)
         {
@@ -164,7 +161,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 4. PUT: api/kategori/{id} (Full Update)
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateKategoriDto model)
         {
@@ -231,7 +227,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 5. PATCH: api/kategori/{id} (Partial Update)
         [HttpPatch("{id}")]
         public async Task<IActionResult> PartialUpdate(int id, [FromBody] PatchKategoriDto model)
         {
@@ -302,7 +297,6 @@ namespace CateringApp.Controllers.Api
             }
         }
 
-        // 6. DELETE: api/kategori/{id} (Soft Delete)
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -321,7 +315,6 @@ namespace CateringApp.Controllers.Api
                     });
                 }
 
-                // Check if category is used in active menus
                 var menuCount = await _context.PaketMenus
                     .CountAsync(m => m.KategoriId == id && m.DeletedAt == null);
 

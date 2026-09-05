@@ -1,4 +1,4 @@
-using CateringApp.Filters;
+﻿using CateringApp.Filters;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,4 +30,3 @@ public class DashboardController : Controller
         return View(data);
     }
 }
-

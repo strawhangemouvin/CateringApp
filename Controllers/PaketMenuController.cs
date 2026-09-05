@@ -1,4 +1,4 @@
-using CateringApp.Filters;
+﻿using CateringApp.Filters;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -28,20 +28,17 @@ namespace CateringApp.Controllers
         {
             var list = _service.GetAllPaket();
 
-            // Search
             if (!string.IsNullOrEmpty(search))
             {
                 string s = search.ToLower();
                 list = list.Where(p => p.NamaPaket.ToLower().Contains(s) || (p.DeskripsiMenu != null && p.DeskripsiMenu.ToLower().Contains(s))).ToList();
             }
 
-            // Filter
             if (kategoriId.HasValue)
             {
                 list = list.Where(p => p.KategoriId == kategoriId.Value).ToList();
             }
 
-            // Sort
             sort = string.IsNullOrEmpty(sort) ? "terbaru" : sort;
             list = sort switch
             {
@@ -53,7 +50,6 @@ namespace CateringApp.Controllers
                 _ => list.OrderByDescending(p => p.CreatedAt ?? DateTime.MinValue).ThenByDescending(p => p.PaketId).ToList(),
             };
 
-            // Pagination
             int total = list.Count;
             var pagedList = list.Skip((page - 1) * size).Take(size).ToList();
 
@@ -84,7 +80,8 @@ namespace CateringApp.Controllers
                 if (FileGambar != null && FileGambar.Length > 0)
                 {
                     string ext = Path.GetExtension(FileGambar.FileName).ToLower();
-                    if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+                    var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                    if (allowedExt.Contains(ext))
                     {
                         string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
                         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
@@ -98,6 +95,12 @@ namespace CateringApp.Controllers
                         }
 
                         model.Gambar = $"/uploads/menu/{uniqueFileName}";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
+                        ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
+                        return View(model);
                     }
                 }
 
@@ -126,7 +129,8 @@ namespace CateringApp.Controllers
                 if (FileGambar != null && FileGambar.Length > 0)
                 {
                     string ext = Path.GetExtension(FileGambar.FileName).ToLower();
-                    if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+                    var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                    if (allowedExt.Contains(ext))
                     {
                         string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
                         if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
@@ -140,6 +144,12 @@ namespace CateringApp.Controllers
                         }
 
                         model.Gambar = $"/uploads/menu/{uniqueFileName}";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
+                        ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
+                        return View(model);
                     }
                 }
 

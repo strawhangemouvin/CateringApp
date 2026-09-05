@@ -74,6 +74,10 @@ CREATE TABLE pesanan (
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     deleted_at DATETIME NULL,
+    refund_nama_bank VARCHAR(50) NULL,
+    refund_no_rekening VARCHAR(50) NULL,
+    refund_atas_nama VARCHAR(100) NULL,
+    refund_bukti_tf VARCHAR(255) NULL,
     CONSTRAINT fk_pesanan_pengguna FOREIGN KEY (pengguna_id) REFERENCES pengguna(pengguna_id)
 );
 
