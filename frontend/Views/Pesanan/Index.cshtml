@@ -6,79 +6,97 @@
     string? role = session?.GetString("Role");
 }
 
-<div class="card card-outline card-primary shadow-sm" style="border-radius: 12px;">
-    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <h3 class="card-title font-weight-bold text-dark mb-2" style="font-family: 'Outfit', sans-serif;">
-                <i class="fas fa-list mr-2 text-primary"></i> Data Transaksi Pesanan
-            </h3>
-            <div class="card-tools mb-2">
-                @if (role == "User")
-                {
-                    <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-primary font-weight-bold" style="border-radius: 8px;">
-                        <i class="fas fa-plus mr-1"></i> Pesan Menu Baru
+<div class="card-modern mb-4">
+    <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h4 class="font-heading font-weight-bold text-dark mb-1">
+                <i class="fas fa-clipboard-list text-danger mr-2"></i> @(role == "User" ? "Riwayat Pesanan Saya" : "Kelola Seluruh Pesanan")
+            </h4>
+            <p class="text-muted small mb-0">Daftar transaksi dan pemantauan tahapan katering.</p>
+        </div>
+        <div class="mt-2 mt-sm-0">
+            @if (role == "User")
+            {
+                <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-modern-primary">
+                    <i class="fas fa-plus mr-1"></i> Pesan Menu Baru
+                </a>
+            }
+            else
+            {
+                <div class="d-flex" style="gap: 8px;">
+                    <a href="@Url.Action("Create", "Pesanan")" class="btn btn-modern-primary">
+                        <i class="fas fa-cash-register mr-1"></i> Pesanan Manual
                     </a>
-                }
-            </div>
+                    <a href="@Url.Action("ManifesDapur", "Pesanan")" class="btn btn-outline-secondary font-weight-bold" style="border-radius: var(--radius-md);">
+                        <i class="fas fa-fire-burner mr-1 text-danger"></i> Manifes Dapur
+                    </a>
+                </div>
+            }
         </div>
     </div>
     
-    <div class="card-body px-4 pb-4">
+    <div class="card-body p-4">
         <!-- Advanced Search, Filtering, and Sorting Form -->
-        <form method="get" class="bg-light p-3 mb-4 rounded border">
-            <div class="row align-items-end">
+        <form method="get" class="p-3 mb-4 rounded-lg bg-light border">
+            <div class="row g-2 align-items-end">
                 <!-- Search Keyword -->
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Cari Kata Kunci</label>
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Cari Kata Kunci</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
                         </div>
-                        <input type="text" name="search" class="form-control border-left-0" placeholder="No. Pesanan atau Pelanggan..." value="@ViewBag.Search" style="border-radius: 0 6px 6px 0;" />
+                        <input type="text" name="search" class="form-control border-left-0" placeholder="No. Pesanan atau Pelanggan..." value="@ViewBag.Search" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0;" />
                     </div>
                 </div>
 
                 <!-- Status Filter -->
-                <div class="col-lg-2 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Status Pesanan</label>
-                    <select name="status" class="form-control" style="border-radius: 6px;">
+                <div class="col-lg-2 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Status Pesanan</label>
+                    <select name="status" class="form-control custom-select custom-select-scroll" style="border-radius: var(--radius-sm);">
                         <option value="">-- Semua Status --</option>
                         <option value="Pending" selected="@(ViewBag.Status == "Pending")">Pending</option>
                         <option value="Diproses" selected="@(ViewBag.Status == "Diproses")">Diproses</option>
                         <option value="Dikirim" selected="@(ViewBag.Status == "Dikirim")">Dikirim</option>
                         <option value="Selesai" selected="@(ViewBag.Status == "Selesai")">Selesai</option>
+                        <option value="Menunggu Refund" selected="@(ViewBag.Status == "Menunggu Refund")">Menunggu Refund</option>
+                        <option value="Refund Selesai" selected="@(ViewBag.Status == "Refund Selesai")">Refund Selesai</option>
+                        <option value="Dibatalkan" selected="@(ViewBag.Status == "Dibatalkan")">Dibatalkan</option>
                     </select>
                 </div>
 
                 <!-- Category Filter -->
-                <div class="col-lg-2 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Kategori Menu</label>
-                    <select name="kategoriId" asp-items="ViewBag.KategoriList" class="form-control" style="border-radius: 6px;">
+                <div class="col-lg-2 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Kategori Menu</label>
+                    <select name="kategoriId" asp-items="ViewBag.KategoriList" class="form-control custom-select custom-select-scroll" style="border-radius: var(--radius-sm);">
                         <option value="">-- Semua Kategori --</option>
                     </select>
                 </div>
 
                 <!-- Date Filter -->
-                <div class="col-lg-2 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Tanggal Pesan</label>
-                    <input type="date" name="tanggal" class="form-control" value="@ViewBag.Tanggal" style="border-radius: 6px;" />
+                <div class="col-lg-2 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Tanggal Pesan</label>
+                    <input type="date" name="tanggal" class="form-control" value="@ViewBag.Tanggal" style="border-radius: var(--radius-sm);" />
                 </div>
 
                 <!-- Sorting Select -->
-                <div class="col-lg-2 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Urutan</label>
-                    <select name="sort" class="form-control" style="border-radius: 6px;">
-                        <option value="terbaru" selected="@(ViewBag.Sort == "terbaru")">Terbaru</option>
-                        <option value="terlama" selected="@(ViewBag.Sort == "terlama")">Terlama</option>
-                        <option value="A-Z" selected="@(ViewBag.Sort == "A-Z")">No. Pesanan A-Z</option>
-                        <option value="Z-A" selected="@(ViewBag.Sort == "Z-A")">No. Pesanan Z-A</option>
+                <div class="col-lg-2 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Urutan</label>
+                    <select name="sort" class="form-control custom-select" style="border-radius: var(--radius-sm);">
+                        <option value="terbaru" selected="@(ViewBag.Sort == "terbaru")">Pesanan Terbaru</option>
+                        <option value="terlama" selected="@(ViewBag.Sort == "terlama")">Pesanan Terlama</option>
+                        <option value="A-Z" selected="@(ViewBag.Sort == "A-Z" || ViewBag.Sort == "pelanggan-az")">Nama Pelanggan (A - Z)</option>
+                        <option value="Z-A" selected="@(ViewBag.Sort == "Z-A" || ViewBag.Sort == "pelanggan-za")">Nama Pelanggan (Z - A)</option>
+                        <option value="total-terbesar" selected="@(ViewBag.Sort == "total-terbesar" || ViewBag.Sort == "termahal")">Total Belanja (Terbesar)</option>
+                        <option value="total-terkecil" selected="@(ViewBag.Sort == "total-terkecil" || ViewBag.Sort == "termurah")">Total Belanja (Terkecil)</option>
+                        <option value="no-pesanan-asc" selected="@(ViewBag.Sort == "no-pesanan-asc")">No. Pesanan (Lama ke Baru)</option>
                     </select>
                 </div>
 
                 <!-- Page Size Dropdown -->
-                <div class="col-lg-1 col-md-6 mb-3">
-                    <label class="form-label font-weight-bold text-muted small mb-1">Baris</label>
-                    <select name="size" class="form-control" style="border-radius: 6px;">
+                <div class="col-lg-1 col-md-6 mb-2">
+                    <label class="font-weight-bold text-muted small mb-1">Baris</label>
+                    <select name="size" class="form-control custom-select" style="border-radius: var(--radius-sm);">
                         <option value="5" selected="@(ViewBag.PageSize == 5)">5</option>
                         <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
                         <option value="20" selected="@(ViewBag.PageSize == 20)">20</option>
@@ -87,29 +105,29 @@
             </div>
 
             <!-- Action Buttons for Filters -->
-            <div class="d-flex justify-content-end" style="gap: 10px;">
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+            <div class="d-flex justify-content-end mt-2" style="gap: 8px;">
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-modern-outline">
                     <i class="fas fa-undo mr-1"></i> Reset
                 </a>
-                <button type="submit" class="btn btn-primary px-4" style="border-radius: 8px;">
-                    <i class="fas fa-filter mr-1"></i> Saring Data
+                <button type="submit" class="btn btn-sm btn-modern-primary">
+                    <i class="fas fa-filter mr-1"></i> Terapkan Filter
                 </button>
             </div>
         </form>
 
         <!-- Orders Table Grid -->
         <div class="table-responsive">
-            <table class="table table-hover table-bordered table-striped mb-0">
-                <thead>
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small font-weight-bold">
                     <tr>
-                        <th class="align-middle">No. Pesanan</th>
-                        <th class="align-middle">Pelanggan</th>
-                        <th class="align-middle">Tgl Pesan</th>
-                        <th class="align-middle">Tgl Kirim</th>
-                        <th class="align-middle">Total</th>
-                        <th class="align-middle">Status Pesanan</th>
-                        <th class="align-middle">Status Bayar</th>
-                        <th class="text-center align-middle" style="width: 220px;">Aksi</th>
+                        <th class="py-3 border-top-0">No. Pesanan</th>
+                        <th class="py-3 border-top-0">Pelanggan</th>
+                        <th class="py-3 border-top-0">Tgl Pesan</th>
+                        <th class="py-3 border-top-0">Tgl Kirim</th>
+                        <th class="py-3 border-top-0">Total</th>
+                        <th class="py-3 border-top-0">Status Pesanan</th>
+                        <th class="py-3 border-top-0">Status Bayar</th>
+                        <th class="py-3 border-top-0 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,55 +136,104 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td class="align-middle font-weight-bold text-primary">@item.NomorPesanan</td>
-                                <td class="align-middle">@item.Pengguna?.NamaLengkap</td>
-                                <td class="align-middle">@item.TanggalPesan.ToString("dd MMM yyyy HH:mm")</td>
-                                <td class="align-middle">@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
-                                <td class="align-middle font-weight-bold">Rp @item.TotalBayar.ToString("N0")</td>
-                                <td class="align-middle">
-                                    <span class="badge px-3 py-2" style="border-radius: 20px; font-size: 85%; 
-                                        background-color: @(item.StatusPesanan == "Selesai" ? "rgba(40, 167, 69, 0.1)" : (item.StatusPesanan == "Diproses" ? "rgba(23, 162, 184, 0.1)" : (item.StatusPesanan == "Dikirim" ? "rgba(0, 123, 255, 0.1)" : "rgba(255, 193, 7, 0.1)")));
-                                        color: @(item.StatusPesanan == "Selesai" ? "#28a745" : (item.StatusPesanan == "Diproses" ? "#17a2b8" : (item.StatusPesanan == "Dikirim" ? "#007bff" : "#fd7e14")));">
-                                        @item.StatusPesanan
-                                    </span>
-                                </td>
-                                <td class="align-middle">
-                                    @if (item.Pembayaran != null)
+                                <td class="py-3 font-weight-bold text-primary">@item.NomorPesanan</td>
+                                <td class="py-3 text-dark">@item.Pengguna?.NamaLengkap</td>
+                                <td class="py-3 text-muted small">@item.TanggalPesan.ToString("dd MMM yyyy HH:mm")</td>
+                                <td class="py-3 font-weight-bold text-dark small">@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
+                                <td class="py-3 font-weight-bold text-dark">Rp @item.TotalBayar.ToString("N0")</td>
+                                <td class="py-3">
+                                    @if (item.StatusPesanan == "Selesai")
                                     {
-                                        <span class="badge px-3 py-2 @(item.Pembayaran.StatusVerifikasi == "Valid" ? "badge-success" : "badge-warning")" style="border-radius: 20px; font-size: 85%;">
+                                        <span class="badge-modern badge-modern-success">
+                                            <i class="fas fa-check-circle"></i> Selesai
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Dikirim")
+                                    {
+                                        <span class="badge-modern badge-modern-info">
+                                            <i class="fas fa-truck"></i> Dikirim
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Diproses")
+                                    {
+                                        <span class="badge-modern badge-modern-warning">
+                                            <i class="fas fa-fire"></i> Diproses
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Menunggu Refund")
+                                    {
+                                        <span class="badge-modern badge-modern-warning" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a;">
+                                            <i class="fas fa-hand-holding-usd"></i> Menunggu Refund
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Refund Selesai")
+                                    {
+                                        <span class="badge-modern badge-modern-success" style="background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                                            <i class="fas fa-undo"></i> Refund Selesai
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Dibatalkan" || item.StatusPesanan == "Batal")
+                                    {
+                                        <span class="badge-modern badge-modern-danger">
+                                            <i class="fas fa-ban"></i> Dibatalkan
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-modern badge-modern-warning">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    }
+                                </td>
+                                <td class="py-3">
+                                    @if (item.StatusPesanan == "Refund Selesai")
+                                    {
+                                        <span class="badge-modern badge-modern-info" title="Dana telah berhasil ditransfer kembali ke rekening pelanggan">
+                                            <i class="fas fa-undo mr-1"></i> Refund Sukses
+                                        </span>
+                                    }
+                                    else if (item.StatusPesanan == "Menunggu Refund")
+                                    {
+                                        <span class="badge-modern badge-modern-warning" title="Sedang menunggu proses transfer refund dari owner">
+                                            <i class="fas fa-clock mr-1"></i> Proses Refund
+                                        </span>
+                                    }
+                                    else if (item.Pembayaran != null)
+                                    {
+                                        <span class="badge-modern @(item.Pembayaran.StatusVerifikasi == "Valid" ? "badge-modern-success" : (item.Pembayaran.StatusVerifikasi == "Tidak Valid" ? "badge-modern-danger" : "badge-modern-warning"))">
                                             @item.Pembayaran.StatusVerifikasi
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge px-3 py-2 badge-danger" style="border-radius: 20px; font-size: 85%;">Belum Bayar</span>
+                                        <span class="badge-modern badge-modern-danger">Belum Bayar</span>
                                     }
                                 </td>
-                                <td class="text-center align-middle" style="white-space: nowrap;">
-                                    <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
-                                        <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-info btn-xs px-2 py-1" style="border-radius: 4px;">
-                                            <i class="fas fa-eye mr-1"></i> Detail
+                                <td class="py-3 text-center">
+                                    <div class="d-flex align-items-center justify-content-center" style="gap: 6px;">
+                                        <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-modern-outline" style="padding: 5px 12px; font-size: 0.82rem;">
+                                            <i class="fas fa-eye mr-1"></i> Rincian
                                         </a>
                                         
                                         @if (role == "User")
                                         {
-                                            if (item.Pembayaran == null)
+                                            if (item.Pembayaran == null && item.StatusPesanan != "Dibatalkan" && item.StatusPesanan != "Batal" && item.StatusPesanan != "Menunggu Refund" && item.StatusPesanan != "Refund Selesai")
                                             {
-                                                <a href="@Url.Action("Bayar", "Pesanan", new { id = item.PesananId })" class="btn btn-success btn-xs px-2 py-1" style="border-radius: 4px;">
-                                                    <i class="fas fa-upload mr-1"></i> Bayar
+                                                <a href="@Url.Action("Bayar", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-modern-primary" style="padding: 5px 12px; font-size: 0.82rem;">
+                                                    <i class="fas fa-credit-card mr-1"></i> Bayar
                                                 </a>
                                             }
                                             
                                             if (item.StatusPesanan == "Pending")
                                             {
-                                                <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-danger btn-xs px-2 py-1" style="border-radius: 4px;" onclick="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
-                                                    <i class="fas fa-times mr-1"></i> Batalkan
+                                                <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-outline-danger" style="padding: 5px 12px; font-size: 0.82rem; border-radius: var(--radius-sm);" onclick="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
+                                                    <i class="fas fa-times mr-1"></i> Batal
                                                 </a>
                                             }
                                         }
-                                        else if (role == "Pemilik Toko")
+                                        else if (role == "Pemilik Toko" && item.StatusPesanan != "Dikirim" && item.StatusPesanan != "Selesai" && item.StatusPesanan != "Menunggu Refund" && item.StatusPesanan != "Refund Selesai")
                                         {
-                                            <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-danger btn-xs px-2 py-1" style="border-radius: 4px;" onclick="return confirm('Apakah Anda yakin ingin menghapus/membatalkan pesanan ini?');">
+                                            <a href="@Url.Action("Delete", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-outline-danger" style="padding: 5px 12px; font-size: 0.82rem; border-radius: var(--radius-sm);" onclick="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?');">
                                                 <i class="fas fa-trash mr-1"></i> Hapus
                                             </a>
                                         }
@@ -179,8 +246,9 @@
                     {
                         <tr>
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-shopping-cart fa-3x mb-3 text-black-50"></i>
-                                <p class="mb-0">Tidak ada pesanan yang sesuai dengan filter pencarian.</p>
+                                <i class="fas fa-receipt fa-3x mb-3 text-secondary opacity-50"></i>
+                                <h6 class="font-weight-bold text-dark mb-1">Tidak Ada Pesanan Ditemukan</h6>
+                                <p class="small text-muted mb-0">Coba ubah kata kunci pencarian atau saringan filter Anda.</p>
                             </td>
                         </tr>
                     }
@@ -190,38 +258,47 @@
 
         <!-- Custom Pagination Footer -->
         <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap">
-            <div class="text-muted mb-2">
+            <div class="text-muted small mb-2">
                 @if (ViewBag.TotalRecords > 0)
                 {
-                    <text>Showing @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) to @Math.Min((int)ViewBag.CurrentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalRecords) of @ViewBag.TotalRecords entries</text>
+                    <text>Menampilkan @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) s.d. @Math.Min((int)ViewBag.CurrentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalRecords) dari @ViewBag.TotalRecords pesanan</text>
                 }
                 else
                 {
-                    <text>Showing 0 to 0 of 0 entries</text>
+                    <text>Menampilkan 0 pesanan</text>
                 }
             </div>
-            
+
             @if (ViewBag.TotalPages > 1)
             {
-                <nav class="mb-2">
-                    <ul class="pagination pagination-sm mb-0" style="border-radius: 8px; overflow: hidden;">
-                        <!-- Previous Page -->
-                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, page = ViewBag.CurrentPage - 1, size = ViewBag.PageSize })">Prev</a>
-                        </li>
-
-                        <!-- Page Numbers -->
-                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                <nav aria-label="Navigasi Halaman">
+                    <ul class="pagination pagination-sm mb-0 shadow-xs" style="border-radius: var(--radius-pill); overflow: hidden;">
+                        @if (ViewBag.CurrentPage > 1)
                         {
-                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, page = i, size = ViewBag.PageSize })">@i</a>
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, size = ViewBag.PageSize, page = ViewBag.CurrentPage - 1 })">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
                             </li>
                         }
 
-                        <!-- Next Page -->
-                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, page = ViewBag.CurrentPage + 1, size = ViewBag.PageSize })">Next</a>
-                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link font-weight-bold" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, size = ViewBag.PageSize, page = i })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, status = ViewBag.Status, kategoriId = ViewBag.SelectedKategoriId, tanggal = ViewBag.Tanggal, sort = ViewBag.Sort, size = ViewBag.PageSize, page = ViewBag.CurrentPage + 1 })">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </nav>
             }

@@ -15,7 +15,7 @@
     
     <div class="card-body">
         <!-- Search, Sort & Paging Controls -->
-        <form method="get" class="row mb-3">
+        <form method="get" class="row mb-3 align-items-center">
             <div class="col-md-4 mb-2">
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="Cari kategori..." value="@ViewBag.Search" />
@@ -40,6 +40,12 @@
                     <option value="10" selected="@(ViewBag.PageSize == 10)">10 per hal</option>
                     <option value="20" selected="@(ViewBag.PageSize == 20)">20 per hal</option>
                 </select>
+            </div>
+
+            <div class="col-md-2 mb-2">
+                <a href="@Url.Action("Index")" class="btn btn-default w-100" title="Reset filter pencarian">
+                    <i class="fas fa-undo mr-1"></i> Reset
+                </a>
             </div>
         </form>
 

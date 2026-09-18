@@ -37,6 +37,13 @@ public interface ICateringService
 
     void UploadBuktiBayar(UploadPembayaranViewModel model, string filePath);
     void VerifikasiPembayaran(int pesananId, string status);
+    void KonfirmasiPembayaranOtomatis(int pesananId, string metodePembayaran);
     void AjukanRefund(int pesananId, string bank, string noRekening, string atasNama);
+    void InputRekeningRefund(int pesananId, string bank, string noRekening, string atasNama);
     void KonfirmasiRefund(int pesananId, string buktiTfPath);
+    (bool IsAllowed, string Reason) CekKelayakanRefund(int pesananId);
+
+    int GetTotalPorsiByTanggal(DateTime tanggal);
+    ManifesDapurViewModel GetManifesDapur(DateTime tanggal);
+    List<NotifikasiItemViewModel> GetNotifikasiList(string role, int? userId);
 }

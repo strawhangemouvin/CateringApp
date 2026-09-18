@@ -1,0 +1,34 @@
+[
+  {
+    "Id": "714f27a3214b437598120e0f4303c0ef",
+    "Nama": "Ines Karlina",
+    "Acara": "Acara Pernikahan",
+    "Rating": 5,
+    "Pesan": "wahhh sukak banget sama pelayanannya",
+    "Tanggal": "09 Sep 2026, 23.46"
+  },
+  {
+    "Id": "kp-001",
+    "Nama": "Ibu Sarah Wijaya",
+    "Acara": "Penyelenggara Pernikahan",
+    "Rating": 5,
+    "Pesan": "Makanan prasmanan yang diantarkan sangat memuaskan! Rasa rendang dan sup kimlonya luar biasa, para tamu undangan pernikahan kami banyak memuji rasanya. Terima kasih Catering Mimi Saripah!",
+    "Tanggal": "05 Sep 2026, 14:30"
+  },
+  {
+    "Id": "kp-002",
+    "Nama": "Bapak Rian Hidayat",
+    "Acara": "HR Manager, PT Tekno Mandiri",
+    "Rating": 5,
+    "Pesan": "Pemesanan 100 box nasi ayam bakar dikirim tepat waktu, makanan masih hangat dan rapi. Sangat rekomen untuk event kantor dadakan karena respon admin yang cepat.",
+    "Tanggal": "04 Sep 2026, 11:15"
+  },
+  {
+    "Id": "kp-003",
+    "Nama": "Hj. Siti Fatimah",
+    "Acara": "Tasyakuran Khitanan",
+    "Rating": 5,
+    "Pesan": "Alhamdulillah tumpeng dan lauk pauk dari Mimi Saripah mantap pisan. Bumbunya meresap dan porsinya pas untuk keluarga besar di Tenajar.",
+    "Tanggal": "02 Sep 2026, 19:40"
+  }
+]

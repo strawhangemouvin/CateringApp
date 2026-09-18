@@ -1,2 +1,117 @@
-﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    (function ($) {
+        if (!$) return;
+
+        // 1. Lokalisasi pesan default jQuery Validate ke Bahasa Indonesia
+        if ($.validator) {
+            $.extend($.validator.messages, {
+                required: "Kolom ini wajib diisi.",
+                remote: "Harap perbaiki kolom ini.",
+                email: "Format alamat email tidak valid (contoh: nama@gmail.com).",
+                url: "Format tautan / URL tidak valid.",
+                date: "Format tanggal tidak valid.",
+                dateISO: "Format tanggal (ISO) tidak valid.",
+                number: "Kolom ini harus berupa angka yang valid.",
+                digits: "Hanya boleh memasukkan angka digit.",
+                creditcard: "Nomor kartu kredit tidak valid.",
+                equalTo: "Silakan masukkan nilai yang sama sekali lagi.",
+                extension: "Format ekstensi file tidak valid.",
+                maxlength: $.validator.format("Maksimal {0} karakter."),
+                minlength: $.validator.format("Minimal {0} karakter."),
+                rangelength: $.validator.format("Panjang karakter harus antara {0} dan {1}."),
+                range: $.validator.format("Nilai harus antara {0} dan {1}."),
+                max: $.validator.format("Nilai harus kurang dari atau sama dengan {0}."),
+                min: $.validator.format("Nilai harus lebih besar atau sama dengan {0}."),
+                step: $.validator.format("Nilai harus berupa kelipatan dari {0}.")
+            });
+
+            // Patch validator step agar tidak gagal karena desimal trailing seperti .00
+            var origStep = $.validator.methods.step;
+            if (origStep) {
+                $.validator.methods.step = function (value, element, param) {
+                    if (this.optional(element) || !param || param === 'any') return true;
+                    var numVal = Number(value);
+                    var numParam = Number(param);
+                    if (!isNaN(numVal) && !isNaN(numParam) && numParam > 0) {
+                        var remainder = numVal % numParam;
+                        return Math.abs(remainder) < 0.0001 || Math.abs(remainder - numParam) < 0.0001;
+                    }
+                    return origStep.call(this, value, element, param);
+                };
+            }
+
+            // Validasi format email ketat & deteksi saltik / typo domain umum
+            var typoList = {
+                'gmial.com': 'gmail.com',
+                'gamil.com': 'gmail.com',
+                'gmaill.com': 'gmail.com',
+                'gmai.com': 'gmail.com',
+                'gmeil.com': 'gmail.com',
+                'gmal.com': 'gmail.com',
+                'gmaik.com': 'gmail.com',
+                'gmail.con': 'gmail.com',
+                'gmail.cpm': 'gmail.com',
+                'gmail.coom': 'gmail.com',
+                'gmail.cm': 'gmail.com',
+                'yaho.com': 'yahoo.com',
+                'yahooo.com': 'yahoo.com',
+                'yahu.com': 'yahoo.com',
+                'hotmial.com': 'hotmail.com',
+                'outlok.com': 'outlook.com',
+                'otlook.com': 'outlook.com',
+                'icoud.com': 'icloud.com',
+                'iclod.com': 'icloud.com'
+            };
+
+            $.validator.addMethod("strictEmail", function (value, element) {
+                if (this.optional(element)) return true;
+                var val = (value || '').trim().toLowerCase();
+                var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(val) || val.indexOf('..') !== -1 || val.indexOf(' ') !== -1) {
+                    return false;
+                }
+                var parts = val.split('@@');
+                if (parts.length !== 2) return false;
+                var domain = parts[1];
+                if (typoList[domain]) {
+                    $.validator.messages.strictEmail = "Format domain email tidak valid (terdeteksi saltik '@@" + domain + "'). Gunakan '@@" + typoList[domain] + "'.";
+                    return false;
+                }
+                return true;
+            }, "Format alamat email tidak valid (contoh: nama@gmail.com).");
+        }
+
+        // 2. Ganti pesan unobtrusive bawaan ASP.NET Core yang masih berbahasa Inggris
+        $(document).ready(function () {
+            // Pasang aturan strictEmail pada semua input type="email"
+            if ($.validator) {
+                $('input[type="email"]').each(function () {
+                    $(this).rules('add', { strictEmail: true });
+                });
+            }
+
+            // data-val-number: "The field ... must be a number."
+            $('input[data-val-number]').each(function () {
+                var msg = $(this).attr('data-val-number');
+                if (msg && (msg.indexOf('must be a number') !== -1 || msg.indexOf('The field') !== -1)) {
+                    var labelText = $(this).closest('.form-group, .mb-3').find('label').first().text().replace('*', '').trim();
+                    var fieldName = labelText || 'Kolom';
+                    $(this).attr('data-val-number', fieldName + ' harus berupa angka yang valid.');
+                }
+            });
+
+            // data-val-required: "The ... field is required."
+            $('input[data-val-required], select[data-val-required], textarea[data-val-required]').each(function () {
+                var msg = $(this).attr('data-val-required');
+                if (msg && (msg.indexOf('field is required') !== -1 || msg.indexOf('The ') !== -1)) {
+                    var labelText = $(this).closest('.form-group, .mb-3').find('label').first().text().replace('*', '').trim();
+                    var fieldName = labelText || 'Kolom ini';
+                    $(this).attr('data-val-required', fieldName + ' wajib diisi.');
+                }
+            });
+        });
+    })(window.jQuery);
+</script>

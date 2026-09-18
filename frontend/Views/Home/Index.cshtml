@@ -1,94 +1,224 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    Layout = "~/Views/Shared/_GuestLayout.cshtml";
-    ViewData["Title"] = "Selamat Datang di CateringApp";
+    Layout = "~/frontend/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Selamat Datang di Catering Mimi Saripah";
+    var session = HttpContextAccessor.HttpContext?.Session;
+    var currentUserId = session?.GetInt32("UserId");
+    var currentUserName = session?.GetString("Nama") ?? "";
 }
 
 <!-- Hero Section -->
-<div class="jumbotron jumbotron-fluid text-white text-center position-relative mb-0" style="background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1470&auto=format&fit=crop') no-repeat center center; background-size: cover; padding: 120px 0;">
+<div class="position-relative text-white text-center" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1470&auto=format&fit=crop') center center / cover no-repeat; padding: 110px 0;">
     <div class="container py-4">
-        <h1 class="display-3 font-weight-bold mb-3">Cita Rasa Terbaik Untuk Momen Spesial Anda</h1>
-        <p class="lead mb-5" style="font-size: 1.35rem; max-width: 800px; margin: 0 auto;">Penyedia catering premium dengan menu khas Nusantara yang higienis, lezat, dan disiapkan oleh koki profesional.</p>
-        <div>
-            <a href="@Url.Action("Register", "Account")" class="btn btn-brand-primary btn-lg px-5 py-3 mr-3 shadow-lg"><i class="fas fa-user-plus mr-2"></i> Daftar Sekarang</a>
-            <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg px-5 py-3 text-dark font-weight-bold shadow-lg"><i class="fas fa-sign-in-alt mr-2"></i> Masuk Sesi</a>
+        <h1 class="display-4 fw-bold mb-3">Cita Rasa Terbaik Untuk Momen Spesial Anda</h1>
+        <p class="lead mb-4 mx-auto" style="max-width: 750px; font-size: 1.25rem;">Penyedia catering terpercaya dengan menu khas Nusantara yang higienis, lezat, dan disiapkan oleh koki berpengalaman.</p>
+        <div class="d-flex justify-content-center flex-wrap gap-3">
+            @if (currentUserId.HasValue)
+            {
+                <a href="@Url.Action("Index", "Dashboard")" class="btn btn-brand-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow d-inline-flex align-items-center">
+                    <i class="fas fa-tachometer-alt me-2"></i> Buka Dashboard Saya
+                </a>
+                <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-light btn-lg rounded-pill px-4 py-3 text-dark fw-bold shadow-sm d-inline-flex align-items-center">
+                    <i class="fas fa-utensils me-2 text-danger"></i> Pesan Menu Sekarang
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("Register", "Account")" class="btn btn-brand-primary btn-lg rounded-pill px-4 py-3 fw-bold shadow d-inline-flex align-items-center">
+                    <i class="fas fa-user-plus me-2"></i> Daftar Sekarang
+                </a>
+                <a href="@Url.Action("Login", "Account")" class="btn btn-light btn-lg rounded-pill px-4 py-3 text-dark fw-bold shadow-sm d-inline-flex align-items-center">
+                    <i class="fas fa-sign-in-alt me-2"></i> Masuk Sesi
+                </a>
+            }
         </div>
     </div>
 </div>
 
-<!-- Features Section -->
+<!-- Features Section ("Mengapa Memilih Kami?") -->
 <div class="py-5 bg-white">
-    <div class="container py-4">
+    <div class="container py-2">
         <div class="text-center mb-5">
-            <h2 class="font-weight-bold text-dark">Mengapa Memilih Kami?</h2>
-            <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Kami berdedikasi menyajikan layanan dan rasa terbaik demi kelancaran acara berharga Anda.</p>
+            <h2 class="fw-bold text-dark mb-2">Mengapa Memilih Kami?</h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">Dedikasi menyajikan layanan dan cita rasa terbaik demi kelancaran acara berharga Anda.</p>
         </div>
-        <div class="row">
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
-                    <div class="mb-3 text-danger"><i class="fas fa-award fa-3x"></i></div>
-                    <h5 class="font-weight-bold text-dark mb-2">Bahan Berkualitas</h5>
-                    <p class="text-muted mb-0">Seluruh masakan diolah dari bahan baku segar, halal, dan bebas bahan pengawet sintetis.</p>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="p-4 border-0 rounded-4 shadow-sm h-100 bg-light">
+                    <div class="text-danger mb-3"><i class="fas fa-award fa-3x"></i></div>
+                    <h5 class="fw-bold text-dark mb-2">Bahan Berkualitas & Segar</h5>
+                    <p class="text-muted mb-0">Seluruh masakan diolah dari bahan baku segar, halal, dan bebas pengawet sintetis.</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
-                    <div class="mb-3 text-danger"><i class="fas fa-heart fa-3x"></i></div>
-                    <h5 class="font-weight-bold text-dark mb-2">Cita Rasa Nusantara</h5>
-                    <p class="text-muted mb-0">Resep bumbu tradisional warisan leluhur yang disesuaikan secara pas untuk lidah Indonesia.</p>
+            <div class="col-md-4 text-center">
+                <div class="p-4 border-0 rounded-4 shadow-sm h-100 bg-light">
+                    <div class="text-danger mb-3"><i class="fas fa-heart fa-3x"></i></div>
+                    <h5 class="fw-bold text-dark mb-2">Cita Rasa Nusantara</h5>
+                    <p class="text-muted mb-0">Bumbu tradisional warisan leluhur yang disesuaikan secara pas untuk lidah Indonesia.</p>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 p-4 shadow-sm h-100 rounded-lg">
-                    <div class="mb-3 text-danger"><i class="fas fa-truck-fast fa-3x"></i></div>
-                    <h5 class="font-weight-bold text-dark mb-2">Pengiriman Tepat Waktu</h5>
-                    <p class="text-muted mb-0">Kurir khusus kami siap mengantarkan hidangan hangat Anda tepat sesuai jadwal kesepakatan.</p>
+            <div class="col-md-4 text-center">
+                <div class="p-4 border-0 rounded-4 shadow-sm h-100 bg-light">
+                    <div class="text-danger mb-3"><i class="fas fa-truck-fast fa-3x"></i></div>
+                    <h5 class="fw-bold text-dark mb-2">Pengiriman Tepat Waktu</h5>
+                    <p class="text-muted mb-0">Kurir khusus siap mengantarkan hidangan hangat Anda tepat sesuai jadwal kesepakatan.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Catering Services Showcase -->
+<!-- Catering Services Showcase ("Layanan Catering Kami") -->
 <div class="py-5" style="background-color: #f7f5f0;">
-    <div class="container py-4">
+    <div class="container py-2">
         <div class="text-center mb-5">
-            <h2 class="font-weight-bold text-dark">Layanan Catering Kami</h2>
-            <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Sesuaikan paket konsumsi dengan konsep dan jumlah tamu acara Anda.</p>
+            <h2 class="fw-bold text-dark mb-2">Layanan Catering Kami</h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">Sesuaikan paket konsumsi dengan konsep dan jumlah tamu acara Anda.</p>
         </div>
-        <div class="row">
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card border-0 shadow-sm h-100 rounded-lg">
-                    <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Nasi Kotak" />
-                    <div class="card-body text-center">
-                        <h5 class="font-weight-bold">Nasi Kotak / Box</h5>
-                        <p class="text-muted" style="font-size: 0.9rem;">Sajian praktis untuk seminar, rapat, maupun makan siang kantor harian.</p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden d-flex flex-column" style="transition: all 0.3s ease;">
+                    <img src="https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Nasi Kotak" />
+                    <div class="card-body text-center p-3 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Nasi Kotak / Box</h5>
+                        <p class="text-muted mb-3 small flex-grow-1">Sajian praktis untuk seminar, rapat, maupun makan siang harian.</p>
+                        <a href="@Url.Action("Katalog", "Pesanan", new { search = "Kotak" })" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold w-100 mt-auto">
+                            Lihat Menu <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card border-0 shadow-sm h-100 rounded-lg">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden d-flex flex-column" style="transition: all 0.3s ease;">
                     <img src="https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Prasmanan" />
-                    <div class="card-body text-center">
-                        <h5 class="font-weight-bold">Prasmanan / Buffet</h5>
-                        <p class="text-muted" style="font-size: 0.9rem;">Layanan prasmanan lengkap dengan alat pemanas makanan untuk hajatan besar.</p>
+                    <div class="card-body text-center p-3 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Prasmanan / Buffet</h5>
+                        <p class="text-muted mb-3 small flex-grow-1">Layanan prasmanan lengkap dengan alat pemanas untuk hajatan besar.</p>
+                        <a href="@Url.Action("Katalog", "Pesanan", new { search = "Prasmanan" })" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold w-100 mt-auto">
+                            Lihat Menu <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card border-0 shadow-sm h-100 rounded-lg">
-                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Tumpengan" />
-                    <div class="card-body text-center">
-                        <h5 class="font-weight-bold">Nasi Tumpeng</h5>
-                        <p class="text-muted" style="font-size: 0.9rem;">Simbol rasa syukur untuk syukuran rumah baru, ulang tahun, hingga peresmian.</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden d-flex flex-column" style="transition: all 0.3s ease;">
+                    <img src="https://images.unsplash.com/photo-1626074353765-517a681e40be?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Tumpengan" />
+                    <div class="card-body text-center p-3 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Nasi Tumpeng</h5>
+                        <p class="text-muted mb-3 small flex-grow-1">Simbol rasa syukur untuk syukuran rumah, ulang tahun, & peresmian.</p>
+                        <a href="@Url.Action("Katalog", "Pesanan", new { search = "Tumpeng" })" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold w-100 mt-auto">
+                            Lihat Menu <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card border-0 shadow-sm h-100 rounded-lg">
-                    <img src="https://images.unsplash.com/photo-1558961309-dbdf71799f54?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Snack Box" />
-                    <div class="card-body text-center">
-                        <h5 class="font-weight-bold">Snack Box</h5>
-                        <p class="text-muted" style="font-size: 0.9rem;">Berbagai kue tradisional basah dan kering premium sebagai kudapan pendukung.</p>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden d-flex flex-column" style="transition: all 0.3s ease;">
+                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=600&auto=format&fit=crop" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Snack Box" loading="lazy" />
+                    <div class="card-body text-center p-3 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-2" style="font-size: 1.1rem;">Snack Box</h5>
+                        <p class="text-muted mb-3 small flex-grow-1">Aneka kue tradisional basah & kering premium kudapan event.</p>
+                        <a href="@Url.Action("Katalog", "Pesanan", new { search = "Snack" })" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-bold w-100 mt-auto">
+                            Lihat Menu <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Lihat Selengkapnya Semua Menu -->
+        <div class="text-center mt-5 pt-2">
+            <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-brand-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow d-inline-flex align-items-center">
+                <i class="fas fa-utensils me-2"></i> Lihat Selengkapnya Semua Menu
+                <i class="fas fa-arrow-right ms-3"></i>
+            </a>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-check-circle text-success me-1"></i> Terbuka untuk umum &mdash; Jelajahi menu, harga, dan rincian lengkap tanpa harus login.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kesan & Pesan Pelanggan (Real-Time) Section -->
+<div class="py-5 bg-white text-dark" id="sectionKesanPesan">
+    <div class="container py-2">
+        <div class="text-center mb-5">
+            <span class="badge bg-danger text-uppercase px-3 py-2 mb-2" style="letter-spacing: 0.5px;">Ulasan Pelanggan</span>
+            <h2 class="fw-bold text-dark mb-2">Kesan & Pesan Pelanggan</h2>
+            <p class="text-muted mx-auto" style="max-width: 600px;">Pengalaman langsung para pelanggan setia Catering Mimi Saripah.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Form Isi Kesan & Pesan -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="background-color: #fdfbf7; border: 1px solid #f0eae1 !important;">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="text-danger me-2"><i class="fas fa-comment-dots fa-2x"></i></div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">Tulis Kesan & Pesan</h5>
+                            <small class="text-muted">Bagikan pengalaman dan penilaian Anda secara langsung</small>
+                        </div>
+                    </div>
+
+                    <form id="formKesanPesan">
+                        <div class="mb-3">
+                            <label class="fw-bold small text-dark mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+                            <input type="text" id="kpNama" class="form-control bg-white" placeholder="Contoh: Ibu Hajah Siti" value="@currentUserName" required maxlength="100" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold small text-dark mb-1">Jenis Acara / Peran</label>
+                            <select id="kpAcara" class="form-select bg-white">
+                                <option value="Acara Pernikahan">Acara Pernikahan</option>
+                                <option value="Khitanan / Tasyakuran">Khitanan / Tasyakuran</option>
+                                <option value="Syukuran Keluarga">Syukuran Keluarga</option>
+                                <option value="Rapat / Event Kantor">Rapat / Event Kantor</option>
+                                <option value="Nasi Kotak / Harian">Nasi Kotak / Harian</option>
+                                <option value="Pelanggan Setia" selected>Pelanggan Setia</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold small text-dark mb-1">Tingkat Kepuasan (Rating)</label>
+                            <div class="d-flex align-items-center star-picker py-1" id="starRatingPicker">
+                                <i class="fas fa-star text-warning me-1 cursor-pointer star-item" data-val="1" style="cursor: pointer; font-size: 1.25rem;"></i>
+                                <i class="fas fa-star text-warning me-1 cursor-pointer star-item" data-val="2" style="cursor: pointer; font-size: 1.25rem;"></i>
+                                <i class="fas fa-star text-warning me-1 cursor-pointer star-item" data-val="3" style="cursor: pointer; font-size: 1.25rem;"></i>
+                                <i class="fas fa-star text-warning me-1 cursor-pointer star-item" data-val="4" style="cursor: pointer; font-size: 1.25rem;"></i>
+                                <i class="fas fa-star text-warning me-2 cursor-pointer star-item" data-val="5" style="cursor: pointer; font-size: 1.25rem;"></i>
+                                <span id="starRatingLabel" class="badge bg-warning text-dark fw-bold">5/5 (Sangat Puas)</span>
+                            </div>
+                            <input type="hidden" id="kpRating" value="5" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold small text-dark mb-1">Isi Kesan & Pesan <span class="text-danger">*</span></label>
+                            <textarea id="kpPesan" class="form-control bg-white" rows="3" placeholder="Ceritakan kepuasan rasa masakan, porsi, ketepatan pengiriman..." required maxlength="500"></textarea>
+                        </div>
+
+                        <button type="submit" id="btnKirimKesanPesan" class="btn btn-brand-primary w-100 py-3 fw-bold shadow-sm">
+                            <i class="fas fa-paper-plane me-1"></i> Kirim Kesan & Pesan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Daftar Kesan & Pesan Real-Time -->
+            <div class="col-lg-7">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-comments text-danger me-2"></i>Ulasan Terbaru
+                        <span id="kpCounter" class="badge bg-light text-muted border ms-2">0 ulasan</span>
+                    </h5>
+                    <span class="badge bg-success"><i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> Live Real-Time</span>
+                </div>
+
+                <div id="containerKesanPesan" style="max-height: 520px; overflow-y: auto; padding-right: 5px;">
+                    <div class="text-center py-5 text-muted" id="kpLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2 text-danger"></i>
+                        <p class="small mb-0">Memuat kesan dan pesan pelanggan...</p>
                     </div>
                 </div>
             </div>
@@ -96,27 +226,271 @@
     </div>
 </div>
 
-<!-- Testimonial Section -->
-<div class="py-5 bg-white text-dark">
-    <div class="container py-4">
-        <div class="text-center mb-5">
-            <h2 class="font-weight-bold">Apa Kata Pelanggan?</h2>
-        </div>
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="card border-0 bg-light p-4 rounded-lg">
-                    <p class="font-italic text-secondary mb-3">"Makanan prasmanan yang diantarkan sangat memuaskan! Rasa rendang dan sup kimlonya luar biasa, para tamu undangan pernikahan kami banyak memuji rasanya. Terima kasih CateringApp!"</p>
-                    <h6 class="font-weight-bold mb-0 text-dark">Ibu Sarah Wijaya</h6>
-                    <small class="text-muted">Penyelenggara Pernikahan</small>
-                </div>
-            </div>
-            <div class="col-md-6 mb-4">
-                <div class="card border-0 bg-light p-4 rounded-lg">
-                    <p class="font-italic text-secondary mb-3">"Pemesanan 100 box nasi ayam bakar dikirim tepat waktu, makanan masih hangat dan rapi. Sangat rekomen untuk event kantor dadakan karena respon admin yang cepat."</p>
-                    <h6 class="font-weight-bold mb-0 text-dark">Bapak Rian Hidayat</h6>
-                    <small class="text-muted">HR Manager, PT Tekno Mandiri</small>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const $container = $('#containerKesanPesan');
+            const $loading = $('#kpLoading');
+            const $counter = $('#kpCounter');
+            const $form = $('#formKesanPesan');
+            const $btnSubmit = $('#btnKirimKesanPesan');
+            let loadedIds = new Set();
+
+            // 1. Rating Bintang Interaktif
+            $('.star-item').on('click', function () {
+                let ratingVal = parseInt($(this).data('val')) || 5;
+                $('#kpRating').val(ratingVal);
+
+                $('.star-item').each(function () {
+                    let starVal = parseInt($(this).data('val'));
+                    if (starVal <= ratingVal) {
+                        $(this).removeClass('far text-muted').addClass('fas text-warning');
+                    } else {
+                        $(this).removeClass('fas text-warning').addClass('far text-muted');
+                    }
+                });
+
+                const labels = {
+                    1: '1/5 (Kurang)',
+                    2: '2/5 (Cukup)',
+                    3: '3/5 (Baik)',
+                    4: '4/5 (Sangat Baik)',
+                    5: '5/5 (Sangat Puas)'
+                };
+                $('#starRatingLabel').text(labels[ratingVal] || (ratingVal + '/5'));
+            });
+
+            // 2. Fungsi Render Kartu Kesan & Pesan
+            function createCardHtml(item, isNew) {
+                let initial = (item.nama && item.nama.trim().length > 0) ? item.nama.trim().charAt(0).toUpperCase() : 'P';
+                let ratingStars = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= (item.rating || 5)) {
+                        ratingStars += '<i class="fas fa-star text-warning me-1"></i>';
+                    } else {
+                        ratingStars += '<i class="far fa-star text-muted me-1"></i>';
+                    }
+                }
+
+                let borderStyle = isNew ? 'border-left: 4px solid #28a745 !important;' : 'border-left: 4px solid #d9534f !important;';
+                let newBadge = isNew ? '<span class="badge bg-success ms-2">Baru Saja</span>' : '';
+
+                return `
+                    <div class="card border-0 shadow-sm rounded-3 mb-2 kp-card" data-id="${item.id}" style="background-color: #ffffff; ${borderStyle}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center fw-bold me-2" style="width: 32px; height: 32px; font-size: 0.85rem; flex-shrink: 0;">
+                                        ${initial}
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.88rem;">${item.nama} ${newBadge}</h6>
+                                        <small class="badge bg-light text-muted border" style="font-size: 0.65rem;">${item.acara || 'Pelanggan'}</small>
+                                    </div>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem;"><i class="far fa-clock me-1"></i>${item.tanggal || ''}</small>
+                            </div>
+                            <div class="mb-1" style="font-size: 0.72rem;">
+                                ${ratingStars}
+                            </div>
+                            <p class="fst-italic text-secondary mb-0" style="font-size: 0.82rem; line-height: 1.45;">
+                                "${item.pesan}"
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Fallback Reviews
+            const fallbackReviews = [
+                {
+                    id: "kp-001",
+                    nama: "Ibu Sarah Wijaya",
+                    acara: "Penyelenggara Pernikahan",
+                    rating: 5,
+                    pesan: "Makanan prasmanan yang diantarkan sangat memuaskan! Rasa rendang dan sup kimlonya luar biasa, para tamu undangan pernikahan kami banyak memuji rasanya. Terima kasih Catering Mimi Saripah!",
+                    tanggal: "05 Sep 2026, 14:30"
+                },
+                {
+                    id: "kp-002",
+                    nama: "Bapak Rian Hidayat",
+                    acara: "HR Manager, PT Tekno Mandiri",
+                    rating: 5,
+                    pesan: "Pemesanan 100 box nasi ayam bakar dikirim tepat waktu, makanan masih hangat dan rapi. Sangat rekomen untuk event kantor dadakan karena respon admin yang cepat.",
+                    tanggal: "04 Sep 2026, 11:15"
+                },
+                {
+                    id: "kp-003",
+                    nama: "Hj. Siti Fatimah",
+                    acara: "Tasyakuran Khitanan",
+                    rating: 5,
+                    pesan: "Alhamdulillah tumpeng dan lauk pauk dari Mimi Saripah mantap pisan. Bumbunya meresap dan porsinya pas untuk keluarga besar di Tenajar.",
+                    tanggal: "02 Sep 2026, 19:40"
+                }
+            ];
+
+            function getStoredReviews() {
+                try {
+                    let localData = localStorage.getItem('mimi_kesan_pesan_list');
+                    if (localData) {
+                        return JSON.parse(localData);
+                    }
+                } catch (e) { }
+                return fallbackReviews;
+            }
+
+            function saveStoredReview(item) {
+                try {
+                    let list = getStoredReviews();
+                    list.unshift(item);
+                    localStorage.setItem('mimi_kesan_pesan_list', JSON.stringify(list));
+                } catch (e) { }
+            }
+
+            function renderReviewList(dataList, isInitial) {
+                if (isInitial) {
+                    $loading.hide();
+                    $container.empty();
+                }
+
+                if (Array.isArray(dataList) && dataList.length > 0) {
+                    $counter.text(dataList.length + ' ulasan');
+
+                    if (isInitial) {
+                        dataList.forEach(function (item) {
+                            loadedIds.add(item.id);
+                            $container.append(createCardHtml(item, false));
+                        });
+                    } else {
+                        dataList.slice().reverse().forEach(function (item) {
+                            if (!loadedIds.has(item.id)) {
+                                loadedIds.add(item.id);
+                                let $newEl = $(createCardHtml(item, true)).hide();
+                                $container.prepend($newEl);
+                                $newEl.slideDown(400);
+                            }
+                        });
+                    }
+                } else if (isInitial) {
+                    $container.html('<div class="text-center py-4 text-muted"><p class="small mb-0">Belum ada kesan dan pesan. Jadilah yang pertama memberikan ulasan!</p></div>');
+                }
+            }
+
+            // 3. Ambil data secara Real-Time via AJAX (dengan auto-fallback lokal)
+            function fetchKesanPesan(isInitial) {
+                $.ajax({
+                    url: '/Home/GetKesanPesan',
+                    type: 'GET',
+                    cache: false,
+                    success: function (data) {
+                        if (Array.isArray(data) && data.length > 0) {
+                            renderReviewList(data, isInitial);
+                        } else {
+                            renderReviewList(getStoredReviews(), isInitial);
+                        }
+                    },
+                    error: function () {
+                        renderReviewList(getStoredReviews(), isInitial);
+                    }
+                });
+            }
+
+            // Muat data awal
+            fetchKesanPesan(true);
+
+            // Polling berkala setiap 12 detik untuk update otomatis real time jika ada ulasan baru
+            setInterval(function () {
+                fetchKesanPesan(false);
+            }, 12000);
+
+            // 4. Kirim Form Kesan & Pesan secara Real-Time tanpa reload
+            $form.on('submit', function (e) {
+                e.preventDefault();
+
+                let namaVal = $('#kpNama').val().trim();
+                let acaraVal = $('#kpAcara').val();
+                let ratingVal = parseInt($('#kpRating').val()) || 5;
+                let pesanVal = $('#kpPesan').val().trim();
+
+                if (!namaVal) {
+                    if (window.toastr) toastr.error('Nama wajib diisi!', 'Pemberitahuan');
+                    $('#kpNama').focus();
+                    return;
+                }
+
+                if (!pesanVal) {
+                    if (window.toastr) toastr.error('Isi kesan & pesan wajib diisi!', 'Pemberitahuan');
+                    $('#kpPesan').focus();
+                    return;
+                }
+
+                let now = new Date();
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                let tglFormatted = String(now.getDate()).padStart(2, '0') + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + ', ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+                let localNewItem = {
+                    id: 'kp-' + Date.now(),
+                    nama: namaVal,
+                    acara: acaraVal || 'Pelanggan',
+                    rating: ratingVal,
+                    pesan: pesanVal,
+                    tanggal: tglFormatted
+                };
+
+                let payload = {
+                    Nama: namaVal,
+                    Acara: acaraVal,
+                    Rating: ratingVal,
+                    Pesan: pesanVal
+                };
+
+                $btnSubmit.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Mengirim...');
+
+                function displaySuccess(itemData) {
+                    $btnSubmit.prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i> Kirim Kesan & Pesan');
+                    
+                    if (window.toastr) {
+                        toastr.success('Kesan & pesan Anda berhasil ditampilkan secara langsung!', 'Ulasan Berhasil Disimpan');
+                    }
+
+                    if ($container.find('.kp-card').length === 0) {
+                        $container.empty();
+                    }
+
+                    loadedIds.add(itemData.id);
+                    let $newCard = $(createCardHtml(itemData, true)).hide();
+                    $container.prepend($newCard);
+                    $newCard.slideDown(500);
+
+                    $container.animate({ scrollTop: 0 }, 400);
+
+                    let currentCount = $container.find('.kp-card').length;
+                    $counter.text(currentCount + ' ulasan');
+
+                    $('#kpPesan').val('');
+                    $('.star-item[data-val="5"]').trigger('click');
+                }
+
+                $.ajax({
+                    url: '/Home/TambahKesanPesan',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(payload),
+                    success: function (res) {
+                        if (res && res.success && res.data) {
+                            saveStoredReview(res.data);
+                            displaySuccess(res.data);
+                        } else {
+                            saveStoredReview(localNewItem);
+                            displaySuccess(localNewItem);
+                        }
+                    },
+                    error: function () {
+                        saveStoredReview(localNewItem);
+                        displaySuccess(localNewItem);
+                    }
+                });
+            });
+        });
+    </script>
+}

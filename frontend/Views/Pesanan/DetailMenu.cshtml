@@ -1,0 +1,212 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model CateringApp.Models.Entity.PaketMenu
+@{
+    var session = HttpContextAccessor.HttpContext?.Session;
+    int? currentUserId = session?.GetInt32("UserId");
+    string? role = session?.GetString("Role");
+    bool isLoggedIn = currentUserId.HasValue;
+    bool isStaffOrOwner = role == "Pemilik Toko" || role == "Karyawan";
+
+    Layout = isLoggedIn ? "_Layout" : "~/frontend/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = Model.NamaPaket + " - Detail Menu Catering Mimi Saripah";
+
+    string categoryName = Model.Kategori?.NamaKategori ?? "Menu Pilihan";
+    string photoUrl = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(Model.NamaPaket, Model.Gambar, categoryName);
+    string deskripsi = Model.DeskripsiMenu ?? "Sajian istimewa kaya cita rasa tradisional khas Catering Mimi Saripah yang higienis, halal, dan lezat untuk setiap perhelatan berharga Anda.";
+}
+
+<div class="@(isLoggedIn ? "container-fluid py-3" : "container py-4")">
+    
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-transparent p-0 small">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")" class="text-decoration-none text-muted"><i class="fas fa-home me-1 mr-1"></i> Beranda</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Katalog", "Pesanan")" class="text-decoration-none text-muted">Katalog Menu</a></li>
+            <li class="breadcrumb-item active text-danger fw-bold" aria-current="page">@Model.NamaPaket</li>
+        </ol>
+    </nav>
+
+    <!-- Main Detail Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row g-4 align-items-center">
+                <!-- Left: Food Image -->
+                <div class="col-lg-5">
+                    <div class="position-relative rounded-4 overflow-hidden shadow-sm" style="height: 380px; background-color: #f8fafc;">
+                        <img src="@photoUrl" alt="@Model.NamaPaket" class="w-100 h-100 object-fit-cover" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='/images/menu_box.svg';" />
+                        <span class="position-absolute bg-white px-3 py-1 rounded-pill shadow-sm small fw-bold text-dark" style="top: 16px; left: 16px;">
+                            <i class="fas fa-tag text-warning me-1 mr-1"></i> @categoryName
+                        </span>
+                        <span class="position-absolute bg-success text-white px-3 py-1 rounded-pill shadow-sm small fw-bold" style="top: 16px; right: 16px;">
+                            <i class="fas fa-shield-alt me-1 mr-1"></i> 100% Halal
+                        </span>
+                    </div>
+
+                    <div class="row g-2 mt-3 text-center">
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-light border">
+                                <small class="text-muted d-block" style="font-size: 0.74rem;">Bahan Baku</small>
+                                <strong class="small text-dark">Alami & Segar</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-light border">
+                                <small class="text-muted d-block" style="font-size: 0.74rem;">Pengawet</small>
+                                <strong class="small text-danger">0% Sintetis</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-light border">
+                                <small class="text-muted d-block" style="font-size: 0.74rem;">Dapur</small>
+                                <strong class="small text-success">Higienis</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Information & Order Form -->
+                <div class="col-lg-7 ps-lg-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-warning small fw-bold">
+                            <i class="fas fa-star"></i> 4.9 <span class="text-muted fw-normal">(Pilihan Terfavorit Pelanggan)</span>
+                        </span>
+                        <span class="badge badge-success px-3 py-1 rounded-pill small">Tersedia</span>
+                    </div>
+
+                    <h2 class="fw-bold text-dark mb-2 font-heading">@Model.NamaPaket</h2>
+
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                        <h2 class="text-danger fw-bold mb-0 font-heading">Rp @Model.Harga.ToString("N0")</h2>
+                        <span class="text-muted small">/ porsi</span>
+                    </div>
+
+                    <!-- Ketentuan Pemesanan -->
+                    <div class="p-3 bg-light rounded-3 border mb-4">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fas fa-info-circle text-danger me-2 mr-2"></i>
+                            <strong class="small text-dark">Ketentuan Pemesanan Catering:</strong>
+                        </div>
+                        <p class="text-muted small mb-0" style="line-height: 1.5;">
+                            Minimal pemesanan untuk paket katering adalah <strong>10 porsi</strong> per transaksi. Pesanan diproses dengan sistem *made-to-order* dari bahan-bahan segar pilihan demi menjaga kualitas dan kelezatan terbaik.
+                        </p>
+                    </div>
+
+                    <!-- Rincian Menu & Komposisi -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-dark mb-2">Deskripsi & Rincian Sajian:</h6>
+                        <p class="text-muted" style="line-height: 1.8; text-align: justify;">
+                            @deskripsi
+                        </p>
+                    </div>
+
+                    <!-- Order Area -->
+                    <div class="p-4 rounded-4 border bg-light">
+                        @if (role == "User")
+                        {
+                            <form asp-controller="Cart" asp-action="Add" method="post">
+                                <input type="hidden" name="paketId" value="@Model.PaketId" />
+                                
+                                <div class="row align-items-center g-3">
+                                    <div class="col-sm-5">
+                                        <label class="small fw-bold text-dark mb-1 d-block">Jumlah Porsi Pesanan:</label>
+                                        <div class="input-group">
+                                            <input type="number" name="jumlah" id="detailJumlahPorsi" value="10" min="10" max="5000" class="form-control text-center fw-bold" style="height: 44px; border-radius: 8px;" />
+                                            <span class="input-group-text bg-white small text-muted">Porsi</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <label class="small fw-bold text-dark mb-1 d-block">Estimasi Subtotal:</label>
+                                        <h5 class="fw-bold text-danger mb-0" id="detailSubtotalPreview">Rp @((Model.Harga * 10).ToString("N0"))</h5>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 form-group">
+                                    <label class="small fw-bold text-dark mb-1">Catatan Tambahan (Opsional):</label>
+                                    <input type="text" name="catatan" class="form-control" placeholder="Contoh: Sambal dipisah, lauk tidak terlalu pedas..." style="border-radius: 8px;" />
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4">
+                                    <button type="submit" class="btn btn-brand-primary btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm flex-grow-1">
+                                        <i class="fas fa-cart-plus me-2 mr-2"></i> Tambahkan ke Keranjang
+                                    </button>
+                                    <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold">
+                                        <i class="fas fa-arrow-left me-1 mr-1"></i> Kembali
+                                    </a>
+                                </div>
+                            </form>
+                        }
+                        else if (isStaffOrOwner)
+                        {
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white p-3 rounded-circle border shadow-xs me-3 mr-3 text-info">
+                                        <i class="fas fa-cash-register fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Mode Staf / Pemilik Toko</h6>
+                                        <p class="text-muted small mb-0">Anda sedang masuk sebagai staf operasional / pemilik toko. Untuk mencatat pesanan katering pelanggan bagi menu ini, silakan gunakan fitur <strong>Pesanan Manual</strong>.</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 mt-4">
+                                    <a href="@Url.Action("Create", "Pesanan", new { paketId = Model.PaketId })" 
+                                       class="btn btn-info btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm flex-grow-1"
+                                       style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none;">
+                                        <i class="fas fa-cash-register me-2 mr-2"></i> Input Pesanan Manual Menu Ini
+                                    </a>
+                                    @if (role == "Pemilik Toko")
+                                    {
+                                        <a href="@Url.Action("Edit", "PaketMenu", new { id = Model.PaketId })" class="btn btn-outline-warning rounded-pill px-4 py-2 fw-bold">
+                                            <i class="fas fa-edit me-1 mr-1"></i> Ubah Menu
+                                        </a>
+                                    }
+                                    <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold">
+                                        <i class="fas fa-arrow-left me-1 mr-1"></i> Kembali ke Katalog
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white p-2 rounded-circle border shadow-xs me-3 mr-3 text-warning">
+                                        <i class="fas fa-lock fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Ingin Memesan Paket Menu Ini?</h6>
+                                        <p class="text-muted small mb-0">Silakan masuk ke akun pelanggan Anda atau mendaftar terlebih dahulu untuk melakukan pemesanan porsi katering.</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    <a href="@Url.Action("Login", "Account")" class="btn btn-brand-primary rounded-pill px-4 py-2 fw-bold text-white shadow-sm">
+                                        <i class="fas fa-sign-in-alt me-1 mr-1"></i> Masuk Sekarang
+                                    </a>
+                                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold">
+                                        <i class="fas fa-user-plus me-1 mr-1"></i> Daftar Akun Baru
+                                    </a>
+                                    <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-outline-secondary rounded-pill px-3 py-2">
+                                        <i class="fas fa-arrow-left me-1 mr-1"></i> Kembali ke Katalog
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var hargaSatuan = @Model.Harga;
+            $('#detailJumlahPorsi').on('input change', function() {
+                var qty = parseInt($(this).val()) || 10;
+                if (qty < 10) qty = 10;
+                var subtotal = qty * hargaSatuan;
+                $('#detailSubtotalPreview').text('Rp ' + Number(subtotal).toLocaleString('id-ID'));
+            });
+        });
+    </script>
+}

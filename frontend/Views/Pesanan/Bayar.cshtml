@@ -1,71 +1,271 @@
 @model CateringApp.Models.ViewModel.UploadPembayaranViewModel
 @{
-    ViewData["Title"] = "Upload Pembayaran";
+    ViewData["Title"] = "Pembayaran Pesanan #" + Model.NomorPesanan;
 }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card card-success card-outline">
-            <div class="card-header">
-                <h3 class="card-title">Pembayaran Pesanan #@Model.NomorPesanan</h3>
-            </div>
-            
-            <form asp-action="Bayar" method="post" enctype="multipart/form-data">
-                <input type="hidden" asp-for="PesananId" />
-                <input type="hidden" asp-for="NomorPesanan" />
-                <input type="hidden" asp-for="TotalBayar" />
-
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h5><i class="icon fas fa-info"></i> Petunjuk Pembayaran</h5>
-                        Silakan transfer sebesar <strong>Rp @Model.TotalBayar.ToString("N0")</strong> ke salah satu rekening berikut:
-                        <ul class="mb-0 mt-2">
-                            <li>Bank Mandiri: <strong>123-456-7890 (A/N Catering App)</strong></li>
-                            <li>GoPay / OVO: <strong>0812-3456-7890</strong></li>
-                        </ul>
+<div class="py-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-11 col-lg-11 col-xl-10" style="max-width: 1040px;">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <!-- Header Card -->
+                <div class="p-4 bg-light border-bottom d-flex flex-column flex-sm-row align-items-sm-center justify-content-between">
+                    <div class="mb-2 mb-sm-0 pr-sm-3">
+                        <span class="badge bg-danger text-uppercase px-2 py-1 mb-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">Menunggu Pembayaran</span>
+                        <h4 class="font-weight-bold text-dark mb-0" style="font-size: 1.35rem;">Pembayaran Pesanan #@Model.NomorPesanan</h4>
                     </div>
-
-                    <div class="form-group">
-                        <label>Total yang Harus Dibayar</label>
-                        <input class="form-control" value="Rp @Model.TotalBayar.ToString("N0")" readonly disabled style="font-weight: bold; color: green; font-size: 1.1em;" />
+                    <div class="text-sm-right flex-shrink-0" style="white-space: nowrap;">
+                        <small class="text-muted d-block font-weight-bold" style="font-size: 0.8rem; letter-spacing: 0.3px;">TOTAL TAGIHAN</small>
+                        <span class="h3 font-weight-bold text-danger mb-0" style="white-space: nowrap;">Rp @Model.TotalBayar.ToString("N0")</span>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label asp-for="MetodePembayaran">Pilih Metode Pembayaran</label>
-                        <select asp-for="MetodePembayaran" class="form-control">
-                            <option value="">-- Pilih Rekening Tujuan --</option>
+                <div class="card-body p-4">
+                    <!-- Form Pilihan Metode Pembayaran -->
+                    <div class="mb-4">
+                        <label class="form-label font-weight-bold text-dark mb-2">
+                            <i class="fas fa-wallet text-success mr-2"></i> Pilih Metode Pembayaran
+                        </label>
+                        <select id="selectMetodeBayar" class="form-control form-control-lg border-2 custom-select-scroll" style="font-size: 1rem; border-radius: 10px;">
+                            <option value="BCA Virtual Account" selected>BCA Virtual Account (Verifikasi Otomatis)</option>
+                            <option value="Mandiri Virtual Account">Mandiri Virtual Account (Verifikasi Otomatis)</option>
+                            <option value="QRIS Real-Time">QRIS Real-Time (Scan Semua E-Wallet & M-Banking)</option>
+                            <option value="GoPay">GoPay (0831-4844-8516 a.n Mimi Saripah)</option>
+                            <option value="OVO">OVO (0831-4844-8516 a.n Mimi Saripah)</option>
+                            <option value="DANA">DANA (0831-4844-8516 a.n Mimi Saripah)</option>
                             <option value="Transfer Bank Mandiri">Transfer Bank Mandiri (123-456-7890)</option>
-                            <option value="GoPay">GoPay (0812-3456-7890)</option>
-                            <option value="OVO">OVO (0812-3456-7890)</option>
                         </select>
-                        <span asp-validation-for="MetodePembayaran" class="text-danger"></span>
+                        <small class="text-muted mt-1 d-block" style="font-size: 0.78rem;">
+                            <i class="fas fa-info-circle text-primary mr-1"></i> Pilih channel resmi di atas untuk menampilkan nomor rekening tujuan.
+                        </small>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="FileBukti">Unggah Bukti Transfer (JPG, PNG, atau PDF)</label>
-                        <div class="custom-file">
-                            <input asp-for="FileBukti" type="file" class="custom-file-input" id="customFile" accept="image/*,.pdf" />
-                            <label class="custom-file-label" for="customFile">Pilih file bukti transfer...</label>
+                    <!-- Dynamic Payment Box (Tidak Dobel / Otomatis Berubah Sesuai Pilihan) -->
+                    <div class="p-4 rounded-4 mb-4" style="background-color: #f8fafc; border: 1.5px dashed #cbd5e1;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white p-2 rounded-3 shadow-xs border mr-3" id="iconMetode">
+                                    <i class="fas fa-university fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-weight-bold text-dark mb-0" id="namaMetode">BCA Virtual Account</h5>
+                                    <small class="text-muted" id="subMetode">A.N. Catering Mimi Saripah</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success px-2 py-1 small fw-bold">
+                                <i class="fas fa-bolt mr-1"></i> Instan
+                            </span>
                         </div>
-                        <span asp-validation-for="FileBukti" class="text-danger"></span>
+
+                        <!-- Bagian Nomor Rekening & Salin -->
+                        <div class="bg-white p-3 rounded-3 border mb-3" id="boxRekening">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted d-block small" id="labelNomor">Nomor Virtual Account</span>
+                                    <span class="h4 font-weight-bold text-dark mb-0" id="nomorRekening" style="letter-spacing: 1px;">8077 0831 4844 8516</span>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm px-3 fw-bold btn-copy" data-target="#nomorRekening" title="Salin nomor ke clipboard">
+                                    <i class="fas fa-copy mr-1"></i> Salin
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- QRIS Code Container (Muncul jika QRIS dipilih) -->
+                        <div id="boxQris" class="text-center p-3 bg-white rounded-3 border mb-3 d-none">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=CATERING-MIMI-SARIPAH-ORD-@Model.NomorPesanan" alt="QRIS Catering Mimi Saripah" class="img-fluid rounded border p-2 mb-2 shadow-xs" style="max-width: 180px;" />
+                            <div class="small font-weight-bold text-dark">NMID: ID1020039485162</div>
+                            <small class="text-muted">Buka BCA Mobile / GoPay / OVO / Dana / ShopeePay & Scan QR di atas</small>
+                        </div>
+
+                        <!-- Total Pembayaran dengan Tombol Salin -->
+                        <div class="bg-white p-3 rounded-3 border mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="text-muted d-block small">Total Pembayaran Tepat</span>
+                                    <span class="h5 font-weight-bold text-danger mb-0" id="valTotal">Rp @Model.TotalBayar.ToString("N0")</span>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold btn-copy-nominal" data-val="@Model.TotalBayar" title="Salin nominal">
+                                    <i class="fas fa-copy mr-1"></i> Salin Jumlah
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panduan Singkat -->
+                        <div class="small text-muted">
+                            <i class="fas fa-shield-alt text-success mr-1"></i> Pembayaran Anda aman dan terenkripsi. Selesaikan sebelum <strong>@DateTime.Now.AddHours(24).ToString("dd MMM yyyy, HH:mm") WIB</strong>.
+                        </div>
+                    </div>
+
+                    <!-- Tombol Simulasi Pembayaran Otomatis -->
+                    <form asp-action="KonfirmasiPembayaranOtomatis" method="post" id="formAutoPay">
+                        <input type="hidden" name="pesananId" value="@Model.PesananId" />
+                        <input type="hidden" name="metodePembayaran" id="inputHiddenMetode" value="BCA Virtual Account" />
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100 py-3 shadow font-weight-bold" id="btnSubmitAutoPay" style="border-radius: 12px; font-size: 1.05rem;">
+                            <i class="fas fa-check-circle mr-2"></i> Saya Sudah Bayar (Konfirmasi Otomatis)
+                        </button>
+                    </form>
+
+                    <!-- Accordion Pilihan Upload Bukti Manual (Opsional / Alternatif) -->
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <a class="text-muted small text-decoration-none" data-toggle="collapse" href="#collapseManualUpload" role="button" aria-expanded="false">
+                            <i class="fas fa-upload mr-1"></i> Ingin unggah struk bukti transfer manual? (Klik di sini)
+                        </a>
+                        
+                        <div class="collapse mt-3 text-left" id="collapseManualUpload">
+                            <div class="card card-body bg-light border-0 rounded-3">
+                                <form asp-action="Bayar" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" asp-for="PesananId" />
+                                    <input type="hidden" asp-for="NomorPesanan" />
+                                    <input type="hidden" asp-for="TotalBayar" />
+                                    <input type="hidden" asp-for="MetodePembayaran" id="inputManualMetode" value="BCA Virtual Account" />
+                                    
+                                    <div class="form-group mb-3">
+                                        <label asp-for="FileBukti" class="font-weight-bold small">Unggah File Bukti Struk (JPG/PNG/PDF)</label>
+                                        <input asp-for="FileBukti" type="file" class="form-control" accept="image/*,.pdf" />
+                                        <span asp-validation-for="FileBukti" class="text-danger small"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100 font-weight-bold">
+                                        <i class="fas fa-paper-plane mr-1"></i> Kirim Struk Bukti Transfer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("Details", new { id = Model.PesananId })" class="text-secondary small font-weight-bold" style="text-decoration: none;">
+                            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Rincian Pesanan
+                        </a>
                     </div>
                 </div>
-
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i> Kirim Bukti Pembayaran</button>
-                    <a href="@Url.Action("Index")" class="btn btn-default">Kembali ke Daftar Pesanan</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // Display selected file name in custom file input
-        $(".custom-file-input").on("change", function () {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        $(document).ready(function () {
+            const dataMetode = {
+                'BCA Virtual Account': {
+                    nomor: '8077 0831 4844 8516',
+                    cleanNomor: '8077083148448516',
+                    an: 'A.N. Catering Mimi Saripah',
+                    label: 'Nomor BCA Virtual Account',
+                    isQris: false,
+                    icon: '<i class="fas fa-university fa-2x text-primary"></i>'
+                },
+                'Mandiri Virtual Account': {
+                    nomor: '8890 0831 4844 8516',
+                    cleanNomor: '8890083148448516',
+                    an: 'A.N. Catering Mimi Saripah',
+                    label: 'Nomor Mandiri Virtual Account',
+                    isQris: false,
+                    icon: '<i class="fas fa-university fa-2x text-warning"></i>'
+                },
+                'QRIS Real-Time': {
+                    nomor: 'NMID: ID1020039485162',
+                    cleanNomor: 'ID1020039485162',
+                    an: 'Catering Mimi Saripah (Tenajar Lor)',
+                    label: 'Scan QRIS Siap Bayar',
+                    isQris: true,
+                    icon: '<i class="fas fa-qrcode fa-2x text-dark"></i>'
+                },
+                'GoPay': {
+                    nomor: '0831 4844 8516',
+                    cleanNomor: '083148448516',
+                    an: 'A.N. Mimi Saripah (GoPay)',
+                    label: 'Nomor Akun GoPay',
+                    isQris: false,
+                    icon: '<i class="fas fa-mobile-alt fa-2x text-info"></i>'
+                },
+                'OVO': {
+                    nomor: '0831 4844 8516',
+                    cleanNomor: '083148448516',
+                    an: 'A.N. Mimi Saripah (OVO)',
+                    label: 'Nomor Akun OVO',
+                    isQris: false,
+                    icon: '<i class="fas fa-mobile-alt fa-2x text-purple" style="color:#7c3aed;"></i>'
+                },
+                'DANA': {
+                    nomor: '0831 4844 8516',
+                    cleanNomor: '083148448516',
+                    an: 'A.N. Mimi Saripah (DANA)',
+                    label: 'Nomor Akun DANA',
+                    isQris: false,
+                    icon: '<i class="fas fa-wallet fa-2x text-primary"></i>'
+                },
+                'Transfer Bank Mandiri': {
+                    nomor: '123 456 7890',
+                    cleanNomor: '1234567890',
+                    an: 'A.N. Catering Mimi Saripah',
+                    label: 'Nomor Rekening Bank Mandiri',
+                    isQris: false,
+                    icon: '<i class="fas fa-money-check-alt fa-2x text-success"></i>'
+                }
+            };
+
+            const $select = $('#selectMetodeBayar');
+            const $hiddenAuto = $('#inputHiddenMetode');
+            const $hiddenManual = $('#inputManualMetode');
+            const $icon = $('#iconMetode');
+            const $nama = $('#namaMetode');
+            const $sub = $('#subMetode');
+            const $label = $('#labelNomor');
+            const $nomor = $('#nomorRekening');
+            const $boxRek = $('#boxRekening');
+            const $boxQris = $('#boxQris');
+
+            $select.on('change', function () {
+                const val = $(this).val();
+                $hiddenAuto.val(val);
+                $hiddenManual.val(val);
+
+                const item = dataMetode[val] || dataMetode['BCA Virtual Account'];
+                $nama.text(val);
+                $sub.text(item.an);
+                $label.text(item.label);
+                $nomor.text(item.nomor);
+                $icon.html(item.icon);
+
+                if (item.isQris) {
+                    $boxQris.removeClass('d-none');
+                    $boxRek.addClass('d-none');
+                } else {
+                    $boxQris.addClass('d-none');
+                    $boxRek.removeClass('d-none');
+                }
+            });
+
+            // Tombol Salin Nomor Rekening
+            $('.btn-copy').click(function () {
+                const text = $('#nomorRekening').text().replace(/\s+/g, '');
+                navigator.clipboard.writeText(text).then(function () {
+                    if (window.toastr) {
+                        toastr.success('Nomor rekening/VA berhasil disalin: ' + text, 'Tersalin!');
+                    } else {
+                        alert('Nomor disalin: ' + text);
+                    }
+                });
+            });
+
+            // Tombol Salin Nominal
+            $('.btn-copy-nominal').click(function () {
+                const val = $(this).data('val');
+                navigator.clipboard.writeText(val).then(function () {
+                    if (window.toastr) {
+                        toastr.success('Nominal Rp ' + parseInt(val).toLocaleString('id-ID') + ' berhasil disalin!', 'Tersalin!');
+                    } else {
+                        alert('Nominal disalin: ' + val);
+                    }
+                });
+            });
+
+            // Feedback loading saat tombol simulasi bayar diklik
+            $('#formAutoPay').on('submit', function () {
+                const $btn = $('#btnSubmitAutoPay');
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Menghubungkan ke Server Pembayaran...');
+            });
         });
     </script>
 }

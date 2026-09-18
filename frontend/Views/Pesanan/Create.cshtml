@@ -1,53 +1,175 @@
 @model CateringApp.Models.ViewModel.PemesananViewModel
 @{
-    ViewData["Title"] = "Pesan Menu Baru";
+    ViewData["Title"] = "Pesanan Manual (Offline & WhatsApp)";
 }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Form Pemesanan Catering</h3>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-header bg-gradient-danger text-white py-3" style="border-radius: 12px 12px 0 0; background: linear-gradient(135deg, #e63946 0%, #c92a37 100%);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 font-weight-bold">
+                        <i class="fas fa-cash-register mr-2"></i> Pesanan Manual (Walk-in / WhatsApp)
+                    </h5>
+                    <span class="badge badge-light text-danger font-weight-bold px-3 py-1">Khusus Staf &amp; Owner</span>
+                </div>
             </div>
+
             <form asp-action="Create" method="post">
-                <div class="card-body">
-                    <div class="form-group">
-                        <label asp-for="PaketId">Pilih Paket Menu</label>
-                        <select asp-for="PaketId" class="form-control" asp-items="ViewBag.PaketId">
-                            <option value="">-- Pilih Paket --</option>
+                <div class="card-body p-4">
+                    <div class="alert alert-info border-0 rounded-lg shadow-xs mb-4" style="background-color: #f0fdf4; border-left: 4px solid #10b981 !important;">
+                        <i class="fas fa-info-circle text-success mr-2"></i>
+                        <span class="text-dark small">
+                            Formulir ini digunakan oleh <strong>Karyawan &amp; Pemilik Toko</strong> untuk mencatat pesanan katering dari pelanggan yang datang langsung (walk-in) atau memesan lewat panggilan telepon/WhatsApp.
+                        </span>
+                    </div>
+
+                    <!-- Identitas Pelanggan -->
+                    <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="fas fa-user-circle text-danger mr-2"></i> 1. Identitas Pemesan
+                    </h6>
+                    <div class="form-group mb-3">
+                        <label asp-for="PenggunaId" class="font-weight-bold text-dark small">Pilih Pelanggan Terdaftar (Jika Ada)</label>
+                        <select id="selectPengguna" asp-for="PenggunaId" class="form-control custom-select-scroll" asp-items="ViewBag.CustomerList">
+                            <option value="">-- Tamu Walk-in / Pelanggan Baru (Belum Punya Akun) --</option>
                         </select>
-                        <span asp-validation-for="PaketId" class="text-danger"></span>
+                        <small class="form-text text-muted">Pilih akun jika pelanggan sudah pernah mendaftar di sistem web.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="JumlahPorsi">Jumlah Porsi</label>
-                        <input asp-for="JumlahPorsi" type="number" class="form-control" placeholder="Contoh: 50" min="1" />
-                        <span asp-validation-for="JumlahPorsi" class="text-danger"></span>
+                    <!-- Panel tamu: muncul jika belum pilih pelanggan terdaftar -->
+                    <div id="panelTamu" class="p-3 mb-3 rounded" style="background: #fff8e1; border: 1.5px dashed #f59e0b; display:none;">
+                        <p class="small font-weight-bold text-warning mb-2">
+                            <i class="fas fa-user-tag mr-1"></i> Data Tamu / Pelanggan Baru (Wajib Diisi)
+                        </p>
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-2">
+                                <label class="font-weight-bold text-dark small">Nama Pemesan <span class="text-danger">*</span></label>
+                                <input id="inputNamaManual" asp-for="NamaPemesanManual" class="form-control" placeholder="Contoh: Ibu Rina (Pesanan WA)" />
+                                <span asp-validation-for="NamaPemesanManual" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 form-group mb-2">
+                                <label class="font-weight-bold text-dark small">No. WhatsApp / Telepon</label>
+                                <input asp-for="TeleponPemesanManual" class="form-control" 
+                                    placeholder="Contoh: 081234567890"
+                                    maxlength="15"
+                                    pattern="[0-9]{8,15}"
+                                    title="Nomor telepon harus 8–15 digit angka"
+                                    oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,15)" />
+                                <span asp-validation-for="TeleponPemesanManual" class="text-danger small"></span>
+                                <small class="form-text text-muted">Hanya angka, maks. 15 digit</small>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="TanggalPengiriman">Tanggal Pengiriman</label>
-                        <input asp-for="TanggalPengiriman" type="date" class="form-control" value="@Model?.TanggalPengiriman.ToString("yyyy-MM-dd")" />
-                        <span asp-validation-for="TanggalPengiriman" class="text-danger"></span>
+                    <!-- Info pelanggan terdaftar -->
+                    <div id="infoPelangganTerdaftar" class="alert alert-success border-0 py-2 px-3 mb-3 small" style="display:none; background:#f0fdf4; border-left: 3px solid #10b981 !important;">
+                        <i class="fas fa-check-circle mr-1 text-success"></i>
+                        <span id="teksInfoPelanggan">Pelanggan terdaftar dipilih — data akun akan digunakan.</span>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="AlamatPengiriman">Alamat Pengiriman Lengkap</label>
-                        <textarea asp-for="AlamatPengiriman" class="form-control" rows="3" placeholder="Masukkan alamat lengkap tujuan pengiriman"></textarea>
-                        <span asp-validation-for="AlamatPengiriman" class="text-danger"></span>
+                    <!-- Pilihan Menu & Porsi -->
+                    <h6 class="font-weight-bold text-dark mt-4 mb-3 border-bottom pb-2">
+                        <i class="fas fa-utensils text-danger mr-2"></i> 2. Paket Katering &amp; Porsi
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-7 form-group mb-3">
+                            <label asp-for="PaketId" class="font-weight-bold text-dark small">Pilih Paket Hidangan</label>
+                            <select asp-for="PaketId" class="form-control custom-select-scroll" asp-items="ViewBag.PaketList">
+                                <option value="">-- Pilih Paket Hidangan --</option>
+                            </select>
+                            <span asp-validation-for="PaketId" class="text-danger small font-weight-bold"></span>
+                        </div>
+                        <div class="col-md-5 form-group mb-3">
+                            <label asp-for="JumlahPorsi" class="font-weight-bold text-dark small">Jumlah Porsi (Min. 10)</label>
+                            <input asp-for="JumlahPorsi" type="number" class="form-control" 
+                                placeholder="10" min="10" max="2000"
+                                oninvalid="this.setCustomValidity('Jumlah porsi minimal 10 dan maksimal 2000')"
+                                oninput="this.setCustomValidity('')" />
+                            <span asp-validation-for="JumlahPorsi" class="text-danger small font-weight-bold"></span>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Catatan">Catatan Khusus (Opsional)</label>
-                        <textarea asp-for="Catatan" class="form-control" rows="2" placeholder="Contoh: Sambal dipisah, lauk tidak pedas"></textarea>
-                        <span asp-validation-for="Catatan" class="text-danger"></span>
+                    <!-- Waktu Pengantaran & Alamat -->
+                    <h6 class="font-weight-bold text-dark mt-4 mb-3 border-bottom pb-2">
+                        <i class="fas fa-clock text-danger mr-2"></i> 3. Jadwal Pengiriman Acara
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="TanggalPengiriman" class="font-weight-bold text-dark small">Tanggal Acara / Pengiriman</label>
+                            <input asp-for="TanggalPengiriman" type="date" class="form-control" value="@Model?.TanggalPengiriman.ToString("yyyy-MM-dd")" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="TanggalPengiriman" class="text-danger small font-weight-bold"></span>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="JamPengantaran" class="font-weight-bold text-dark small">Slot Jam Pengantaran</label>
+                            <select asp-for="JamPengantaran" class="form-control custom-select-scroll">
+                                <option value="06:00 - 08:00">06:00 - 08:00 WIB (Pagi Sarapan)</option>
+                                <option value="08:00 - 10:00">08:00 - 10:00 WIB (Pagi Menjelang Siang)</option>
+                                <option value="10:00 - 12:00" selected>10:00 - 12:00 WIB (Makan Siang Utama)</option>
+                                <option value="12:00 - 14:00">12:00 - 14:00 WIB (Siang Menjelang Sore)</option>
+                                <option value="16:00 - 18:00">16:00 - 18:00 WIB (Sore Hari)</option>
+                                <option value="18:00 - 20:00">18:00 - 20:00 WIB (Malam Resepsi)</option>
+                            </select>
+                            <span asp-validation-for="JamPengantaran" class="text-danger small font-weight-bold"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="AlamatPengiriman" class="font-weight-bold text-dark small">Alamat Pengiriman Lengkap</label>
+                        <textarea asp-for="AlamatPengiriman" class="form-control" rows="3" placeholder="Masukkan alamat pengiriman acara / gedung / rumah pemesan"></textarea>
+                        <span asp-validation-for="AlamatPengiriman" class="text-danger small font-weight-bold"></span>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label asp-for="Catatan" class="font-weight-bold text-dark small">Catatan Khusus Pesanan</label>
+                        <textarea asp-for="Catatan" class="form-control" rows="2" placeholder="Contoh: Sambal dipisah, minta sendok garpu lebih, dll."></textarea>
+                        <span asp-validation-for="Catatan" class="text-danger small"></span>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Lanjutkan ke Pembayaran</button>
-                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+
+                <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary font-weight-bold px-4">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
+                    </a>
+                    <button type="submit" class="btn btn-danger font-weight-bold px-4 shadow-sm" style="background: linear-gradient(135deg, #e63946 0%, #c92a37 100%);">
+                        <i class="fas fa-save mr-1"></i> Simpan Pesanan Manual
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const selectPengguna = document.getElementById('selectPengguna');
+            const panelTamu = document.getElementById('panelTamu');
+            const infoPelanggan = document.getElementById('infoPelangganTerdaftar');
+            const inputNama = document.getElementById('inputNamaManual');
+
+            function togglePanelTamu() {
+                const val = selectPengguna.value;
+                if (!val || val === '') {
+                    // Tamu / Walk-in
+                    panelTamu.style.display = 'block';
+                    infoPelanggan.style.display = 'none';
+                    if (inputNama) inputNama.setAttribute('required', 'required');
+                } else {
+                    // Pelanggan terdaftar
+                    panelTamu.style.display = 'none';
+                    infoPelanggan.style.display = 'block';
+                    if (inputNama) inputNama.removeAttribute('required');
+                    // Tampilkan nama pelanggan yang dipilih
+                    const selectedText = selectPengguna.options[selectPengguna.selectedIndex].text;
+                    document.getElementById('teksInfoPelanggan').textContent =
+                        'Pelanggan terdaftar: ' + selectedText + ' — data akun akan digunakan.';
+                }
+            }
+
+            selectPengguna.addEventListener('change', togglePanelTamu);
+            // Jalankan saat load (misal validasi gagal dan form di-render ulang)
+            togglePanelTamu();
+        })();
+    </script>
+}

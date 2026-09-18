@@ -1,4 +1,4 @@
-﻿using CateringApp.Models.DTO;
+using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Context;
@@ -70,7 +70,7 @@ namespace CateringApp.Controllers.Api
                 });
             }
 
-            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password.Trim());
+            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, model.Password.Trim());
             if (verificationResult != PasswordVerificationResult.Success)
             {
                 return Unauthorized(new

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace CateringApp.Models.ViewModel;
 
@@ -22,11 +22,11 @@ public class RegisterViewModel
 
     [Required(ErrorMessage = "Email wajib diisi")]
     [EmailAddress(ErrorMessage = "Format email tidak valid")]
+    [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", ErrorMessage = "Email harus memiliki tanda '@' dan domain yang valid (contoh: user@gmail.com).")]
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Nomor Telepon wajib diisi")]
-    [MaxLength(15, ErrorMessage = "Nomor telepon tidak boleh lebih dari 15 digit.")]
-    [RegularExpression(@"^(0|62|\+62)[0-9]{8,12}$", ErrorMessage = "Nomor telepon harus diawali 0, 62, atau +62 dan terdiri dari 9-15 digit.")]
+    [MaxLength(14, ErrorMessage = "Nomor telepon kartu seluler tidak boleh lebih dari 13 digit.")]
     public string NomorTelepon { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Alamat wajib diisi")]

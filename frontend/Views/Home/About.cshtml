@@ -1,13 +1,14 @@
 @{
-    Layout = "~/Views/Shared/_GuestLayout.cshtml";
-    ViewData["Title"] = "Tentang Kami";
+    Layout = "~/frontend/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Tentang Kami - Catering Mimi Saripah";
 }
 
 <!-- About Header -->
-<div class="jumbotron jumbotron-fluid text-white text-center position-relative mb-0" style="background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1470&auto=format&fit=crop') no-repeat center center; background-size: cover; padding: 80px 0;">
-    <div class="container py-3">
-        <h1 class="display-4 font-weight-bold">Tentang Kami</h1>
-        <p class="lead" style="font-size: 1.15rem; max-width: 600px; margin: 0 auto;">Ketahui perjalanan kami dalam menyajikan cita rasa Nusantara terbaik sejak tahun 2018.</p>
+<div class="position-relative text-white text-center" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1470&auto=format&fit=crop') center center / cover no-repeat; padding: 110px 0;">
+    <div class="container py-4">
+        <span class="badge bg-danger text-uppercase px-3 py-2 mb-3 fw-bold" style="letter-spacing: 1px;">Katering Khas Nusantara</span>
+        <h1 class="display-4 fw-bold mb-3">Tentang Kami</h1>
+        <p class="lead mb-0 mx-auto" style="font-size: 1.25rem; max-width: 720px; line-height: 1.6;">Mengenal perjalanan Catering Mimi Saripah dalam merawat tradisi dan menyajikan kelezatan masakan khas Nusantara untuk setiap momen istimewa Anda.</p>
     </div>
 </div>
 
@@ -15,31 +16,65 @@
 <div class="py-5 bg-white">
     <div class="container py-4">
         <div class="row align-items-center">
-            <div class="col-md-6 mb-4">
-                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=1470&auto=format&fit=crop" class="img-fluid rounded-lg shadow-sm" alt="Dapur Kami" />
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="position-relative">
+                    <img src="@Url.Content("~/images/dapur_catering_mimi_saripah.jpg")" class="img-fluid rounded-4 shadow" alt="Tim Dapur Profesional Catering Mimi Saripah" style="max-height: 440px; width: 100%; object-fit: cover;" />
+                    <div class="position-absolute bg-white px-3 py-2 rounded-3 shadow-sm" style="bottom: 16px; left: 16px; border-left: 4px solid var(--brand-primary, #d9534f);">
+                        <small class="fw-bold text-dark d-block"><i class="fas fa-utensils text-danger me-2"></i> Tim Dapur Profesional</small>
+                        <span class="text-muted small">Cita rasa autentik rempah Nusantara</span>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6 mb-4 pl-md-5">
-                <h2 class="font-weight-bold text-dark mb-3">Sejarah Singkat</h2>
-                <p>CateringApp didirikan pada tahun 2018 berawal dari sebuah dapur rumahan sederhana dengan misi menyajikan masakan tradisional berkualitas tinggi yang praktis. Berkat kepercayaan dari pelanggan setia, kini kami telah berkembang menjadi salah satu penyedia jasa catering terpercaya yang melayani ribuan pesanan per bulan di wilayah Jabodetabek.</p>
-                <p>Kami meyakini bahwa hidangan lezat adalah elemen kunci dari setiap event yang sukses. Oleh sebab itu, kami selalu berkomitmen menjaga konsistensi rasa, kebersihan dapur, dan profesionalitas pelayanan demi kepuasan Anda.</p>
+            <div class="col-md-6 mb-4 mb-md-0 ps-md-5">
+                <span class="text-danger fw-bold text-uppercase small" style="letter-spacing: 0.5px;">Dedikasi Dapur Mimi Saripah</span>
+                <h2 class="fw-bold text-dark mb-3 mt-1">Sejarah Singkat & Perjalanan</h2>
+                <p class="text-muted" style="line-height: 1.8; text-align: justify;"><strong>Catering Mimi Saripah</strong> berawal dari dapur rumahan di <em>Desa Tenajar Lor, Kec. Kertasemaya, Kab. Indramayu</em>. Didirikan dengan kecintaan mendalam pada kekayaan bumbu rempah Nusantara serta komitmen kuat menghadirkan masakan yang halal, higienis, dan sedap di lidah.</p>
+                <p class="text-muted" style="line-height: 1.8; text-align: justify;">Seiring berjalannya waktu dan tingginya kepercayaan masyarakat Indramayu, Cirebon, dan sekitarnya, kami berkembang melayani berbagai perhelatan besar: mulai dari resepsi pernikahan adat, hajatan khitanan, syukuran tumpengan, snack box rapat kedinasan, hingga katering harian keluarga.</p>
+                <div class="row g-3 mt-3 pt-3 border-top">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.25rem;"></i>
+                            <span class="fw-bold text-dark small">100% Bahan Baku Segar & Halal</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.25rem;"></i>
+                            <span class="fw-bold text-dark small">Koki Tradisional Berpengalaman</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.25rem;"></i>
+                            <span class="fw-bold text-dark small">Standar Higienitas Dapur Terjaga</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.25rem;"></i>
+                            <span class="fw-bold text-dark small">Pengantaran Tepat Waktu</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <hr class="my-5" />
 
-        <div class="row text-center mt-4">
+        <!-- Visi & Misi -->
+        <div class="row text-center">
             <div class="col-md-6 mb-4">
-                <div class="p-4 bg-light rounded-lg border-0 shadow-sm h-100">
+                <div class="p-4 bg-light rounded-4 border-0 shadow-sm h-100">
                     <div class="text-danger mb-3"><i class="fas fa-eye fa-2x"></i></div>
-                    <h4 class="font-weight-bold text-dark mb-2">Visi Kami</h4>
-                    <p class="text-muted mb-0">Menjadi pionir layanan catering digital di Indonesia yang menyajikan kelezatan makanan Nusantara dengan standar higienitas bintang lima.</p>
+                    <h4 class="fw-bold text-dark mb-2">Visi Kami</h4>
+                    <p class="text-muted mb-0" style="line-height: 1.7;">Menjadi layanan katering Nusantara terkemuka dan terpercaya yang melestarikan kelezatan kuliner tradisional dengan sentuhan manajemen modern dan higienitas prima.</p>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="p-4 bg-light rounded-lg border-0 shadow-sm h-100">
+                <div class="p-4 bg-light rounded-4 border-0 shadow-sm h-100">
                     <div class="text-danger mb-3"><i class="fas fa-bullseye fa-2x"></i></div>
-                    <h4 class="font-weight-bold text-dark mb-2">Misi Kami</h4>
-                    <p class="text-muted mb-0">Mengutamakan kualitas bahan baku lokal segar, memberdayakan UMKM kuliner mitra, dan mengoptimalkan ketepatan waktu distribusi melalui teknologi cerdas.</p>
+                    <h4 class="fw-bold text-dark mb-2">Misi Kami</h4>
+                    <p class="text-muted mb-0" style="line-height: 1.7;">Menyajikan hidangan berkualitas terbaik tanpa pengawet sintetis, memberdayakan bahan pangan petani lokal, serta melayani setiap pelanggan dengan penuh ketulusan dan ketepatan waktu.</p>
                 </div>
             </div>
         </div>

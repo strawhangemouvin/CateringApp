@@ -6,70 +6,91 @@
     ViewData["Title"] = "Dashboard Pelanggan";
 }
 
-<!-- Welcome Header -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-gradient-primary border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;">
-            <div class="card-body p-4 text-white">
-                <div class="d-flex align-items-center justify-content-between flex-wrap">
-                    <div class="mb-2 mb-md-0">
-                        <h4 class="font-weight-bold mb-1" style="font-family: 'Outfit', sans-serif;">Selamat Datang Kembali, @userFullName!</h4>
-                        <p class="mb-0 text-white-50">Kelola pesanan katering Anda, lacak pengiriman, dan lakukan transaksi dengan mudah.</p>
-                    </div>
-                    <div>
-                        <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-light text-primary font-weight-bold px-4 py-2" style="border-radius: 8px;">
-                            <i class="fas fa-utensils mr-2"></i> Mulai Pesan Katering
-                        </a>
-                    </div>
-                </div>
+<!-- Modern Greeting Banner -->
+<div class="card border-0 mb-4 overflow-hidden shadow-sm" style="border-radius: var(--radius-xl); background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+    <div class="card-body p-4 p-md-5 text-white">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge badge-modern mb-2" style="background: rgba(230, 57, 70, 0.25); color: #ff8a95; border: 1px solid rgba(230, 57, 70, 0.35);">
+                    <i class="fas fa-hand-sparkles mr-1"></i> Selamat Datang di Portal Katering
+                </span>
+                <h3 class="font-heading font-weight-bold text-white mb-2" style="font-size: 1.85rem;">
+                    Halo, @userFullName! Senang Melihat Anda Kembali.
+                </h3>
+                <p class="text-white-50 mb-0" style="font-size: 1.02rem; max-width: 640px;">
+                    Pantau pesanan katering aktif Anda, telusuri aneka hidangan lezat khas Nusantara, dan kelola transaksi Anda dengan mudah.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-right mt-3 mt-lg-0">
+                <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-modern-primary btn-lg shadow-lg px-4 py-3" style="border-radius: var(--radius-pill);">
+                    <i class="fas fa-utensils mr-2"></i> Mulai Pesan Katering
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="row">
-    <!-- Stat 1: Total Orders -->
-    <div class="col-lg-4 col-sm-6 mb-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; transition: transform 0.2s;">
-            <div class="card-body d-flex align-items-center justify-content-between">
+@if (Model.PesananButuhRefund.Any())
+{
+    <div class="alert alert-danger border-0 shadow-sm rounded-lg mb-4" style="background-color: #fff1f2; border-left: 5px solid #e11d48 !important; border-radius: var(--radius-lg); padding: 18px 24px;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+            <div class="d-flex align-items-center mb-2 mb-md-0">
+                <i class="fas fa-hand-holding-usd fa-2x text-danger mr-3"></i>
                 <div>
-                    <h6 class="text-muted text-uppercase font-weight-bold small mb-1">Total Pesanan Saya</h6>
-                    <h3 class="mb-0 font-weight-bold text-dark">@Model.TotalPesanan <span class="text-muted font-weight-normal" style="font-size: 1rem;">Transaksi</span></h3>
+                    <h5 class="font-weight-bold text-danger mb-0">Pemberitahuan Refund: @Model.PesananButuhRefund.Count Pesanan Dibatalkan Butuh Rekening Anda</h5>
+                    <small class="text-muted">Pesanan Anda yang telah lunas telah dibatalkan. Masukkan nomor rekening/e-wallet Anda agar Pemilik Toko dapat mentransfer balik dana Anda.</small>
                 </div>
-                <div class="bg-primary-light p-3" style="background-color: rgba(0, 123, 255, 0.1); border-radius: 50%;">
-                    <i class="fas fa-shopping-bag text-primary fa-2x"></i>
-                </div>
+            </div>
+            <a href="@Url.Action("Details", "Pesanan", new { id = Model.PesananButuhRefund.First().PesananId })" class="btn btn-danger btn-sm font-weight-bold shadow-xs px-3 py-2" style="border-radius: var(--radius-md);">
+                <i class="fas fa-edit mr-1"></i> Lengkapi Rekening Refund
+            </a>
+        </div>
+    </div>
+}
+
+<!-- Modern Stat Cards -->
+<div class="row g-4 mb-4">
+    <!-- Stat 1: Total Orders -->
+    <div class="col-lg-4 col-sm-6 mb-3 mb-lg-0">
+        <div class="stat-card-modern h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Total Pesanan Saya</span>
+                <h3 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 1.8rem;">
+                    @Model.TotalPesanan <span class="text-muted font-weight-normal" style="font-size: 0.95rem;">Transaksi</span>
+                </h3>
+            </div>
+            <div class="stat-icon-wrapper" style="background: var(--primary-light); color: var(--primary);">
+                <i class="fas fa-shopping-bag"></i>
             </div>
         </div>
     </div>
 
     <!-- Stat 2: Total Spent -->
-    <div class="col-lg-4 col-sm-6 mb-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; transition: transform 0.2s;">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
-                    <h6 class="text-muted text-uppercase font-weight-bold small mb-1">Total Belanja (Selesai)</h6>
-                    <h3 class="mb-0 font-weight-bold text-success">Rp @Model.TotalBelanja.ToString("N0")</h3>
-                </div>
-                <div class="bg-success-light p-3" style="background-color: rgba(40, 167, 69, 0.1); border-radius: 50%;">
-                    <i class="fas fa-wallet text-success fa-2x"></i>
-                </div>
+    <div class="col-lg-4 col-sm-6 mb-3 mb-lg-0">
+        <div class="stat-card-modern h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Total Belanja Selesai</span>
+                <h3 class="font-heading font-weight-bold text-success mt-1 mb-0" style="font-size: 1.8rem;">
+                    Rp @Model.TotalBelanja.ToString("N0")
+                </h3>
+            </div>
+            <div class="stat-icon-wrapper" style="background: var(--success-light); color: var(--success);">
+                <i class="fas fa-wallet"></i>
             </div>
         </div>
     </div>
 
     <!-- Stat 3: Active Orders -->
-    <div class="col-lg-4 col-12 mb-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; transition: transform 0.2s;">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
-                    <h6 class="text-muted text-uppercase font-weight-bold small mb-1">Pesanan Aktif / Lacak</h6>
-                    <h3 class="mb-0 font-weight-bold text-warning">@Model.PesananAktif <span class="text-muted font-weight-normal" style="font-size: 1rem;">Diproses</span></h3>
-                </div>
-                <div class="bg-warning-light p-3" style="background-color: rgba(255, 193, 7, 0.1); border-radius: 50%;">
-                    <i class="fas fa-clock text-warning fa-2x"></i>
-                </div>
+    <div class="col-lg-4 col-12">
+        <div class="stat-card-modern h-100 d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Pesanan Aktif</span>
+                <h3 class="font-heading font-weight-bold text-warning mt-1 mb-0" style="font-size: 1.8rem;">
+                    @Model.PesananAktif <span class="text-muted font-weight-normal" style="font-size: 0.95rem;">Sedang Berjalan</span>
+                </h3>
+            </div>
+            <div class="stat-icon-wrapper" style="background: var(--warning-light); color: var(--warning);">
+                <i class="fas fa-clock"></i>
             </div>
         </div>
     </div>
@@ -77,61 +98,79 @@
 
 <div class="row">
     <!-- Quick Actions Panel -->
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
-            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-                <h5 class="card-title font-weight-bold text-dark mb-0" style="font-family: 'Outfit', sans-serif;"><i class="fas fa-compass mr-2 text-primary"></i> Akses Cepat</h5>
-            </div>
-            <div class="card-body px-4 pb-4">
-                <div class="d-flex flex-column gap-3">
-                    <a href="@Url.Action("Katalog", "Pesanan")" class="d-flex align-items-center p-3 text-decoration-none bg-light border" style="border-radius: 8px; color: #495057; transition: background-color 0.2s; margin-bottom: 12px;">
-                        <i class="fas fa-utensils text-primary fa-lg mr-3"></i>
-                        <div>
-                            <div class="font-weight-bold mb-0">Katalog Menu</div>
-                            <small class="text-muted">Pilih paket katering lezat</small>
-                        </div>
-                        <i class="fas fa-chevron-right ml-auto text-muted"></i>
-                    </a>
-                    
-                    <a href="@Url.Action("Index", "Pesanan")" class="d-flex align-items-center p-3 text-decoration-none bg-light border" style="border-radius: 8px; color: #495057; transition: background-color 0.2s; margin-bottom: 12px;">
-                        <i class="fas fa-history text-success fa-lg mr-3"></i>
-                        <div>
-                            <div class="font-weight-bold mb-0">Riwayat Pesanan Saya</div>
-                            <small class="text-muted">Cek semua pesanan Anda</small>
-                        </div>
-                        <i class="fas fa-chevron-right ml-auto text-muted"></i>
-                    </a>
-
-                    <a href="@Url.Action("Index", "Cart")" class="d-flex align-items-center p-3 text-decoration-none bg-light border" style="border-radius: 8px; color: #495057; transition: background-color 0.2s;">
-                        <i class="fas fa-shopping-basket text-info fa-lg mr-3"></i>
-                        <div>
-                            <div class="font-weight-bold mb-0">Keranjang Belanja</div>
-                            <small class="text-muted">Lanjutkan ke pembayaran</small>
-                        </div>
-                        <i class="fas fa-chevron-right ml-auto text-muted"></i>
-                    </a>
+    <div class="col-lg-4 mb-4">
+        <div class="card-modern h-100 p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="stat-icon-wrapper mr-3" style="width: 44px; height: 44px; background: var(--slate-100); color: var(--slate-800); font-size: 1.1rem;">
+                    <i class="fas fa-compass text-danger"></i>
                 </div>
+                <div>
+                    <h5 class="font-heading font-weight-bold mb-0 text-dark">Akses Cepat</h5>
+                    <small class="text-muted">Navigasi fitur utama</small>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column" style="gap: 12px;">
+                <a href="@Url.Action("Katalog", "Pesanan")" class="d-flex align-items-center p-3 text-decoration-none bg-light rounded-lg border transition-hover" style="border-radius: var(--radius-md); color: var(--slate-800);">
+                    <div class="stat-icon-wrapper mr-3" style="width: 40px; height: 40px; background: var(--primary-light); color: var(--primary); font-size: 1rem;">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div>
+                        <div class="font-weight-bold mb-0" style="font-size: 0.95rem;">Katalog Menu</div>
+                        <small class="text-muted">Pilih paket katering lezat</small>
+                    </div>
+                    <i class="fas fa-arrow-right ml-auto text-muted small"></i>
+                </a>
+                
+                <a href="@Url.Action("Index", "Pesanan")" class="d-flex align-items-center p-3 text-decoration-none bg-light rounded-lg border transition-hover" style="border-radius: var(--radius-md); color: var(--slate-800);">
+                    <div class="stat-icon-wrapper mr-3" style="width: 40px; height: 40px; background: var(--success-light); color: var(--success); font-size: 1rem;">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div>
+                        <div class="font-weight-bold mb-0" style="font-size: 0.95rem;">Riwayat Pesanan Saya</div>
+                        <small class="text-muted">Pantau seluruh status pesanan</small>
+                    </div>
+                    <i class="fas fa-arrow-right ml-auto text-muted small"></i>
+                </a>
+
+                <a href="@Url.Action("Index", "Cart")" class="d-flex align-items-center p-3 text-decoration-none bg-light rounded-lg border transition-hover" style="border-radius: var(--radius-md); color: var(--slate-800);">
+                    <div class="stat-icon-wrapper mr-3" style="width: 40px; height: 40px; background: var(--info-light); color: var(--info); font-size: 1rem;">
+                        <i class="fas fa-shopping-basket"></i>
+                    </div>
+                    <div>
+                        <div class="font-weight-bold mb-0" style="font-size: 0.95rem;">Keranjang Belanja</div>
+                        <small class="text-muted">Periksa item dan checkout</small>
+                    </div>
+                    <i class="fas fa-arrow-right ml-auto text-muted small"></i>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Recent Orders Table -->
-    <div class="col-md-8 mb-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
-            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-4 px-4 pb-0">
-                <h5 class="card-title font-weight-bold text-dark mb-0" style="font-family: 'Outfit', sans-serif;"><i class="fas fa-history mr-2 text-success"></i> 5 Pesanan Terbaru</h5>
-                <a href="@Url.Action("Index", "Pesanan")" class="btn btn-link text-primary font-weight-bold p-0">Lihat Semua</a>
+    <div class="col-lg-8 mb-4">
+        <div class="card-modern h-100">
+            <div class="card-header-modern d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="font-heading font-weight-bold text-dark mb-0">
+                        <i class="fas fa-history text-danger mr-2"></i> Transaksi Pesanan Terbaru
+                    </h5>
+                    <small class="text-muted">Daftar 5 pesanan katering terakhir Anda</small>
+                </div>
+                <a href="@Url.Action("Index", "Pesanan")" class="btn btn-sm btn-modern-outline" style="border-radius: var(--radius-pill); font-size: 0.85rem;">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
             </div>
-            <div class="card-body p-0 mt-3">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-valign-middle mb-0" style="border-collapse: collapse;">
-                        <thead>
-                            <tr class="bg-light">
-                                <th class="pl-4" style="border-top: none;">No. Pesanan</th>
-                                <th style="border-top: none;">Tgl Pesan</th>
-                                <th style="border-top: none;">Total Bayar</th>
-                                <th style="border-top: none;">Status</th>
-                                <th class="pr-4 text-center" style="border-top: none; width: 220px;">Aksi</th>
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <tr>
+                                <th class="pl-4 py-3 border-top-0">No. Pesanan</th>
+                                <th class="py-3 border-top-0">Tgl Pesan</th>
+                                <th class="py-3 border-top-0">Total Bayar</th>
+                                <th class="py-3 border-top-0">Status</th>
+                                <th class="pr-4 py-3 border-top-0 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -141,25 +180,68 @@
                                 {
                                     bool isPendingPayment = item.StatusPesanan == "Pending" && (item.Pembayaran == null || item.Pembayaran.StatusVerifikasi == "Belum Bayar");
                                     <tr>
-                                        <td class="pl-4 font-weight-bold text-primary">@item.NomorPesanan</td>
-                                        <td>@item.TanggalPesan.ToString("dd MMM yyyy")</td>
-                                        <td class="font-weight-bold">Rp @item.TotalBayar.ToString("N0")</td>
+                                        <td class="pl-4 font-weight-bold text-primary">
+                                            @item.NomorPesanan
+                                        </td>
+                                        <td class="text-muted small">
+                                            @item.TanggalPesan.ToString("dd MMM yyyy HH:mm")
+                                        </td>
+                                        <td class="font-weight-bold text-dark">
+                                            Rp @item.TotalBayar.ToString("N0")
+                                        </td>
                                         <td>
-                                            <span class="badge px-3 py-2" style="border-radius: 20px; font-size: 85%; 
-                                                background-color: @(item.StatusPesanan == "Selesai" ? "rgba(40, 167, 69, 0.1)" : (item.StatusPesanan == "Diproses" ? "rgba(23, 162, 184, 0.1)" : (item.StatusPesanan == "Dikirim" ? "rgba(0, 123, 255, 0.1)" : "rgba(255, 193, 7, 0.1)")));
-                                                color: @(item.StatusPesanan == "Selesai" ? "#28a745" : (item.StatusPesanan == "Diproses" ? "#17a2b8" : (item.StatusPesanan == "Dikirim" ? "#007bff" : "#fd7e14")));">
-                                                @item.StatusPesanan
-                                            </span>
+                                            @if (item.StatusPesanan == "Selesai")
+                                            {
+                                                <span class="badge-modern badge-modern-success">
+                                                    <i class="fas fa-check-circle"></i> Selesai
+                                                </span>
+                                            }
+                                            else if (item.StatusPesanan == "Dikirim")
+                                            {
+                                                <span class="badge-modern badge-modern-info">
+                                                    <i class="fas fa-truck"></i> Dikirim
+                                                </span>
+                                            }
+                                            else if (item.StatusPesanan == "Diproses")
+                                            {
+                                                <span class="badge-modern badge-modern-warning">
+                                                    <i class="fas fa-fire"></i> Diproses
+                                                </span>
+                                            }
+                                            else if (item.StatusPesanan == "Menunggu Refund")
+                                            {
+                                                <span class="badge-modern badge-modern-warning" style="background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a;">
+                                                    <i class="fas fa-hand-holding-usd"></i> Menunggu Refund
+                                                </span>
+                                            }
+                                            else if (item.StatusPesanan == "Refund Selesai")
+                                            {
+                                                <span class="badge-modern badge-modern-success" style="background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                                                    <i class="fas fa-undo"></i> Refund Selesai
+                                                </span>
+                                            }
+                                            else if (item.StatusPesanan == "Dibatalkan" || item.StatusPesanan == "Batal")
+                                            {
+                                                <span class="badge-modern badge-modern-danger">
+                                                    <i class="fas fa-ban"></i> Dibatalkan
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge-modern badge-modern-warning">
+                                                    <i class="fas fa-clock"></i> Pending
+                                                </span>
+                                            }
                                         </td>
                                         <td class="pr-4 text-center">
-                                            <div class="d-flex align-items-center justify-content-center" style="gap: 5px;">
-                                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-outline-primary btn-sm px-3" style="border-radius: 6px;">
+                                            <div class="d-flex align-items-center justify-content-center" style="gap: 6px;">
+                                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-modern-outline" style="padding: 6px 14px; font-size: 0.82rem;">
                                                     <i class="fas fa-eye mr-1"></i> Rincian
                                                 </a>
                                                 @if (isPendingPayment)
                                                 {
-                                                    <a href="@Url.Action("Bayar", "Pesanan", new { id = item.PesananId })" class="btn btn-warning btn-sm px-3 font-weight-bold" style="border-radius: 6px; color: #212529;">
-                                                        <i class="fas fa-upload mr-1"></i> Bayar
+                                                    <a href="@Url.Action("Bayar", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-modern-primary" style="padding: 6px 14px; font-size: 0.82rem;">
+                                                        <i class="fas fa-credit-card mr-1"></i> Bayar
                                                     </a>
                                                 }
                                             </div>
@@ -171,8 +253,14 @@
                             {
                                 <tr>
                                     <td colspan="5" class="text-center py-5 text-muted">
-                                        <i class="fas fa-utensils fa-3x mb-3 text-black-50"></i>
-                                        <p class="mb-0">Anda belum melakukan pesanan katering apa pun.</p>
+                                        <div class="p-4">
+                                            <i class="fas fa-receipt fa-3x mb-3 text-secondary opacity-50"></i>
+                                            <h6 class="font-weight-bold text-dark mb-1">Belum Ada Transaksi</h6>
+                                            <p class="small text-muted mb-3">Anda belum memiliki riwayat pesanan katering saat ini.</p>
+                                            <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-sm btn-modern-primary">
+                                                <i class="fas fa-utensils mr-1"></i> Mulai Pesan Sekarang
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }

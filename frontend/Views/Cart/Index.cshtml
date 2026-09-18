@@ -4,37 +4,39 @@
     decimal total = Model.Sum(item => item.Subtotal);
 }
 
-<div class="container py-5">
-    <!-- Step Indicator -->
-    <div class="row mb-5 justify-content-center">
-        <div class="col-md-10 text-center">
-            <div class="d-flex justify-content-between position-relative" style="max-width: 600px; margin: 0 auto;">
-                <div class="position-absolute" style="top: 20px; left: 10%; right: 10%; height: 4px; background-color: #e9ecef; z-index: 1;">
-                    <div style="width: 0%; height: 100%; background-color: #28a745;"></div>
-                </div>
-                <div class="text-center position-relative" style="z-index: 2; width: 100px;">
-                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-2 shadow" style="width: 45px; height: 45px; font-weight: bold;">1</div>
-                    <span class="font-weight-bold text-dark" style="font-size: 0.85rem;">Keranjang</span>
-                </div>
-                <div class="text-center position-relative" style="z-index: 2; width: 100px;">
-                    <div class="rounded-circle bg-white text-muted border border-secondary d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 45px; height: 45px; font-weight: bold;">2</div>
-                    <span class="text-muted" style="font-size: 0.85rem;">Buat Pesanan</span>
-                </div>
-                <div class="text-center position-relative" style="z-index: 2; width: 100px;">
-                    <div class="rounded-circle bg-white text-muted border border-secondary d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 45px; height: 45px; font-weight: bold;">3</div>
-                    <span class="text-muted" style="font-size: 0.85rem;">Pembayaran</span>
-                </div>
+<div class="py-2">
+    <!-- Modern Step Indicator -->
+    <div class="card-modern mb-4 p-3 text-center">
+        <div class="d-flex justify-content-between position-relative mx-auto" style="max-width: 540px;">
+            <div class="position-absolute" style="top: 20px; left: 12%; right: 12%; height: 4px; background-color: var(--slate-200); z-index: 1; border-radius: 4px;">
+                <div style="width: 0%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+            </div>
+            <div class="text-center position-relative" style="z-index: 2; width: 110px;">
+                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center mx-auto mb-1 shadow-sm" style="width: 42px; height: 42px; font-weight: 800; font-size: 1rem;">1</div>
+                <span class="font-weight-bold text-dark small">Keranjang</span>
+            </div>
+            <div class="text-center position-relative" style="z-index: 2; width: 110px;">
+                <div class="rounded-circle bg-white text-muted border d-flex align-items-center justify-content-center mx-auto mb-1" style="width: 42px; height: 42px; font-weight: 700; font-size: 1rem;">2</div>
+                <span class="text-muted small">Buat Pesanan</span>
+            </div>
+            <div class="text-center position-relative" style="z-index: 2; width: 110px;">
+                <div class="rounded-circle bg-white text-muted border d-flex align-items-center justify-content-center mx-auto mb-1" style="width: 42px; height: 42px; font-weight: 700; font-size: 1rem;">3</div>
+                <span class="text-muted small">Pembayaran</span>
             </div>
         </div>
     </div>
 
     @if (Model.Count == 0)
     {
-        <div class="text-center py-5 shadow-sm rounded-lg bg-white">
-            <div class="mb-4 text-muted"><i class="fas fa-shopping-basket fa-5x"></i></div>
-            <h3 class="font-weight-bold text-dark">Keranjang Belanja Anda Kosong</h3>
-            <p class="text-secondary mb-4">Yuk, cari paket catering lezat untuk acara Anda di katalog kami!</p>
-            <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-success btn-lg px-4"><i class="fas fa-store mr-2"></i> Belanja Sekarang</a>
+        <div class="card-modern text-center py-5 px-4">
+            <div class="stat-icon-wrapper mx-auto mb-3" style="width: 80px; height: 80px; background: var(--primary-light); color: var(--primary); font-size: 2.2rem;">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <h4 class="font-heading font-weight-bold text-dark mb-1">Keranjang Belanja Anda Kosong</h4>
+            <p class="text-muted small mb-4">Yuk, temukan berbagai paket catering lezat khas Nusantara untuk acara Anda di katalog!</p>
+            <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-modern-primary px-4 py-2">
+                <i class="fas fa-utensils mr-2"></i> Jelajahi Katalog Menu
+            </a>
         </div>
     }
     else
@@ -42,48 +44,50 @@
         <div class="row">
             <!-- Cart Items List -->
             <div class="col-lg-8 mb-4">
-                <div class="card border-0 shadow-sm rounded-lg">
-                    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                        <h4 class="font-weight-bold text-dark mb-0"><i class="fas fa-shopping-cart mr-2 text-success"></i> Menu Terpilih</h4>
-                        <span class="badge badge-success px-3 py-2 font-weight-bold">@Model.Count Item</span>
+                <div class="card-modern">
+                    <div class="card-header-modern d-flex justify-content-between align-items-center">
+                        <h5 class="font-heading font-weight-bold text-dark mb-0">
+                            <i class="fas fa-shopping-cart text-danger mr-2"></i> Menu Terpilih
+                        </h5>
+                        <span class="badge-modern badge-modern-success">@Model.Count Item Menu</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0" style="min-width: 600px;">
-                                <thead class="bg-light text-secondary font-weight-bold" style="font-size: 0.85rem; border-top: 1px solid #eef2f5;">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted small font-weight-bold">
                                     <tr>
-                                        <th scope="col" style="padding-left: 20px;">Menu Paket</th>
-                                        <th scope="col" class="text-center">Harga</th>
-                                        <th scope="col" class="text-center" style="width: 150px;">Jumlah Porsi</th>
-                                        <th scope="col" class="text-right" style="padding-right: 20px;">Subtotal</th>
+                                        <th scope="col" class="pl-4 py-3 border-top-0">Menu Paket</th>
+                                        <th scope="col" class="py-3 border-top-0 text-center">Harga</th>
+                                        <th scope="col" class="py-3 border-top-0 text-center" style="width: 150px;">Porsi</th>
+                                        <th scope="col" class="pr-4 py-3 border-top-0 text-right">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @for (int i = 0; i < Model.Count; i++)
                                     {
                                         var item = Model[i];
+                                        string imgUrl = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(item.NamaPaket, item.Gambar);
                                         <tr>
-                                            <td style="padding-left: 20px;">
+                                            <td class="pl-4 py-3">
                                                 <div class="d-flex align-items-center">
-                                                    <img src="@item.Gambar" alt="@item.NamaPaket" class="rounded mr-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;" onerror="this.src='/images/menu_box.svg';" />
+                                                    <img src="@imgUrl" alt="@item.NamaPaket" referrerpolicy="no-referrer" class="rounded mr-3 shadow-xs" style="width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm);" onerror="this.src='/images/menu_box.svg';" />
                                                     <div>
-                                                        <h6 class="font-weight-bold text-dark mb-1">@item.NamaPaket</h6>
-                                                        <small class="text-muted d-block">Catatan khusus:</small>
-                                                        <input type="text" name="catatan" value="@item.Catatan" class="form-control form-control-sm mt-1 input-catatan" data-paketid="@item.PaketId" placeholder="Contoh: Tanpa jeroan, kuah dipisah..." style="max-width: 250px; font-size: 0.8rem; border-radius: 6px;" />
+                                                        <h6 class="font-weight-bold text-dark mb-1" style="font-size: 0.95rem;">@item.NamaPaket</h6>
+                                                        <input type="text" name="catatan" value="@item.Catatan" class="form-control form-control-sm mt-1 input-catatan" data-paketid="@item.PaketId" placeholder="Catatan khusus: (tanpa pedas, dll)" style="max-width: 260px; font-size: 0.8rem; border-radius: var(--radius-sm);" />
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-center font-weight-bold text-secondary">
+                                            <td class="py-3 text-center text-muted font-weight-bold">
                                                 Rp @item.Harga.ToString("N0")
                                             </td>
-                                            <td class="text-center">
+                                            <td class="py-3 text-center">
                                                 <form asp-action="Update" method="post" class="d-inline">
                                                     <input type="hidden" name="paketId" value="@item.PaketId" />
                                                     <div class="input-group input-group-sm mx-auto" style="width: 110px;">
                                                         <div class="input-group-prepend">
                                                             <button class="btn btn-outline-secondary btn-qty-dec" type="button"><i class="fas fa-minus"></i></button>
                                                         </div>
-                                                        <input type="number" name="jumlah" value="@item.Jumlah" min="1" class="form-control text-center input-qty font-weight-bold" />
+                                                        <input type="number" name="jumlah" value="@item.Jumlah" min="10" class="form-control text-center input-qty font-weight-bold" style="font-size: 0.9rem;" />
                                                         <div class="input-group-append">
                                                             <button class="btn btn-outline-secondary btn-qty-inc" type="button"><i class="fas fa-plus"></i></button>
                                                         </div>
@@ -91,12 +95,12 @@
                                                 </form>
                                                 <form asp-action="Remove" method="post" class="mt-2">
                                                     <input type="hidden" name="paketId" value="@item.PaketId" />
-                                                    <button type="submit" class="btn btn-link text-danger p-0 small" style="font-size: 0.75rem; text-decoration: none;">
+                                                    <button type="submit" class="btn btn-link text-danger p-0 small" style="font-size: 0.78rem; text-decoration: none;">
                                                         <i class="fas fa-trash-alt mr-1"></i> Hapus
                                                     </button>
                                                 </form>
                                             </td>
-                                            <td class="text-right font-weight-bold text-success" style="padding-right: 20px; font-size: 1.05rem;">
+                                            <td class="pr-4 py-3 text-right font-weight-bold text-dark" style="font-size: 1.05rem;">
                                                 Rp @item.Subtotal.ToString("N0")
                                             </td>
                                         </tr>
@@ -108,34 +112,72 @@
                 </div>
             </div>
 
-            <!-- Order Summary Sidebar -->
+            <!-- Order Summary & Ongkir Estimator Sidebar (Shopee-Style) -->
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm rounded-lg sticky-top" style="top: 20px;">
-                    <div class="card-header bg-white border-0 py-3">
-                        <h5 class="font-weight-bold text-dark mb-0">Ringkasan Pesanan</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-secondary">Subtotal Menu</span>
-                            <span class="font-weight-bold text-dark">Rp @total.ToString("N0")</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-secondary">Biaya Kirim</span>
-                            <span class="badge badge-success px-2 py-1 align-self-center font-weight-bold">Gratis</span>
-                        </div>
-                        <hr class="my-3" />
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="h5 font-weight-bold text-dark mb-0">Grand Total</span>
-                            <span class="h4 font-weight-bold text-success mb-0">Rp @total.ToString("N0")</span>
+                <div class="card-modern sticky-top p-4" style="top: 80px;">
+                    <h5 class="font-heading font-weight-bold text-dark mb-3">
+                        <i class="fas fa-calculator text-danger mr-2"></i> Ringkasan Belanja
+                    </h5>
+
+                    <!-- Alamat Pengiriman & Estimasi Ongkir -->
+                    <div class="p-3 mb-3 bg-light rounded-3 border" style="border-color: #e2e8f0 !important;">
+                        <label class="font-weight-bold text-dark small d-flex align-items-center justify-content-between mb-2">
+                            <span><i class="fas fa-map-marker-alt text-danger mr-1"></i> Destinasi Pengiriman</span>
+                            <span class="badge badge-secondary" style="font-size: 0.72rem;">Cek Ongkir</span>
+                        </label>
+                        
+                        <div class="form-group mb-2">
+                            <select id="selectWilayahCart" class="form-control form-control-sm custom-select-scroll" style="font-size: 0.82rem; border-radius: var(--radius-sm);">
+                                <option value="kertasemaya">Kec. Kertasemaya & Sekitarnya (Gratis Ongkir)</option>
+                                <option value="indramayu">Kab. Indramayu (Tengah & Timur) - Rp 15.000</option>
+                                <option value="indramayu_barat">Kab. Indramayu (Barat & Selatan) - Rp 25.000</option>
+                                <option value="cirebon">Kabupaten & Kota Cirebon - Rp 35.000</option>
+                                <option value="majalengka">Kabupaten Majalengka - Rp 40.000</option>
+                                <option value="subang">Kabupaten Subang (Timur) - Rp 50.000</option>
+                                <option value="custom">-- Ketik Alamat Spesifik --</option>
+                            </select>
                         </div>
 
-                        <a href="@Url.Action("Checkout")" class="btn btn-success btn-block btn-lg py-3 font-weight-bold shadow rounded-lg mb-3" style="letter-spacing: 0.5px;">
-                            Lanjut Buat Pesanan <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                        <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-outline-secondary btn-block py-2 font-weight-bold rounded-lg" style="font-size: 0.9rem;">
-                            <i class="fas fa-plus mr-2"></i> Tambah Menu Lain
-                        </a>
+                        <div id="boxCustomAlamat" class="form-group mb-2" style="display: none;">
+                            <input type="text" id="inputCustomAlamat" class="form-control form-control-sm" placeholder="Ketik nama jalan / kecamatan Anda..." value="@(ViewBag.UserAlamat ?? "")" style="font-size: 0.82rem;" />
+                        </div>
+
+                        <div class="p-2 bg-white rounded border d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-muted small"><i class="fas fa-truck text-success mr-1"></i> Biaya Kirim:</span>
+                            <span id="badgeOngkirCart" class="badge badge-success px-2 py-1">Gratis Ongkir</span>
+                        </div>
+                        <small id="textKeteranganOngkirCart" class="text-muted d-block mt-2" style="font-size: 0.74rem; line-height: 1.4;">
+                            <i class="fas fa-check-circle text-success mr-1"></i> Area lokal dapur Catering Mimi Saripah (Tenajar Lor / Kertasemaya).
+                        </small>
                     </div>
+
+                    <!-- Rincian Biaya -->
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Subtotal Produk</span>
+                        <span class="font-weight-bold text-dark">Rp @total.ToString("N0")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Total Ongkos Kirim</span>
+                        <span class="font-weight-bold text-success" id="textNilaiOngkir">Rp 0</span>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <span class="font-weight-bold text-dark d-block">Total Pembayaran</span>
+                            <small class="text-muted" style="font-size: 0.72rem;">Termasuk ongkir</small>
+                        </div>
+                        <span class="font-heading font-weight-bold text-danger h4 mb-0" id="textGrandTotalCart">Rp @total.ToString("N0")</span>
+                    </div>
+
+                    <a href="@Url.Action("Checkout")" class="btn btn-modern-primary w-100 py-3 mb-2 shadow-sm font-weight-bold" style="font-size: 1rem;">
+                        Lanjut ke Pengiriman <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="@Url.Action("Katalog", "Pesanan")" class="btn btn-modern-outline w-100 py-2" style="font-size: 0.88rem;">
+                        <i class="fas fa-plus mr-1"></i> Tambah Menu Lain
+                    </a>
                 </div>
             </div>
         </div>
@@ -148,31 +190,42 @@
             // Decrease Qty
             $('.btn-qty-dec').click(function() {
                 var input = $(this).closest('.input-group').find('.input-qty');
-                var val = parseInt(input.val()) || 1;
-                if (val > 1) {
-                    input.val(val - 1);
-                    $(this).closest('form').submit();
+                var val = parseInt(input.val()) || 10;
+                if (val <= 10) {
+                    if (window.toastr) {
+                        toastr.warning('Minimal pemesanan untuk paket katering adalah 10 porsi ya!', 'Batas Minimal Pesanan');
+                    } else {
+                        alert('Minimal pemesanan untuk paket katering adalah 10 porsi ya!');
+                    }
+                    return false;
                 }
+                input.val(val - 1);
+                $(this).closest('form').submit();
             });
 
             // Increase Qty
             $('.btn-qty-inc').click(function() {
                 var input = $(this).closest('.input-group').find('.input-qty');
-                var val = parseInt(input.val()) || 1;
+                var val = parseInt(input.val()) || 10;
                 input.val(val + 1);
                 $(this).closest('form').submit();
             });
 
-            // Auto-Submit on manually editing Qty and pressing Enter/leaving field
+            // Auto-Submit on manually editing Qty
             $('.input-qty').change(function() {
-                var val = parseInt($(this).val()) || 1;
-                if(val < 1) $(this).val(1);
+                var val = parseInt($(this).val()) || 10;
+                if (val < 10) {
+                    $(this).val(10);
+                    if (window.toastr) {
+                        toastr.warning('Minimal pemesanan katering adalah 10 porsi ya!', 'Batas Minimal Pesanan');
+                    }
+                }
                 $(this).closest('form').submit();
             });
 
-            // Auto-Save Note on blur (focus out)
-            $('.note-input').blur(function() {
-                var paketId = $(this).data('id');
+            // Auto-Save Note on blur
+            $('.input-catatan').blur(function() {
+                var paketId = $(this).data('paketid');
                 var text = $(this).val();
 
                 $.ajax({
@@ -183,13 +236,78 @@
                         catatan: text
                     },
                     success: function(response) {
-                        console.log('Catatan berhasil diperbarui.');
-                    },
-                    error: function() {
-                        console.error('Gagal memperbarui catatan.');
+                        console.log('Catatan diperbarui.');
                     }
                 });
             });
+
+            // Live Ongkir Calculation (Shopee-Style)
+            var subtotalMenu = @total;
+
+            function updateOngkirDisplay(ongkir, keterangan, badgeText, isCovered) {
+                if (isCovered === false) {
+                    $('#badgeOngkirCart').removeClass('badge-primary badge-info badge-success').addClass('badge-danger').text('Di Luar Jangkauan');
+                    $('#textNilaiOngkir').removeClass('text-success text-dark').addClass('text-danger').text('Tidak Dapat Dikirim');
+                    $('#textKeteranganOngkirCart').html('<i class="fas fa-ban text-danger mr-1"></i> ' + keterangan);
+                    $('#textGrandTotalCart').text('Di Luar Jangkauan');
+                    return;
+                }
+
+                if (ongkir === 0) {
+                    $('#badgeOngkirCart').removeClass('badge-primary badge-info badge-danger').addClass('badge-success').text(badgeText || 'Gratis Ongkir');
+                    $('#textNilaiOngkir').removeClass('text-dark text-danger').addClass('text-success').text('Rp 0');
+                } else {
+                    $('#badgeOngkirCart').removeClass('badge-success badge-danger').addClass('badge-primary').text('Rp ' + Number(ongkir).toLocaleString('id-ID'));
+                    $('#textNilaiOngkir').removeClass('text-success text-danger').addClass('text-dark').text('Rp ' + Number(ongkir).toLocaleString('id-ID'));
+                }
+                $('#textKeteranganOngkirCart').html('<i class="fas fa-info-circle text-primary mr-1"></i> ' + keterangan);
+                var grandTotal = subtotalMenu + ongkir;
+                $('#textGrandTotalCart').text('Rp ' + Number(grandTotal).toLocaleString('id-ID'));
+            }
+
+            $('#selectWilayahCart').change(function() {
+                var val = $(this).val();
+                if (val === 'custom') {
+                    $('#boxCustomAlamat').slideDown(200);
+                    var addr = $('#inputCustomAlamat').val();
+                    if (addr.trim().length > 0) {
+                        hitungOngkirCustom(addr);
+                    }
+                } else {
+                    $('#boxCustomAlamat').slideUp(200);
+                    if (val === 'kertasemaya') {
+                        updateOngkirDisplay(0, 'Area lokal dapur Catering Mimi Saripah (Tenajar Lor / Kertasemaya).', 'Gratis Ongkir', true);
+                    } else if (val === 'indramayu') {
+                        updateOngkirDisplay(15000, 'Ongkir pengantaran wilayah Kab. Indramayu (Tengah & Timur).', 'Rp 15.000', true);
+                    } else if (val === 'indramayu_barat') {
+                        updateOngkirDisplay(25000, 'Ongkir pengantaran wilayah Kab. Indramayu (Barat & Selatan).', 'Rp 25.000', true);
+                    } else if (val === 'cirebon') {
+                        updateOngkirDisplay(35000, 'Ongkir pengantaran wilayah Kabupaten & Kota Cirebon.', 'Rp 35.000', true);
+                    } else if (val === 'majalengka') {
+                        updateOngkirDisplay(40000, 'Ongkir pengantaran wilayah Kabupaten Majalengka.', 'Rp 40.000', true);
+                    } else if (val === 'subang') {
+                        updateOngkirDisplay(50000, 'Ongkir pengantaran batas wilayah Subang Timur.', 'Rp 50.000', true);
+                    }
+                }
+            });
+
+            var timeoutCustom = null;
+            $('#inputCustomAlamat').on('input', function() {
+                clearTimeout(timeoutCustom);
+                var text = $(this).val();
+                timeoutCustom = setTimeout(function() {
+                    hitungOngkirCustom(text);
+                }, 400);
+            });
+
+            function hitungOngkirCustom(alamat) {
+                if (!alamat || alamat.trim().length === 0) return;
+                $.get('@Url.Action("CalculateOngkir")', { alamat: alamat }, function(res) {
+                    if (res) {
+                        updateOngkirDisplay(res.ongkir, res.keterangan, null, res.isCovered);
+                    }
+                });
+            }
         });
     </script>
 }

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Lengkap Flowchart Sistem Catering Mimi Saripah</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #a855f7;
+            --indigo: #6366f1;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            padding: 0.6rem 1.5rem;
+            background: #111827;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #0f172a;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: auto;
+            background: #090d16;
+            padding: 1.5rem;
+            justify-content: center;
+        }
+
+        .diagram-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .mermaid {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            min-width: 920px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <h1>📊 Flowchart Terpadu Sistem Catering Mimi Saripah</h1>
+            <p>100% Sesuai Antarmuka Web, Logika Routing Role di Session, &amp; Relasi Tabel SQL (db_catering)</p>
+        </div>
+        <div class="legend-bar">
+            <div class="legend-item"><span class="legend-badge" style="background:#22c55e; border-radius:10px;"></span> <b>Terminal:</b> Mulai / Selesai</div>
+            <div class="legend-item"><span class="legend-badge" style="background:#0284c7; transform: skewX(-15deg);"></span> <b>Input/Output:</b> Form / Layar</div>
+            <div class="legend-item"><span class="legend-badge" style="background:#d97706;"></span> <b>Process:</b> Logika / Token / Hash</div>
+            <div class="legend-item"><span class="legend-badge" style="background:#dc2626; transform: rotate(45deg); width:8px; height:8px;"></span> <b>Decision:</b> Validasi / Cek Role</div>
+            <div class="legend-item"><span class="legend-badge" style="background:#4338ca; border-radius: 4px 4px 2px 2px;"></span> <b>Database:</b> Tabung [(Tabel)]</div>
+            <div class="legend-item"><span class="legend-badge" style="background:#9333ea; border-radius:50%;"></span> <b>Connector:</b> Penghubung ((A-E))</div>
+        </div>
+    </header>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchView('routing')">🔐 1. Alur Publik, Login &amp; Routing Role</button>
+        <button class="tab-btn" onclick="switchView('pelanggan')">👤 2. Role 1: Pelanggan (User)</button>
+        <button class="tab-btn" onclick="switchView('karyawan')">👨‍🍳 3. Role 2: Karyawan (Dapur &amp; Kurir)</button>
+        <button class="tab-btn" onclick="switchView('owner')">👑 4. Role 3: Pemilik Toko (Owner)</button>
+        <button class="tab-btn" onclick="switchView('semua')">🌐 5. Seluruh Sistem (Master Terintegrasi)</button>
+    </div>
+
+    <div class="main-container">
+        <!-- TAB 1: ROUTING LOGIN & PERAN -->
+        <div id="view-routing" class="diagram-container">
+            <pre class="mermaid">
+flowchart TD
+    StartApp(["Mulai Akses Web Catering Mimi Saripah"]) --> ViewHomePage[/Tampilkan Beranda: Hero Banner, Keunggulan, Menu Populer, Form Kesan & Pesan/]
+    ViewHomePage --> NavPublik{"Pengunjung Ingin Mengakses Menu Lain?"}
+    
+    NavPublik -- "Lihat Profil" --> ViewAbout[/Tampilkan Halaman Tentang Kami: Sejarah Dapur Tenajar Lor & Kontak/]
+    NavPublik -- "Jelajah Menu" --> ViewKatalogPublik[/Tampilkan Katalog Menu Publik & Filter Kategori/]
+    ViewKatalogPublik --> ModalDetailPublik[/Modal Detail Paket Menu: Foto, Harga, Porsi & Deskripsi/]
+    NavPublik -- "Pesan / Masuk" --> CheckAkses{"Pengunjung Ingin Memesan / Masuk Akun?"}
+    ViewAbout --> CheckAkses
+    ModalDetailPublik --> CheckAkses
+    
+    CheckAkses --> CheckPunyaAkun{"Sudah Memiliki Akun Terdaftar?"}
+    CheckPunyaAkun -- "Belum (Akun Baru)" --> FormRegister[/Form Registrasi: Input Nama, Username, Email, No. Telp, Alamat, Password/]
+    FormRegister --> ValRegister{"Validasi Registrasi: Data Lengkap & Username/Email Unik?"}
+    ValRegister -- "Tidak Valid" --> ErrRegister[/Tampilkan Pesan Error: Username / Email Sudah Terdaftar/]
+    ErrRegister --> FormRegister
+    ValRegister -- "Valid" --> HashPass[Hash Password Pengguna via IPasswordHasher]
+    HashPass --> SaveAkun[(Database: Simpan Akun Baru ke Tabel 'pengguna' - Peran_id = 2)]
+    SaveAkun --> Conn_Login((A))
+    
+    CheckPunyaAkun -- "Sudah" --> Conn_Login
+    Conn_Login --> FormLogin[/Form Login: Input Username & Password/]
+    
+    FormLogin --> CheckLupaPass{"Pengguna Lupa Kata Sandi?"}
+    CheckLupaPass -- "Ya, Lupa Password" --> FormForgot[/Form Lupa Password: Input Email Terdaftar/]
+    FormForgot --> KirimOTP[Generate 6-Digit OTP & Kirim via Email SMTP / Cache 15 Menit]
+    KirimOTP --> FormReset[/Form Reset Password: Input Kode OTP & Password Baru/]
+    FormReset --> ValOTP{"Validasi Kode OTP Cocok & Belum Kadaluarsa?"}
+    ValOTP -- "Tidak Valid" --> FormReset
+    ValOTP -- "Valid" --> SaveNewPass[(Database: Update PasswordHash Baru di Tabel 'pengguna')]
+    SaveNewPass --> Conn_Login
+    
+    CheckLupaPass -- "Tidak, Masukkan Kredensial" --> ValLogin{"Kredensial Cocok & Akun Aktif (DeletedAt IS NULL)?"}
+    ValLogin -- "Gagal" --> ErrLogin[/Tampilkan Pesan Error: Username atau Password Tidak Valid/]
+    ErrLogin --> FormLogin
+    ValLogin -- "Berhasil" --> GenSession[Generate JWT Token Cookie & Set Session: UserId, Username, Nama, Role]
+    GenSession --> CheckRole{"Cek Peran Pengguna (Role di Session)?"}
+
+    %% PERCABANGAN UTAMA ROLE
+    CheckRole -- "Role == 'User' (Pelanggan)" --> Conn_User((B))
+    CheckRole -- "Role == 'Karyawan'" --> Conn_Karyawan((C))
+    CheckRole -- "Role == 'Pemilik Toko' (Owner)" --> Conn_Owner((D))
+
+    classDef terminalStyle fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+    classDef ioStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef processStyle fill:#ffffff,stroke:#334155,stroke-width:2px,color:#0f172a;
+    classDef dbStyle fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81,font-weight:600;
+    classDef decisionStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b;
+    classDef connectorStyle fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8,font-weight:bold;
+
+    class StartApp terminalStyle;
+    class ViewHomePage,ViewAbout,ViewKatalogPublik,ModalDetailPublik,FormRegister,ErrRegister,FormLogin,FormForgot,FormReset,ErrLogin ioStyle;
+    class HashPass,KirimOTP,GenSession processStyle;
+    class SaveAkun,SaveNewPass dbStyle;
+    class NavPublik,CheckAkses,CheckPunyaAkun,ValRegister,CheckLupaPass,ValOTP,ValLogin,CheckRole decisionStyle;
+    class Conn_Login,Conn_User,Conn_Karyawan,Conn_Owner connectorStyle;
+            </pre>
+        </div>
+
+        <!-- TAB 2: ROLE 1 PELANGGAN -->
+        <div id="view-pelanggan" class="diagram-container" style="display:none;">
+            <pre class="mermaid">
+flowchart TD
+    Conn_User((B)) --> CustDashboard[/Tampilkan Dashboard Pelanggan: Total Belanja, Pesanan Aktif, Menunggu Bayar/]
+    CustDashboard --> CustKatalog[/Tampilkan Katalog Menu Katering & Filter Kategori: Baca Tabel 'paket_menu'/]
+    CustKatalog --> CustPilihMenu[/Buka Modal Detail Menu: Info Bahan & Lauk/]
+    CustPilihMenu --> CustInputPorsi[/Input Jumlah Porsi & Catatan Khusus/]
+    CustInputPorsi --> CustCekMinPorsi{"Jumlah Porsi Minimal 10 Porsi?"}
+    CustCekMinPorsi -- "Kurang (< 10)" --> CustTolakPorsi[/Tampilkan Peringatan: Minimal Pemesanan Paket adalah 10 Porsi/]
+    CustTolakPorsi --> CustInputPorsi
+    CustCekMinPorsi -- "Ya (>= 10)" --> CustAddToCart[Simpan Item Menu ke Session Keranjang 'Cart']
+    CustAddToCart --> CustViewCart[/Tampilkan Keranjang Belanja: Daftar Item, Subtotal & Live Cek Ongkir Wilayah/]
+    CustViewCart --> CustCekCoverage{"Alamat Pengiriman Masuk Area Layanan Katering?"}
+    CustCekCoverage -- "Luar Area" --> CustTolakWilayah[/Tampilkan Peringatan: Wilayah Pengantaran di Luar Jangkauan Kurir/]
+    CustTolakWilayah --> CustViewCart
+    CustCekCoverage -- "Masuk Area Layanan" --> CustFormCheckout[/Form Checkout: Input Tanggal Acara, Jam Antar, Catatan Khusus/]
+    
+    CustFormCheckout --> CustCekHMin1{"Jadwal Pengiriman Minimal H+1 Sebelum Hari Acara?"}
+    CustCekHMin1 -- "Hari Ini / Lampau" --> CustTolakHMin1[/Tampilkan Penolakan: Pemesanan Minimal H-1 Sebelum Acara/]
+    CustTolakHMin1 --> CustFormCheckout
+    CustCekHMin1 -- "Valid (>= H+1)" --> CustCekKuota{"Kapasitas Dapur Harian Masih Tersedia (Maks. 400 Porsi/Hari)?"}
+    CustCekKuota -- "Kuota Penuh (> 400)" --> CustTolakKuota[/Tampilkan Penolakan: Kuota Dapur Tanggal Tersebut Telah Penuh/]
+    CustTolakKuota --> CustFormCheckout
+    CustCekKuota -- "Kuota Tersedia" --> CustCreateOrder[Generate Nomor Pesanan: ORD-YYYYMMDD-XXX]
+    CustCreateOrder --> CustSaveOrder[(Database: Simpan Transaksi ke Tabel 'pesanan' & 'detail_pesanan' - Status 'Pending')]
+    CustSaveOrder --> CustClearCart[Kosongkan Session Keranjang 'Cart']
+    CustClearCart --> CustPilihBayar{"Pilih Metode Pembayaran"}
+    
+    CustPilihBayar -- "Transfer Bank Manual" --> CustBayarManual[Pilih Transfer Bank Manual: BCA, Mandiri, BNI, BRI]
+    CustBayarManual --> CustUploadBukti[/Form Pembayaran: Unggah Berkas Bukti Transfer Bank/]
+    CustUploadBukti --> CustSaveBukti[(Database: Simpan Transaksi ke Tabel 'pembayaran' - Status 'Menunggu Verifikasi')]
+    CustSaveBukti --> CustConnTrack((E))
+    CustPilihBayar -- "VA / QRIS" --> CustBayarInstan[Pilih Pembayaran Instan: Virtual Account / QRIS]
+    CustBayarInstan --> CustConnTrack
+    
+    CustConnTrack --> CustTrackOrder[/Tampilkan Halaman 'Pesanan Saya' & Timeline Tracking Status Pesanan/]
+    CustTrackOrder --> CustBatalCheck{"Pelanggan Ingin Membatalkan Pesanan?"}
+    CustBatalCheck -- "Ya, Ajukan Batal" --> CustCekCutoff{"Batas Waktu Pembatalan Terpenuhi (Minimal H-2 Acara)?"}
+    CustCekCutoff -- "Terlambat (< H-2)" --> CustTolakBatal[/Tampilkan Penolakan: Pembatalan Ditolak karena Melewati Batas H-2 Acara/]
+    CustTolakBatal --> CustTrackOrder
+    CustCekCutoff -- "Boleh (>= H-2)" --> CustFormRefund[/Form Modal Refund: Input Nama Bank, No. Rekening 8-20 Digit, Atas Nama/]
+    CustFormRefund --> CustSaveRefund[(Database: Update Kolom Refund di Tabel 'pesanan' - Status 'Menunggu Refund')]
+    CustSaveRefund --> CustConnTrack
+    
+    CustBatalCheck -- "Tidak, Menunggu Pesanan" --> CustTerimaPesanan[/Tampilkan Konfirmasi: Pesanan Tiba & Diterima Pelanggan di Lokasi/]
+    CustTerimaPesanan --> CustFormTestimoni[/Form Ulasan: Input Rating Bintang 1-5 & Pesan Kesan Menu Acara/]
+    CustFormTestimoni --> CustSaveTestimoni[(Database: Simpan Feedback ke Berkas JSON 'App_Data/kesan_pesan.json')]
+    CustSaveTestimoni --> CustLogout[Klik Menu Logout: Hapus Cookie JWT & Bersihkan Session]
+    CustLogout --> CustEnd(["Selesai Sesi Pelanggan"])
+
+    classDef terminalStyle fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+    classDef ioStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef processStyle fill:#ffffff,stroke:#334155,stroke-width:2px,color:#0f172a;
+    classDef dbStyle fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81,font-weight:600;
+    classDef decisionStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b;
+    classDef connectorStyle fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8,font-weight:bold;
+
+    class CustEnd terminalStyle;
+    class CustDashboard,CustKatalog,CustPilihMenu,CustInputPorsi,CustTolakPorsi,CustViewCart,CustTolakWilayah,CustFormCheckout,CustTolakHMin1,CustTolakKuota,CustUploadBukti,CustTrackOrder,CustTolakBatal,CustFormRefund,CustTerimaPesanan,CustFormTestimoni ioStyle;
+    class CustAddToCart,CustCreateOrder,CustClearCart,CustBayarInstan,CustBayarManual,CustLogout processStyle;
+    class CustSaveOrder,CustSaveBukti,CustSaveRefund,CustSaveTestimoni dbStyle;
+    class CustCekMinPorsi,CustCekCoverage,CustCekHMin1,CustCekKuota,CustPilihBayar,CustBatalCheck,CustCekCutoff decisionStyle;
+    class Conn_User,CustConnTrack connectorStyle;
+            </pre>
+        </div>
+
+        <!-- TAB 3: ROLE 2 KARYAWAN -->
+        <div id="view-karyawan" class="diagram-container" style="display:none;">
+            <pre class="mermaid">
+flowchart TD
+    Conn_Karyawan((C)) --> KaryawanDashboard[/Tampilkan Dashboard Operasional: Pesanan Hari Ini, Antrean Dapur, Siap Kirim/]
+    KaryawanDashboard --> KaryawanManifes[/Tampilkan & Cetak Manifes Dapur: Rekap Total Porsi & Resep dari Tabel 'detail_pesanan'/]
+    KaryawanDashboard --> KaryawanInputWalkin[/Form Input Pesanan Manual / Walk-in / Telepon WA/]
+    KaryawanInputWalkin --> KaryawanSaveWalkin[(Database: Simpan Pesanan ke Tabel 'pesanan' & 'detail_pesanan')]
+    KaryawanSaveWalkin --> KaryawanAntreanMasak[/Tampilkan Daftar Antrean Masak Dapur: Status 'Diproses'/]
+    
+    KaryawanDashboard --> KaryawanAntreanMasak
+    KaryawanAntreanMasak --> KaryawanProsesMasak[Proses Memasak Menu Sesuai Resep Otentik & Catatan Khusus Pelanggan]
+    KaryawanProsesMasak --> KaryawanQC[Quality Control Rasa, Higienitas & Pengemasan Kotak/Prasmanan/Tumpeng]
+    KaryawanQC --> KaryawanSiapKirim{"Makanan Selesai Dikemas Sesuai Slot Jam Antar?"}
+    KaryawanSiapKirim -- "Siap Diantar" --> KaryawanDispatch[Kurir Mengantar Pesanan ke Alamat Acara Menggunakan Armada Katering]
+    KaryawanDispatch --> KaryawanSaveKirim[(Database: Update Kolom Status 'Dikirim' di Tabel 'pesanan')]
+    KaryawanSaveKirim --> KaryawanTibaLokasi{"Pesanan Tiba & Diserahterimakan ke Pelanggan di Lokasi Acara?"}
+    KaryawanTibaLokasi -- "Diterima Pelanggan" --> KaryawanSaveSelesai[(Database: Update Kolom Status 'Selesai' di Tabel 'pesanan')]
+    
+    KaryawanSaveSelesai --> KaryawanViewPaket[/Lihat Master Paket Menu di Tabel 'paket_menu'/]
+    KaryawanViewPaket --> KaryawanLogout[Klik Menu Logout: Bersihkan Session & Cookie JWT Token]
+    KaryawanLogout --> KaryawanEnd(["Selesai Sesi Karyawan"])
+
+    classDef terminalStyle fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+    classDef ioStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef processStyle fill:#ffffff,stroke:#334155,stroke-width:2px,color:#0f172a;
+    classDef dbStyle fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81,font-weight:600;
+    classDef decisionStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b;
+    classDef connectorStyle fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8,font-weight:bold;
+
+    class KaryawanEnd terminalStyle;
+    class KaryawanDashboard,KaryawanManifes,KaryawanInputWalkin,KaryawanAntreanMasak,KaryawanViewPaket ioStyle;
+    class KaryawanProsesMasak,KaryawanQC,KaryawanDispatch,KaryawanLogout processStyle;
+    class KaryawanSaveWalkin,KaryawanSaveKirim,KaryawanSaveSelesai dbStyle;
+    class KaryawanSiapKirim,KaryawanTibaLokasi decisionStyle;
+    class Conn_Karyawan connectorStyle;
+            </pre>
+        </div>
+
+        <!-- TAB 4: ROLE 3 OWNER -->
+        <div id="view-owner" class="diagram-container" style="display:none;">
+            <pre class="mermaid">
+flowchart TD
+    Conn_Owner((D)) --> OwnerDashboard[/Tampilkan Dashboard Owner: Grafik Omset 7 Hari, Ringkasan Finansial, Card Perhatian/]
+    
+    %% Verifikasi Bukti Bayar
+    OwnerDashboard --> OwnerListVerif[/Tampilkan Antrean Verifikasi Bukti Pembayaran: Status 'Menunggu Verifikasi'/]
+    OwnerListVerif --> OwnerCekBukti{"Validasi Berkas Bukti Transfer Pelanggan & Mutasi Rekening Bank?"}
+    OwnerCekBukti -- "Bukti Palsu / Tidak Sesuai" --> OwnerTolakBayar[(Database: Update Status 'Ditolak' di Tabel 'pembayaran')]
+    OwnerCekBukti -- "Bukti Sah & Dana Masuk" --> OwnerSetujuBayar[Konfirmasi Pembayaran Lunas]
+    OwnerSetujuBayar --> OwnerSaveLunas[(Database: Update Status 'Diproses' di Tabel 'pesanan' & 'Valid' di 'pembayaran')]
+    
+    %% Refund
+    OwnerDashboard --> OwnerListRefund[/Tampilkan Antrean Pesanan Menunggu Refund di Tabel 'pesanan'/]
+    OwnerListRefund --> OwnerCekRekening{"Validasi Data Rekening Pelanggan (Bank, No. Rek, Nama Sesuai)?"}
+    OwnerCekRekening -- "Data Cocok" --> OwnerTransferDana[Lakukan Transfer Balik Dana Refund via m-Banking / ATM]
+    OwnerTransferDana --> OwnerUploadBuktiRefund[/Form Konfirmasi Refund: Unggah Berkas Bukti Transfer Refund/]
+    OwnerUploadBuktiRefund --> OwnerSaveRefund[(Database: Update Kolom 'refund_bukti_tf' & Status 'Refund Selesai' di Tabel 'pesanan')]
+    
+    %% Master Data
+    OwnerDashboard --> OwnerKelolaKategori[/Menu Kelola Master Kategori: CRUD Tabel 'kategori_menu'/]
+    OwnerKelolaKategori --> OwnerSaveKategori[(Database: Simpan / Update Kategori di Tabel 'kategori_menu')]
+    
+    OwnerDashboard --> OwnerKelolaPaket[/Menu Kelola Master Paket Menu: CRUD Tabel 'paket_menu'/]
+    OwnerKelolaPaket --> OwnerSavePaket[(Database: Simpan Paket Menu, Harga & Upload Foto di Tabel 'paket_menu')]
+    
+    OwnerDashboard --> OwnerKelolaUser[/Menu Kelola Pengguna: CRUD Akun Karyawan & Pelanggan di Tabel 'pengguna'/]
+    OwnerKelolaUser --> OwnerSaveUser[(Database: Simpan / Update Akun & Hak Akses di Tabel 'pengguna')]
+    
+    %% Manual Order & Manifes
+    OwnerDashboard --> OwnerOrderManual[/Form Input Pesanan Manual / VIP Pelanggan Luar Sistem/]
+    OwnerOrderManual --> OwnerSaveManual[(Database: Simpan Pesanan ke Tabel 'pesanan' & 'detail_pesanan')]
+    OwnerDashboard --> OwnerMonitorManifes[/Pantau Utilisasi Kuota & Manifes Dapur Harian/]
+    OwnerMonitorManifes --> OwnerLogout[Klik Menu Logout: Bersihkan Session & Cookie JWT Token]
+    OwnerLogout --> OwnerEnd(["Selesai Sesi Owner"])
+
+    classDef terminalStyle fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+    classDef ioStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef processStyle fill:#ffffff,stroke:#334155,stroke-width:2px,color:#0f172a;
+    classDef dbStyle fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81,font-weight:600;
+    classDef decisionStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b;
+    classDef connectorStyle fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8,font-weight:bold;
+
+    class OwnerEnd terminalStyle;
+    class OwnerDashboard,OwnerListVerif,OwnerListRefund,OwnerUploadBuktiRefund,OwnerKelolaKategori,OwnerKelolaPaket,OwnerKelolaUser,OwnerOrderManual,OwnerMonitorManifes ioStyle;
+    class OwnerSetujuBayar,OwnerTransferDana,OwnerLogout processStyle;
+    class OwnerTolakBayar,OwnerSaveLunas,OwnerSaveRefund,OwnerSaveKategori,OwnerSavePaket,OwnerSaveUser,OwnerSaveManual dbStyle;
+    class OwnerCekBukti,OwnerCekRekening decisionStyle;
+    class Conn_Owner connectorStyle;
+            </pre>
+        </div>
+
+        <!-- TAB 5: SELURUH SISTEM -->
+        <div id="view-semua" class="diagram-container" style="display:none;">
+            <pre class="mermaid" id="mermaid-full">
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            themeVariables: {
+                background: '#ffffff',
+                clusterBkg: '#ffffff',
+                clusterBorder: '#94a3b8',
+                edgeLabelBackground: '#ffffff'
+            },
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        function switchView(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            ['routing', 'pelanggan', 'karyawan', 'owner', 'semua'].forEach(t => {
+                document.getElementById('view-' + t).style.display = 'none';
+            });
+
+            if (tab === 'routing') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('view-routing').style.display = 'flex';
+            } else if (tab === 'pelanggan') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('view-pelanggan').style.display = 'flex';
+            } else if (tab === 'karyawan') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('view-karyawan').style.display = 'flex';
+            } else if (tab === 'owner') {
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                document.getElementById('view-owner').style.display = 'flex';
+            } else {
+                document.querySelectorAll('.tab-btn')[4].classList.add('active');
+                document.getElementById('view-semua').style.display = 'flex';
+                loadFullDiagram();
+            }
+        }
+
+        let fullLoaded = false;
+        async function loadFullDiagram() {
+            if (fullLoaded) return;
+            try {
+                const res = await fetch('flowchart_cateringapp.mmd');
+                const code = await res.text();
+                const container = document.getElementById('mermaid-full');
+                container.textContent = code;
+                await mermaid.run({ nodes: [container] });
+                fullLoaded = true;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

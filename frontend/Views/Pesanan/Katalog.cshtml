@@ -1,139 +1,279 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @model IEnumerable<CateringApp.Models.Entity.PaketMenu>
 @{
-    ViewData["Title"] = "Katalog Menu Catering";
+    var session = HttpContextAccessor.HttpContext?.Session;
+    int? currentUserId = session?.GetInt32("UserId");
+    string? role = session?.GetString("Role");
+    bool isLoggedIn = currentUserId.HasValue;
+    bool isStaffOrOwner = role == "Pemilik Toko" || role == "Karyawan";
+
+    // Tamu yang belum login menggunakan _GuestLayout agar senada dengan Beranda & Tentang Kami
+    Layout = isLoggedIn ? "_Layout" : "~/frontend/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Katalog Menu Catering Mimi Saripah";
+    string selectedCat = ViewBag.SelectedKategoriId?.ToString() ?? "";
 }
 
-<div class="row mb-3">
-    <div class="col-12">
-        <div class="card card-outline card-primary shadow-sm border-0 mb-2">
-            <div class="card-body py-2 px-3">
-                <form method="get" class="form-row align-items-center">
-                    <div class="col-md-5 my-1">
-                        <div class="input-group input-group-sm">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            </div>
-                            <input type="text" name="search" class="form-control" placeholder="Cari nama paket..." value="@ViewBag.Search" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 my-1">
-                        <select name="kategoriId" class="form-control form-control-sm" asp-items="ViewBag.KategoriId" onchange="this.form.submit()">
-                            <option value="">-- Semua Kategori --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 my-1">
-                        <button type="submit" class="btn btn-primary btn-sm btn-block"><i class="fas fa-filter mr-1"></i> Filter</button>
-                    </div>
-                </form>
+<div class="@(isLoggedIn ? "container-fluid py-3" : "container py-4")">
+
+    <!-- Guest Notification Banner (Mode Tamu / Hanya Melihat Menu) -->
+    @if (!isLoggedIn)
+    {
+        <div class="alert alert-light border rounded-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 p-md-4 mb-4 shadow-sm" style="background: #fff8f5; border-color: #ffd6cc !important;">
+            <div class="d-flex align-items-center mb-3 mb-md-0">
+                <div class="text-danger me-3" style="font-size: 1.8rem;">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1 text-dark">Mode Tamu &mdash; Penjelajahan Menu Lengkap</h6>
+                    <p class="text-muted mb-0 small">Anda dapat leluasa menjelajahi seluruh menu, harga, dan rincian hidangan kami. Untuk melakukan pemesanan porsi katering, silakan masuk ke akun Anda.</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2 ms-md-3">
+                <a href="@Url.Action("Login", "Account")" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-bold text-nowrap">
+                    <i class="fas fa-sign-in-alt me-1"></i> Masuk Sesi
+                </a>
+                <a href="@Url.Action("Register", "Account")" class="btn btn-brand-primary btn-sm rounded-pill px-3 py-2 fw-bold text-nowrap text-white">
+                    <i class="fas fa-user-plus me-1"></i> Daftar Akun
+                </a>
             </div>
         </div>
-    </div>
-</div>
+    }
 
-<div class="row">
-    @if (Model != null && Model.Any())
-    {
-        foreach (var item in Model)
-        {
-            <div class="col-md-4 col-sm-6 mb-3">
-                <div class="card h-100 shadow-sm border-0 transition-hover">
-                    @if (!string.IsNullOrEmpty(item.Gambar))
-                    {
-                        <img src="@item.Gambar" class="card-img-top" style="height: 140px; object-fit: cover; border-top-left-radius: 8px; border-top-right-radius: 8px;" alt="@item.NamaPaket" />
-                    }
-                    else
-                    {
-                        <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 140px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                            <i class="fas fa-utensils fa-3x text-light"></i>
-                        </div>
-                    }
-                    
-                    <div class="card-body d-flex flex-column py-2 px-3" style="min-height: 180px;">
-                        <div class="mb-1">
-                            <span class="badge badge-info px-2 py-1" style="font-size: 0.75rem;">@item.Kategori?.NamaKategori</span>
-                        </div>
-                        <h6 class="card-title font-weight-bold text-dark mb-1" style="font-size: 0.95rem; line-height: 1.2;">@item.NamaPaket</h6>
-                        
-                        <p class="card-text text-muted flex-grow-1 mb-2 text-truncate-3" style="font-size: 0.8rem; line-height: 1.3;">
-                            @(item.DeskripsiMenu ?? "Tidak ada deskripsi detail.")
-                        </p>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                            <span class="font-weight-bold text-success" style="font-size: 0.95rem;">Rp @item.Harga.ToString("N0")</span>
-                             <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
-                                 <input type="hidden" name="paketId" value="@item.PaketId" />
-                                 <input type="hidden" name="jumlah" value="10" />
-                                 <button type="submit" class="btn btn-success btn-xs px-3 font-weight-bold">
-                                     <i class="fas fa-cart-plus mr-1"></i> + Keranjang
-                                 </button>
-                             </form>
-                        </div>
+    <!-- Hero Catalog Header -->
+    <div class="card border-0 mb-4 overflow-hidden shadow-sm" style="border-radius: 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+        <div class="card-body p-4 p-md-5 text-white position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge mb-2 px-3 py-2" style="background: rgba(230, 57, 70, 0.25); color: #ff8591; border: 1px solid rgba(230, 57, 70, 0.35); border-radius: 30px; font-weight: 600;">
+                        <i class="fas fa-utensils me-1"></i> Sajian Nusantara Otentik & Higienis
+                    </span>
+                    <h1 class="fw-bold text-white mb-2" style="font-size: 2rem;">Katalog Menu Catering Mimi Saripah</h1>
+                    <p class="text-white-50 mb-0" style="font-size: 1.05rem; max-width: 680px; line-height: 1.6;">
+                        Pilihan paket hidangan istimewa siap saji dengan bahan baku segar, halal, dan bumbu rempah Nusantara pilihan untuk pesta, syukuran, kantor, maupun keluarga.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0 d-none d-lg-block">
+                    <div class="p-3 d-inline-block rounded-circle bg-white text-dark shadow-lg" style="width: 85px; height: 85px; line-height: 55px; text-align: center;">
+                        <i class="fas fa-bowl-food fa-2x text-danger" style="line-height: 55px;"></i>
                     </div>
                 </div>
             </div>
-        }
-    }
-    else
-    {
-        <div class="col-12">
-            <div class="alert alert-warning text-center py-2" style="font-size: 0.9rem;">
-                <i class="fas fa-info-circle mr-2"></i> Maaf, paket menu tidak ditemukan.
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="card border-0 mb-4 p-3 shadow-sm rounded-4" style="background-color: #ffffff;">
+        <form method="get" class="row align-items-center g-2">
+            <div class="col-lg-5 col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 30px 0 0 30px; padding-left: 18px;">
+                        <i class="fas fa-search text-danger"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control border-start-0" placeholder="Cari menu... (misal: Nasi Kotak, Tumpeng, Rendang)" value="@ViewBag.Search" style="border-radius: 0 30px 30px 0; font-size: 0.95rem; height: 46px;" />
+                </div>
             </div>
+
+            <div class="col-lg-4 col-md-4 mb-2 mb-md-0">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 30px 0 0 30px; padding-left: 16px;">
+                        <i class="fas fa-tag text-danger"></i>
+                    </span>
+                    <select name="kategoriId" class="form-select border-start-0 custom-select-scroll" onchange="this.form.submit()" style="border-radius: 0 30px 30px 0; height: 46px; font-size: 0.92rem; font-weight: 500; cursor: pointer;">
+                        <option value="">-- Semua Kategori Hidangan --</option>
+                        @if (ViewBag.KategoriId != null)
+                        {
+                            foreach (var cat in (IEnumerable<SelectListItem>)ViewBag.KategoriId)
+                            {
+                                <option value="@cat.Value" selected="@(selectedCat == cat.Value)">@cat.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-3 d-flex align-items-center">
+                <button type="submit" class="btn btn-brand-primary flex-grow-1 mr-2" style="height: 46px; border-radius: 30px; font-weight: 600; margin-right: 12px !important;">
+                    <i class="fas fa-filter mr-1"></i> Saring
+                </button>
+                <a href="@Url.Action("Katalog")" class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center text-nowrap" style="height: 46px; border-radius: 30px; padding: 0 18px; font-weight: 500;" title="Reset Filter">
+                    <i class="fas fa-undo mr-1"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Food Grid Section -->
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                string categoryName = item.Kategori?.NamaKategori ?? "Menu Pilihan";
+                string photoUrl = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(item.NamaPaket, item.Gambar, categoryName);
+                string itemDeskripsi = item.DeskripsiMenu ?? "Sajian istimewa kaya cita rasa tradisional khas Catering Mimi Saripah yang higienis, halal, dan lezat.";
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100 rounded-4 overflow-hidden d-flex flex-column" style="transition: transform 0.2s, box-shadow 0.2s;">
+                        
+                        <!-- Food Image & Badges (Clickable to View Detail Page) -->
+                        <a href="@Url.Action("DetailMenu", "Pesanan", new { id = item.PaketId })"
+                           class="d-block position-relative overflow-hidden"
+                           style="height: 220px; background-color: #eee;"
+                           title="Klik untuk melihat detail menu @item.NamaPaket">
+                            <img src="@photoUrl" class="w-100 h-100 object-fit-cover" alt="@item.NamaPaket" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='/images/menu_box.svg';" />
+                            <span class="position-absolute bg-white px-3 py-1 rounded-pill shadow-sm small fw-bold text-dark" style="top: 14px; left: 14px; font-size: 0.82rem;">
+                                <i class="fas fa-tag me-1 mr-1 text-warning"></i> @categoryName
+                            </span>
+                            <span class="position-absolute bg-danger text-white px-3 py-1 rounded-pill shadow-sm small fw-bold" style="bottom: 14px; right: 14px; font-size: 0.88rem;">
+                                Rp @item.Harga.ToString("N0")
+                            </span>
+                        </a>
+
+                        <!-- Card Body -->
+                        <div class="card-body p-4 d-flex flex-column flex-grow-1 justify-content-between">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="text-warning small fw-bold">
+                                        <i class="fas fa-star"></i> 4.9 <span class="text-muted fw-normal">(Pilihan Favorit)</span>
+                                    </span>
+                                    <small class="text-muted"><i class="fas fa-shield-alt text-success me-1 mr-1"></i> Halal 100%</small>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-2" style="font-size: 1.18rem; line-height: 1.35;">
+                                    <a href="@Url.Action("DetailMenu", "Pesanan", new { id = item.PaketId })" class="text-dark text-decoration-none" title="Klik untuk melihat detail menu">
+                                        @item.NamaPaket
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted small mb-3" style="line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @itemDeskripsi
+                                </p>
+                            </div>
+
+                            <!-- Card Action Footer -->
+                            <div class="pt-3 border-top mt-auto">
+                                <!-- Tombol Lihat Detail Menu (Membuka Halaman Detail Menu Lengkap) -->
+                                <a href="@Url.Action("DetailMenu", "Pesanan", new { id = item.PaketId })"
+                                   class="btn btn-outline-danger btn-sm rounded-pill w-100 mb-2 py-2 fw-bold d-flex align-items-center justify-content-center text-decoration-none">
+                                    <i class="fas fa-eye me-2 mr-2"></i> Lihat Detail Menu
+                                </a>
+
+                                @if (role == "User")
+                                {
+                                    <!-- Pelanggan Retail: Input Porsi + Tombol Pesan ke Keranjang -->
+                                    <form asp-controller="Cart" asp-action="Add" method="post" class="m-0 d-flex align-items-center" style="gap: 8px;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="paketId" value="@item.PaketId" />
+                                        <div class="input-group input-group-sm" style="width: 125px; flex-shrink: 0;">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-light text-muted font-weight-bold" style="border-radius: 20px 0 0 20px; font-size: 0.8rem; height: 38px; padding: 0 10px; border-right: none;">Porsi</span>
+                                            </div>
+                                            <input type="number" name="jumlah" value="10" min="10" max="5000" class="form-control text-center font-weight-bold" style="border-radius: 0 20px 20px 0; height: 38px; font-size: 0.92rem; padding: 0 4px;" title="Minimal 10 porsi" />
+                                        </div>
+                                        <button type="submit" class="btn btn-brand-primary btn-sm flex-grow-1 rounded-pill font-weight-bold text-white shadow-sm" style="height: 38px; white-space: nowrap; font-size: 0.88rem;">
+                                            <i class="fas fa-cart-plus mr-1"></i> Pesan
+                                        </button>
+                                    </form>
+                                }
+                                else if (isStaffOrOwner)
+                                {
+                                    <!-- Staf / Pemilik Toko (Pengguna Fitur Pesanan Manual): Tombol Shortcut Pesanan Manual -->
+                                    <a href="@Url.Action("Create", "Pesanan", new { paketId = item.PaketId })" 
+                                       class="btn btn-info btn-sm rounded-pill w-100 py-2 fw-bold text-white shadow-sm d-flex align-items-center justify-content-center text-decoration-none"
+                                       style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border: none;">
+                                        <i class="fas fa-cash-register me-2 mr-2"></i> Input Pesanan Manual
+                                    </a>
+                                }
+                                else
+                                {
+                                    <!-- Tamu / Belum Login: Arahkan ke Dialog Masuk -->
+                                    <button type="button" class="btn btn-brand-primary btn-sm rounded-pill w-100 py-2 fw-bold text-white shadow-sm"
+                                            onclick="promptGuestLogin('@item.NamaPaket')">
+                                        <i class="fas fa-lock me-1 mr-1"></i> Pesan Menu (Masuk)
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 py-5 text-center">
+                <div class="p-5 bg-white rounded-4 shadow-sm border mx-auto" style="max-width: 520px;">
+                    <div class="mb-3 text-muted">
+                        <i class="fas fa-utensils fa-4x text-danger opacity-50"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Menu Tidak Ditemukan</h4>
+                    <p class="text-muted small mb-4">Maaf, kami tidak menemukan menu dengan kata kunci atau kategori yang Anda pilih.</p>
+                    <a href="@Url.Action("Katalog")" class="btn btn-brand-outline rounded-pill px-4 py-2">
+                        <i class="fas fa-redo me-2"></i> Tampilkan Semua Menu
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-center mt-5">
+            <nav aria-label="Navigasi Halaman Katalog">
+                <ul class="pagination shadow-sm" style="border-radius: 30px; overflow: hidden;">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link border-0 px-3 py-2 text-dark" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = ViewBag.CurrentPage - 1 })">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link border-0 px-3 py-2 fw-bold" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link border-0 px-3 py-2 text-dark" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = ViewBag.CurrentPage + 1 })">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
         </div>
     }
 </div>
 
-@if (ViewBag.TotalPages > 1)
-{
-    <nav class="mt-2">
-        <ul class="pagination pagination-sm justify-content-center">
-            @if (ViewBag.CurrentPage > 1)
-            {
-                <li class="page-item">
-                    <a class="page-link" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = ViewBag.CurrentPage - 1 })"><i class="fas fa-chevron-left"></i></a>
-                </li>
+<!-- Modal Detail Menu (Kompatibel Bootstrap 5 & Bootstrap 4) -->
+@section Scripts {
+    <script>
+        function promptGuestLogin(namaMenu) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Masuk Sesi Terlebih Dahulu',
+                    html: `Untuk memesan hidangan <strong>"${namaMenu}"</strong>, Anda perlu masuk ke akun pelanggan atau mendaftar terlebih dahulu.`,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d9534f',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-sign-in-alt me-1"></i> Masuk Sekarang',
+                    cancelButtonText: 'Lanjut Lihat-Lihat',
+                    footer: '<a href="@Url.Action("Register", "Account")" class="text-danger fw-bold small text-decoration-none">Belum punya akun? Daftar di sini</a>'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    }
+                });
+            } else {
+                if (confirm(`Untuk memesan "${namaMenu}", silakan masuk terlebih dahulu.\n\nKlik OK untuk menuju halaman Masuk.`)) {
+                    window.location.href = '@Url.Action("Login", "Account")';
+                }
             }
-            @for (int i = 1; i <= ViewBag.TotalPages; i++)
-            {
-                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = i })">@i</a>
-                </li>
-            }
-            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-            {
-                <li class="page-item">
-                    <a class="page-link" href="@Url.Action("Katalog", new { search = ViewBag.Search, kategoriId = ViewBag.SelectedKategoriId, page = ViewBag.CurrentPage + 1 })"><i class="fas fa-chevron-right"></i></a>
-                </li>
-            }
-        </ul>
-    </nav>
+        }
+    </script>
 }
-
-<style>
-    .transition-hover {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border-radius: 8px;
-    }
-    .transition-hover:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-    }
-    .text-truncate-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;  
-        overflow: hidden;
-        white-space: normal;
-    }
-    .page-item.active .page-link {
-        background-color: #d9534f !important;
-        border-color: #d9534f !important;
-        color: #ffffff !important;
-    }
-    .page-link {
-        color: #d9534f;
-    }
-    .page-link:hover {
-        color: #c9302c;
-    }
-</style>

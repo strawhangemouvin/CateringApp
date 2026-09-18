@@ -29,6 +29,24 @@
         </div>
     </div>
 
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-lg mb-4" role="alert" style="background-color: #fef2f2; border-left: 5px solid #ef4444 !important;">
+            <div class="d-flex align-items-start">
+                <i class="fas fa-exclamation-triangle fa-lg text-danger mr-3 mt-1"></i>
+                <div>
+                    <strong class="text-danger d-block mb-1" style="font-size: 1rem;">Mohon Periksa Kembali Formulir Pemesanan Anda:</strong>
+                    <ul class="mb-0 pl-3 small text-danger font-weight-bold">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="row">
         <!-- Shipping Details Form -->
         <div class="col-lg-7 mb-4">
@@ -37,21 +55,80 @@
                     <h4 class="font-weight-bold text-dark mb-0"><i class="fas fa-truck text-success mr-2"></i> Informasi Pengiriman</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Checkout" method="post">
-                        <div class="form-group mb-4">
-                            <label asp-for="TanggalPengiriman" class="font-weight-bold text-dark">Tanggal Pengiriman</label>
-                            <input asp-for="TanggalPengiriman" class="form-control form-control-lg" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" style="border-radius: 8px;" />
-                            <span asp-validation-for="TanggalPengiriman" class="text-danger small font-weight-bold"></span>
-                            <small class="form-text text-muted">Pesanan dikirim minimal H+1 dari hari ini agar dapur kami dapat mempersiapkannya secara optimal.</small>
+                    <!-- Kitchen Quota Badge -->
+                    <div class="alert alert-info border-0 rounded-lg shadow-sm mb-4 d-flex align-items-center" style="background-color: #f0fdf4; border-left: 4px solid #10b981 !important;">
+                        <i class="fas fa-fire-burner fa-2x text-success mr-3"></i>
+                        <div>
+                            <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">Kapasitas Dapur Mimi Saripah</div>
+                            <small class="text-muted">
+                                Total porsi keranjang: <span class="badge badge-success font-weight-bold">@ViewBag.TotalPorsiKeranjang Porsi</span> | 
+                                Sisa kuota dapur di tanggal ini: <span class="badge badge-primary font-weight-bold">@ViewBag.SisaKuota / 400 Porsi</span>
+                            </small>
+                        </div>
+                    </div>
+
+                    <form asp-action="Checkout" method="post" id="formCheckout">
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-4">
+                                <label asp-for="TanggalPengiriman" class="font-weight-bold text-dark">Tanggal Acara / Pengiriman</label>
+                                <input asp-for="TanggalPengiriman" class="form-control form-control-lg" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" style="border-radius: 8px;" />
+                                <span asp-validation-for="TanggalPengiriman" class="text-danger small font-weight-bold"></span>
+                                <small class="form-text text-muted">Minimal H-1 dari hari ini untuk persiapan bahan baku.</small>
+                            </div>
+
+                            <div class="col-md-6 form-group mb-4">
+                                <label asp-for="JamPengantaran" class="font-weight-bold text-dark">Jam Pengantaran / Acara</label>
+                                <select asp-for="JamPengantaran" class="form-control form-control-lg custom-select-scroll" style="border-radius: 8px;">
+                                    <option value="06:00 - 08:00">06:00 - 08:00 WIB (Pagi Hari - Sarapan)</option>
+                                    <option value="08:00 - 10:00">08:00 - 10:00 WIB (Pagi Menjelang Siang)</option>
+                                    <option value="10:00 - 12:00" selected>10:00 - 12:00 WIB (Makan Siang Utama)</option>
+                                    <option value="12:00 - 14:00">12:00 - 14:00 WIB (Siang Menjelang Sore)</option>
+                                    <option value="16:00 - 18:00">16:00 - 18:00 WIB (Sore Hari - Coffee Break)</option>
+                                    <option value="18:00 - 20:00">18:00 - 20:00 WIB (Malam Hari - Resepsi)</option>
+                                </select>
+                                <span asp-validation-for="JamPengantaran" class="text-danger small font-weight-bold"></span>
+                                <small class="form-text text-muted">Waktu kedatangan tim katering ke lokasi.</small>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Bantuan Pilihan Wilayah -->
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-dark d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-map-marked-alt text-success mr-1"></i> Pilih Wilayah Pengantaran</span>
+                                <small class="badge badge-success text-white font-weight-normal"><i class="fas fa-shield-alt mr-1"></i>Jangkauan Resmi</small>
+                            </label>
+                            <select id="selectWilayahPreset" class="form-control form-control-lg custom-select-scroll" style="border-radius: 8px;">
+                                <option value="">-- Pilih Wilayah / Kota Anda (Otomatis Deteksi Tarif) --</option>
+                                <optgroup label="Kabupaten Indramayu">
+                                    <option value="Kertasemaya, Indramayu">Kec. Kertasemaya & Sekitarnya (Tenajar, Jatibarang, Sukagumiwang) - Gratis Ongkir</option>
+                                    <option value="Indramayu Kota, Indramayu">Indramayu Kota, Sindang, Balongan, Karangampel, Lohbener - Rp 15.000</option>
+                                    <option value="Haurgeulis, Indramayu">Indramayu Barat & Selatan (Haurgeulis, Patrol, Kandanghaur, Losarang) - Rp 25.000</option>
+                                </optgroup>
+                                <optgroup label="Wilayah Ciayumajakuning & Subang">
+                                    <option value="Cirebon">Kabupaten & Kota Cirebon (Arjawinangun, Weru, Kedawung, Sumber) - Rp 35.000</option>
+                                    <option value="Majalengka">Kabupaten Majalengka (Kertajati, Jatitujuh, Jatiwangi, Majalengka Kota) - Rp 40.000</option>
+                                    <option value="Pamanukan, Subang">Kabupaten Subang Timur (Pamanukan, Pusakanagara, Ciasem) - Rp 50.000</option>
+                                </optgroup>
+                                <option value="manual">-- Ketik Alamat Lengkap Manual --</option>
+                            </select>
+                            <small class="form-text text-muted">Pilih wilayah di atas untuk mengisi kota secara otomatis atau ketik langsung alamat lengkap di bawah.</small>
                         </div>
 
                         <div class="form-group mb-4">
-                            <label asp-for="AlamatPengiriman" class="font-weight-bold text-dark">Alamat Pengiriman Lengkap</label>
-                            <textarea asp-for="AlamatPengiriman" class="form-control" rows="4" placeholder="Masukkan alamat lengkap pengiriman, beserta patokan jika ada..." style="border-radius: 8px; resize: none;"></textarea>
+                            <label asp-for="AlamatPengiriman" class="font-weight-bold text-dark">Alamat Pengiriman Lengkap & Patokan Jalan</label>
+                            <textarea asp-for="AlamatPengiriman" id="inputAlamat" class="form-control" rows="3" placeholder="Contoh: Jl. Raya Tenajar Lor No. 12, RT 02/RW 01, Kec. Kertasemaya, Kab. Indramayu (Dekat Balai Desa)..." style="border-radius: 8px; resize: none;"></textarea>
                             <span asp-validation-for="AlamatPengiriman" class="text-danger small font-weight-bold"></span>
+                            
+                            <!-- Box Status Jangkauan & Ongkir -->
+                            <div id="boxOngkirInfo" class="mt-2 p-3 rounded small bg-light border">
+                                <div class="d-flex align-items-center">
+                                    <i id="iconOngkirStatus" class="fas fa-info-circle text-primary mr-2 fa-lg"></i>
+                                    <span id="textOngkirInfo">Ketik nama jalan, kecamatan, dan kota Anda untuk mengecek jangkauan pengiriman katering.</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-success btn-lg btn-block py-3 font-weight-bold shadow rounded-lg" style="letter-spacing: 0.5px;">
+                        <button type="submit" id="btnSubmitCheckout" class="btn btn-success btn-lg btn-block py-3 font-weight-bold shadow rounded-lg" style="letter-spacing: 0.5px;">
                             <i class="fas fa-check-circle mr-2"></i> Buat Pesanan Sekarang
                         </button>
                     </form>
@@ -69,8 +146,9 @@
                     <div class="px-3" style="max-height: 250px; overflow-y: auto;">
                         @foreach (var item in cart)
                         {
+                            string imgUrl = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(item.NamaPaket, item.Gambar);
                             <div class="d-flex align-items-center py-3 border-bottom">
-                                <img src="@item.Gambar" class="rounded shadow-sm mr-3" style="width: 55px; height: 55px; object-fit: cover;" alt="@item.NamaPaket" />
+                                <img src="@imgUrl" class="rounded shadow-sm mr-3" referrerpolicy="no-referrer" style="width: 55px; height: 55px; object-fit: cover;" alt="@item.NamaPaket" onerror="this.src='/images/menu_box.svg';" />
                                 <div class="flex-grow-1">
                                     <h6 class="font-weight-bold text-dark mb-0" style="font-size: 0.9rem;">@item.NamaPaket</h6>
                                     <small class="text-secondary font-weight-bold">@item.Jumlah Porsi x Rp @item.Harga.ToString("N0")</small>
@@ -85,17 +163,17 @@
                     </div>
                     <div class="p-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-secondary">Subtotal</span>
+                            <span class="text-secondary">Subtotal Menu</span>
                             <span class="font-weight-bold text-dark">Rp @grandTotal.ToString("N0")</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-secondary">Biaya Kirim</span>
-                            <span class="font-weight-bold text-success">Gratis</span>
+                            <span id="badgeOngkir" class="font-weight-bold text-success">Gratis</span>
                         </div>
                         <hr class="my-3" style="border-top: 1px dashed #e9ecef;" />
                         <div class="d-flex justify-content-between">
-                            <h6 class="font-weight-bold text-dark mb-0">Grand Total</h6>
-                            <h5 class="font-weight-bold text-success mb-0">Rp @grandTotal.ToString("N0")</h5>
+                            <h6 class="font-weight-bold text-dark mb-0">Total Pembayaran</h6>
+                            <h5 id="textGrandTotal" class="font-weight-bold text-success mb-0">Rp @grandTotal.ToString("N0")</h5>
                         </div>
                     </div>
                 </div>
@@ -109,4 +187,85 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            const subtotal = @grandTotal;
+            const $inputAlamat = $('#inputAlamat');
+            const $selectWilayahPreset = $('#selectWilayahPreset');
+            const $badgeOngkir = $('#badgeOngkir');
+            const $textGrandTotal = $('#textGrandTotal');
+            const $textOngkirInfo = $('#textOngkirInfo');
+            const $boxOngkirInfo = $('#boxOngkirInfo');
+            const $iconOngkirStatus = $('#iconOngkirStatus');
+            const $btnSubmit = $('#btnSubmitCheckout');
+
+            // Quick Preset Selection
+            $selectWilayahPreset.change(function() {
+                const val = $(this).val();
+                if (val && val !== 'manual') {
+                    const current = $inputAlamat.val().trim();
+                    if (!current || current.indexOf(val) === -1) {
+                        if (current.length > 0) {
+                            $inputAlamat.val(current + ', ' + val);
+                        } else {
+                            $inputAlamat.val('Jl. Utama, ' + val);
+                        }
+                    }
+                    evaluasiOngkir();
+                }
+            });
+
+            let timerAjax = null;
+            function evaluasiOngkir() {
+                const alamat = $inputAlamat.val().trim();
+                if (alamat.length === 0) {
+                    $boxOngkirInfo.removeClass('alert-danger alert-success alert-warning').addClass('bg-light border');
+                    $iconOngkirStatus.attr('class', 'fas fa-info-circle text-primary mr-2 fa-lg');
+                    $textOngkirInfo.text('Ketik nama jalan, kecamatan, dan kota Anda untuk mengecek jangkauan pengiriman.');
+                    $badgeOngkir.text('Belum Terisi').attr('class', 'font-weight-bold text-muted');
+                    $textGrandTotal.text('Rp ' + subtotal.toLocaleString('id-ID'));
+                    $btnSubmit.prop('disabled', false).removeClass('btn-secondary').addClass('btn-success');
+                    return;
+                }
+
+                clearTimeout(timerAjax);
+                timerAjax = setTimeout(function() {
+                    $.ajax({
+                        url: '@Url.Action("CalculateOngkir")',
+                        data: { alamat: alamat },
+                        method: 'GET',
+                        success: function(res) {
+                            if (!res.isCovered) {
+                                // Alamat Di Luar Jangkauan (misal: Batusangkar, Jakarta, dll)
+                                $boxOngkirInfo.removeClass('bg-light alert-success alert-warning').addClass('alert-danger border-danger');
+                                $iconOngkirStatus.attr('class', 'fas fa-ban text-danger mr-2 fa-lg');
+                                $textOngkirInfo.html('<strong>Di Luar Jangkauan:</strong> ' + res.keterangan);
+                                $badgeOngkir.text('Di Luar Jangkauan').attr('class', 'font-weight-bold text-danger');
+                                $textGrandTotal.text('Tidak Dapat Dikirim');
+                                $btnSubmit.prop('disabled', true).removeClass('btn-success').addClass('btn-secondary');
+                            } else {
+                                // Alamat Terjangkau
+                                $boxOngkirInfo.removeClass('bg-light alert-danger alert-warning').addClass('alert-success border-success');
+                                $iconOngkirStatus.attr('class', 'fas fa-check-circle text-success mr-2 fa-lg');
+                                $textOngkirInfo.html('<strong>' + res.namaZona + ':</strong> ' + res.keterangan);
+                                
+                                if (res.ongkir === 0) {
+                                    $badgeOngkir.text('Gratis Ongkir').attr('class', 'font-weight-bold text-success');
+                                } else {
+                                    $badgeOngkir.text(res.ongkirFormat).attr('class', 'font-weight-bold text-primary');
+                                }
+                                
+                                const total = subtotal + res.ongkir;
+                                $textGrandTotal.text('Rp ' + total.toLocaleString('id-ID'));
+                                $btnSubmit.prop('disabled', false).removeClass('btn-secondary').addClass('btn-success');
+                            }
+                        }
+                    });
+                }, 300);
+            }
+
+            $inputAlamat.on('input propertychange', evaluasiOngkir);
+            evaluasiOngkir();
+        });
+    </script>
 }

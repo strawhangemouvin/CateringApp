@@ -54,17 +54,10 @@
                 <h3 class="card-title">Foto / Gambar Menu</h3>
             </div>
             <div class="card-body text-center">
-                @if (!string.IsNullOrEmpty(Model.Gambar))
-                {
-                    <img src="@Model.Gambar" class="img-fluid img-thumbnail rounded" style="max-height: 300px;" alt="@Model.NamaPaket" />
+                @{
+                    string detailImg = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(Model.NamaPaket, Model.Gambar, Model.Kategori?.NamaKategori);
                 }
-                else
-                {
-                    <div class="py-5 text-muted">
-                        <i class="fas fa-image fa-5x mb-3"></i>
-                        <p>Belum ada foto untuk paket menu ini.</p>
-                    </div>
-                }
+                <img src="@detailImg" referrerpolicy="no-referrer" class="img-fluid img-thumbnail rounded shadow-sm" style="max-height: 320px; object-fit: cover;" alt="@Model.NamaPaket" onerror="this.onerror=null; this.src='/images/menu_box.svg';" />
             </div>
         </div>
     </div>

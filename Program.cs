@@ -1,4 +1,4 @@
-﻿using CateringApp.Models.Entity;
+using CateringApp.Models.Entity;
 using CateringApp.Services.Context;
 using CateringApp.Services.Impl;
 using CateringApp.Services.Interface;
@@ -61,7 +61,44 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllersWithViews()
+var frontendWwwroot = Path.Combine(builder.Environment.ContentRootPath, "frontend", "wwwroot");
+if (Directory.Exists(frontendWwwroot))
+{
+    builder.Environment.WebRootPath = frontendWwwroot;
+}
+
+builder.Services.AddControllersWithViews(options =>
+{
+    // Lokalisasi Pesan Validasi Model Binding ke Bahasa Indonesia
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+        x => $"Kolom {x} harus berupa angka yang valid.");
+    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor(
+        (val, x) => $"Nilai '{val}' tidak valid untuk {x}.");
+    options.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(
+        () => "Kolom ini wajib diisi.");
+    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(
+        x => $"Nilai untuk kolom '{x}' tidak boleh kosong.");
+    options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+        x => $"Kolom {x} wajib diisi.");
+    options.ModelBindingMessageProvider.SetValueIsInvalidAccessor(
+        x => $"Nilai '{x}' tidak valid.");
+    options.ModelBindingMessageProvider.SetUnknownValueIsInvalidAccessor(
+        x => $"Nilai tidak valid untuk kolom {x}.");
+    options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(
+        val => $"Nilai '{val}' tidak valid.");
+    options.ModelBindingMessageProvider.SetNonPropertyUnknownValueIsInvalidAccessor(
+        () => "Nilai yang dimasukkan tidak valid.");
+    options.ModelBindingMessageProvider.SetNonPropertyValueMustBeANumberAccessor(
+        () => "Kolom harus berupa angka yang valid.");
+})
+    .AddRazorOptions(options =>
+    {
+        options.ViewLocationFormats.Clear();
+        options.ViewLocationFormats.Add("/frontend/Views/{1}/{0}.cshtml");
+        options.ViewLocationFormats.Add("/frontend/Views/Shared/{0}.cshtml");
+        options.ViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
+        options.ViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
@@ -140,6 +177,14 @@ app.UseStatusCodePagesWithReExecute("/Home/ErrorStatus/{0}");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+if (Directory.Exists(frontendWwwroot))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(frontendWwwroot),
+        RequestPath = ""
+    });
+}
 
 app.Use(async (context, next) =>
 {

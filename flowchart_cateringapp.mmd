@@ -1,0 +1,218 @@
+flowchart TD
+    %% =========================================================================
+    %% CATERINGAPP - FLOWCHART SISTEM LENGKAP TANPA SUBGRAPH / TANPA KOTAK PEMBATAS
+    %% Bebas diatur, digeser, dan ditata di editor (Draw.io / Mermaid)
+    %% Standar Simbol Bagan Alir (ISO/ANSI):
+    %% 1. Terminal / Terminator   : ([ Oval / Kapsul ])    -> Titik Mulai & Selesai
+    %% 2. Masukan / Keluaran (I/O): [/ Jajar Genjang /]   -> Halaman, Form Input, Alert
+    %% 3. Proses (Process)        : [ Persegi Panjang ]   -> Logika, Hashing, Token, Komputasi
+    %% 4. Titik Keputusan (Dec.)  : { Belah Ketupat }     -> Validasi Kredensial, Cek Role, Kuota
+    %% 5. Basis Data (Database)   : [( Tabung / Silinder )]-> Disimpan/Diupdate ke Tabel SQL
+    %% 6. Penghubung (Connector)  : (( Lingkaran Kecil )) -> On-Page Connector A, B, C, D, E
+    %% =========================================================================
+
+    %% =========================================================================
+    %% BAGIAN 1: AKSES PUBLIK, REGISTRASI & OTENTIKASI (ROLE ROUTING)
+    %% =========================================================================
+    Start(["Mulai Akses Web Catering Mimi Saripah"]) --> Home[/Menampilkan Home Page: Hero Banner, Menu Populer, Form Kesan & Pesan/]
+    Home --> NavPublik{"Pengunjung Ingin Mengakses Menu Lain?"}
+    
+    NavPublik -- "Lihat Profil" --> ViewAbout[/Halaman Tentang Kami: Profil Usaha & Alamat Tenajar Lor/]
+    NavPublik -- "Jelajah Menu" --> ViewKatalogPublik[/Katalog Menu Publik & Filter Kategori/]
+    ViewKatalogPublik --> ModalDetailPublik[/Modal Detail Paket Menu: Foto, Harga, Porsi/]
+    
+    NavPublik -- "Pesan / Masuk" --> AuthCheck{"Sudah Memiliki Akun Terdaftar?"}
+    ViewAbout --> AuthCheck
+    ModalDetailPublik --> AuthCheck
+    
+    %% Alur Registrasi
+    AuthCheck -- "Belum (Akun Baru)" --> FormReg[/Form Registrasi: Input Nama, Username, Email, No. Telp, Alamat, Password/]
+    FormReg --> ValidasiReg{"Validasi Registrasi Lengkap & Unik?"}
+    ValidasiReg -- "Tidak Valid" --> RegFail[/Tampilkan Pesan Error: Username / Email Duplikat/]
+    RegFail --> FormReg
+    ValidasiReg -- "Valid" --> HashPass[Hash Password Pengguna via IPasswordHasher]
+    HashPass --> SaveAkun[(Database: Simpan Akun ke Tabel 'pengguna' - PeranId = 3)]
+    SaveAkun --> Conn_Login((A))
+    
+    %% Alur Login Menggunakan On-Page Connector A
+    AuthCheck -- "Sudah" --> Conn_Login
+    Conn_Login --> FormLogin[/Form Login: Input Username & Password/]
+    FormLogin --> CekLupaPass{"Pengguna Lupa Kata Sandi?"}
+    
+    %% Alur Lupa Password / OTP
+    CekLupaPass -- "Ya, Lupa Password" --> FormForgot[/Form Lupa Password: Input Email Terdaftar/]
+    FormForgot --> KirimOTP[Generate 6-Digit OTP & Kirim via Email SMTP / Cache 15 Menit]
+    KirimOTP --> FormReset[/Form Reset Password: Input Kode OTP & Password Baru/]
+    FormReset --> ValOTP{"Validasi Kode OTP Cocok & Aktif?"}
+    ValOTP -- "Tidak Valid" --> FormReset
+    ValOTP -- "Valid" --> SaveNewPass[(Database: Update PasswordHash Baru di Tabel 'pengguna')]
+    SaveNewPass --> Conn_Login
+    
+    %% Validasi Login & Role Redirection
+    CekLupaPass -- "Tidak, Masukkan Kredensial" --> ValLogin{"Kredensial Cocok & Akun Aktif?"}
+    ValLogin -- "Gagal" --> LoginFail[/Tampilkan Pesan Error: Username atau Password Tidak Valid/]
+    LoginFail --> FormLogin
+    ValLogin -- "Berhasil" --> GenSession[Set Session & Cookie JWT: UserId, Username, Nama, Role]
+    GenSession --> CheckRole{"Cek Peran Pengguna (Role di Session)?"}
+    
+    %% Percabangan Hak Akses (Role Routing)
+    CheckRole -- "Role == 'User' (Pelanggan)" --> Conn_User((B))
+    CheckRole -- "Role == 'Karyawan'" --> Conn_Karyawan((C))
+    CheckRole -- "Role == 'Pemilik Toko' (Owner)" --> Conn_Owner((D))
+
+
+    %% =========================================================================
+    %% BAGIAN 2: ROLE 1 - PELANGGAN (CUSTOMER / USER)
+    %% =========================================================================
+    Conn_User --> CustDashboard[/Tampilkan Dashboard Pelanggan: Total Belanja, Pesanan Aktif/]
+    CustDashboard --> CustKatalog[/Tampilkan Katalog Menu Katering & Filter Kategori/]
+    CustKatalog --> CustPilihMenu[/Pilih Paket Menu & Input Jumlah Porsi/]
+    
+    CustPilihMenu --> CustCekMinPorsi{"Jumlah Porsi Minimal 10 Porsi?"}
+    CustCekMinPorsi -- "Kurang (< 10)" --> CustPorsiKurang[/Tampilkan Pesan: Minimal Pemesanan Paket adalah 10 Porsi/]
+    CustPorsiKurang --> CustPilihMenu
+    CustCekMinPorsi -- "Ya (>= 10)" --> CustAddToCart[Simpan Item Menu ke Session Keranjang 'Cart']
+    
+    CustAddToCart --> CustViewCart[/Tampilkan Keranjang Belanja: Daftar Item & Live Cek Ongkir Wilayah/]
+    CustViewCart --> CustCekCoverage{"Alamat Pengiriman Masuk Area Layanan Katering?"}
+    CustCekCoverage -- "Luar Wilayah" --> CustLuarJangkauan[/Tampilkan Peringatan: Wilayah Pengantaran di Luar Jangkauan Kurir/]
+    CustLuarJangkauan --> CustViewCart
+    CustCekCoverage -- "Masuk Area Layanan" --> CustFormCheckout[/Form Checkout: Input Tanggal Acara, Jam Antar, Catatan Khusus/]
+    
+    %% Validasi H+1 & Kuota Dapur 400 Porsi
+    CustFormCheckout --> CustCekHMin1{"Jadwal Pengiriman Minimal H+1 Sebelum Hari Acara?"}
+    CustCekHMin1 -- "Hari Ini / Lampau" --> CustTolakHMin1[/Tampilkan Penolakan: Pemesanan Minimal H-1 Sebelum Acara/]
+    CustTolakHMin1 --> CustFormCheckout
+    CustCekHMin1 -- "Valid (>= H+1)" --> CustCekKuota{"Kapasitas Dapur Harian Masih Tersedia (Maks. 400 Porsi/Hari)?"}
+    CustCekKuota -- "Kuota Penuh (> 400)" --> CustKuotaPenuh[/Tampilkan Penolakan: Kuota Dapur Tanggal Tersebut Telah Penuh/]
+    CustKuotaPenuh --> CustFormCheckout
+    CustCekKuota -- "Kuota Tersedia" --> CustCreateOrder[Generate Nomor Pesanan Unik: ORD-YYYYMMDD-XXX]
+    
+    %% Penyimpanan Pesanan ke Database
+    CustCreateOrder --> CustSaveOrder[(Database: Simpan Header ke Tabel 'pesanan' - Status 'Pending')]
+    CustSaveOrder --> CustSaveDetail[(Database: Simpan Item ke Tabel 'detail_pesanan')]
+    CustSaveDetail --> CustClearCart[Kosongkan Session Keranjang 'Cart']
+    CustClearCart --> CustPilihBayar{"Pilih Metode Pembayaran"}
+    
+    %% Pembayaran
+    CustPilihBayar -- "Transfer Bank Manual" --> CustBayarManual[Pilih Transfer Bank Manual: BCA, Mandiri, BNI, BRI]
+    CustBayarManual --> CustUploadBukti[/Form Pembayaran: Unggah Berkas Bukti Transfer Bank/]
+    CustUploadBukti --> CustSaveBukti[(Database: Simpan Transaksi ke Tabel 'pembayaran' - Status 'Menunggu Verifikasi')]
+    CustSaveBukti --> Conn_Track((E))
+    
+    CustPilihBayar -- "VA / QRIS" --> CustBayarInstan[Pilih Pembayaran Instan: Virtual Account / QRIS]
+    CustBayarInstan --> CustSaveBayarInstan[(Database: Simpan Transaksi ke Tabel 'pembayaran' - Status 'Lunas Otomatis')]
+    CustSaveBayarInstan --> Conn_Track
+    
+    %% Pelacakan, Pembatalan & Refund H-2
+    Conn_Track --> CustTrackOrder[/Tampilkan Halaman 'Pesanan Saya' & Timeline Tracking Status Pesanan/]
+    CustTrackOrder --> CustBatalCheck{"Pelanggan Ingin Membatalkan Pesanan?"}
+    
+    CustBatalCheck -- "Ya, Ajukan Batal" --> CustCekCutoff{"Batas Waktu Pembatalan Terpenuhi (Minimal H-2 Sebelum Acara)?"}
+    CustCekCutoff -- "Terlambat (< H-2)" --> CustTolakBatal[/Tampilkan Penolakan: Pembatalan Ditolak karena Melewati Batas H-2 Acara/]
+    CustTolakBatal --> CustTrackOrder
+    CustCekCutoff -- "Boleh (>= H-2)" --> CustFormRefund[/Form Modal Refund: Input Nama Bank, No. Rekening, Atas Nama/]
+    CustFormRefund --> CustSaveRefund[(Database: Update Kolom Refund di Tabel 'pesanan' - Status 'Menunggu Refund')]
+    CustSaveRefund --> Conn_Track
+    
+    %% Selesai Pesanan & Testimoni Pelanggan
+    CustBatalCheck -- "Tidak, Menunggu Pesanan" --> CustTerimaPesanan[/Tampilkan Konfirmasi: Pesanan Tiba & Diterima Pelanggan di Lokasi/]
+    CustTerimaPesanan --> CustUpdateSelesai[(Database: Update Status 'Selesai' di Tabel 'pesanan')]
+    CustUpdateSelesai --> CustFormTestimoni[/Form Ulasan: Input Rating Bintang 1-5 & Pesan Kesan Menu Acara/]
+    CustFormTestimoni --> CustSaveTestimoni[(Database: Simpan Feedback ke Berkas JSON 'App_Data/kesan_pesan.json')]
+    CustSaveTestimoni --> CustLogout[Klik Menu Logout: Hapus Cookie JWT & Bersihkan Session]
+    CustLogout --> EndCust(["Selesai Sesi Pelanggan"])
+
+
+    %% =========================================================================
+    %% BAGIAN 3: ROLE 2 - KARYAWAN (OPERASIONAL, DAPUR & PENGANTARAN)
+    %% =========================================================================
+    Conn_Karyawan --> KaryawanDashboard[/Tampilkan Dashboard Operasional: Pesanan Hari Ini, Antrean Dapur, Siap Kirim/]
+    KaryawanDashboard --> KaryawanPilihFitur{"Pilih Aktivitas Operasional Karyawan?"}
+    
+    %% Fitur Kitchen Manifest
+    KaryawanPilihFitur -- "Lihat Manifes Dapur" --> KaryawanManifes[/Tampilkan & Cetak Manifes Dapur: Rekap Total Porsi & Resep/]
+    KaryawanManifes --> KaryawanDashboard
+    
+    %% Fitur Input Pesanan Manual Walk-in
+    KaryawanPilihFitur -- "Input Pesanan Offline" --> KaryawanInputWalkin[/Form Input Pesanan Manual / Walk-in / Telepon WA/]
+    KaryawanInputWalkin --> KaryawanSaveWalkin[(Database: Simpan Pesanan ke Tabel 'pesanan' & 'detail_pesanan')]
+    KaryawanSaveWalkin --> KaryawanAntreanMasak[/Tampilkan Daftar Antrean Masak Dapur: Status 'Dikonfirmasi'/]
+    
+    %% Alur Produksi Dapur
+    KaryawanPilihFitur -- "Proses Dapur & Pengiriman" --> KaryawanAntreanMasak
+    KaryawanAntreanMasak --> KaryawanProsesMasak[Koki Memasak Menu Sesuai Resep Otentik & Catatan Khusus Pelanggan]
+    KaryawanProsesMasak --> KaryawanSaveMasak[(Database: Update Status 'Dimasak' di Tabel 'pesanan')]
+    KaryawanSaveMasak --> KaryawanQC[Quality Control: Cita Rasa, Higienitas & Pengemasan Kotak/Prasmanan]
+    
+    %% Pengantaran Kurir
+    KaryawanQC --> KaryawanDispatch[Kurir Mengantar Pesanan ke Alamat Acara Menggunakan Armada Katering]
+    KaryawanDispatch --> KaryawanSaveKirim[(Database: Update Status 'Dikirim' di Tabel 'pesanan')]
+    KaryawanSaveKirim --> KaryawanTibaLokasi[/Serah Terima Paket Katering ke Pelanggan di Lokasi Acara/]
+    KaryawanTibaLokasi --> KaryawanSaveSelesai[(Database: Update Status 'Selesai' di Tabel 'pesanan')]
+    
+    KaryawanSaveSelesai --> KaryawanViewPaket[/Lihat Master Paket Menu di Tabel 'paket_menu'/]
+    KaryawanViewPaket --> KaryawanLogout[Klik Menu Logout: Bersihkan Session & Cookie JWT Token]
+    KaryawanLogout --> EndKaryawan(["Selesai Sesi Karyawan"])
+
+
+    %% =========================================================================
+    %% BAGIAN 4: ROLE 3 - PEMILIK TOKO (OWNER / KEUANGAN & ADMINISTRATOR)
+    %% =========================================================================
+    Conn_Owner --> OwnerDashboard[/Tampilkan Dashboard Owner: Grafik Omset 7 Hari, Ringkasan Finansial, Card Perhatian/]
+    OwnerDashboard --> OwnerPilihAksi{"Pilih Wewenang Pemilik Toko?"}
+    
+    %% Verifikasi Pembayaran
+    OwnerPilihAksi -- "Verifikasi Transfer" --> OwnerListVerif[/Tampilkan Antrean Verifikasi Bukti Pembayaran: Status 'Menunggu Verifikasi'/]
+    OwnerListVerif --> OwnerCekBukti{"Validasi Berkas Bukti Transfer Pelanggan & Mutasi Rekening Bank?"}
+    OwnerCekBukti -- "Bukti Palsu / Tidak Masuk" --> OwnerTolakBayar[(Database: Update Status 'Ditolak' di Tabel 'pembayaran' & 'Dibatalkan' di 'pesanan')]
+    OwnerTolakBayar --> OwnerDashboard
+    OwnerCekBukti -- "Bukti Sah & Dana Masuk" --> OwnerSetujuBayar[Konfirmasi Pembayaran Lunas]
+    OwnerSetujuBayar --> OwnerSaveLunas[(Database: Update Status 'Dikonfirmasi' di Tabel 'pesanan' & 'Terverifikasi' di 'pembayaran')]
+    OwnerSaveLunas --> OwnerDashboard
+    
+    %% Eksekusi Refund
+    OwnerPilihAksi -- "Proses Refund Dana" --> OwnerListRefund[/Tampilkan Antrean Pesanan Menunggu Refund di Tabel 'pesanan'/]
+    OwnerListRefund --> OwnerCekRekening{"Validasi Data Rekening Pelanggan: Bank, No. Rek, Nama Sesuai?"}
+    OwnerCekRekening --> OwnerTransferDana[Lakukan Transfer Balik Dana Refund via m-Banking / ATM]
+    OwnerTransferDana --> OwnerUploadBuktiRefund[/Form Konfirmasi Refund: Unggah Berkas Bukti Transfer Refund/]
+    OwnerUploadBuktiRefund --> OwnerSaveRefund[(Database: Update Kolom 'refund_bukti_tf' & Status 'Refund Selesai' di Tabel 'pesanan')]
+    OwnerSaveRefund --> OwnerDashboard
+    
+    %% Master Data CRUD & Pengguna
+    OwnerPilihAksi -- "Kelola Master Kategori" --> OwnerKelolaKategori[/Menu Kelola Master Kategori: CRUD Tabel 'kategori_menu'/]
+    OwnerKelolaKategori --> OwnerSaveKategori[(Database: Simpan / Update Kategori di Tabel 'kategori_menu')]
+    OwnerSaveKategori --> OwnerDashboard
+    
+    OwnerPilihAksi -- "Kelola Master Paket" --> OwnerKelolaPaket[/Menu Kelola Master Paket Menu: CRUD Tabel 'paket_menu'/]
+    OwnerSavePaket --> OwnerSavePaketDB[(Database: Simpan Paket Menu, Harga & Upload Foto di Tabel 'paket_menu')]
+    OwnerSavePaketDB --> OwnerDashboard
+    
+    OwnerPilihAksi -- "Kelola Akun Pengguna" --> OwnerKelolaUser[/Menu Kelola Pengguna: CRUD Akun Karyawan & Pelanggan di Tabel 'pengguna'/]
+    OwnerKelolaUser --> OwnerSaveUser[(Database: Simpan / Update Akun & Hak Akses di Tabel 'pengguna')]
+    OwnerSaveUser --> OwnerDashboard
+    
+    OwnerPilihAksi -- "Input Pesanan VIP Manual" --> OwnerOrderManual[/Form Input Pesanan Manual / VIP Pelanggan Luar Sistem/]
+    OwnerOrderManual --> OwnerSaveManual[(Database: Simpan Pesanan ke Tabel 'pesanan' & 'detail_pesanan')]
+    OwnerSaveManual --> OwnerDashboard
+    
+    OwnerDashboard --> OwnerLogout[Klik Menu Logout: Bersihkan Session & Cookie JWT Token]
+    OwnerLogout --> EndOwner(["Selesai Sesi Owner"])
+
+
+    %% =========================================================================
+    %% STYLING KOTAK SESUAI GAMBAR REFERENSI (TANPA CONTAINER / TANPA SUBGRAPH)
+    %% =========================================================================
+    classDef terminalStyle fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#14532d;
+    classDef ioStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;
+    classDef processStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;
+    classDef dbStyle fill:#e0e7ff,stroke:#4338ca,stroke-width:2px,color:#312e81,font-weight:600;
+    classDef decisionStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b;
+    classDef connectorStyle fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8,font-weight:bold;
+
+    class Start,EndCust,EndKaryawan,EndOwner terminalStyle;
+    class Home,ViewAbout,ViewKatalogPublik,ModalDetailPublik,FormReg,RegFail,FormLogin,FormForgot,FormReset,LoginFail,CustDashboard,CustKatalog,CustPilihMenu,CustPorsiKurang,CustViewCart,CustLuarJangkauan,CustFormCheckout,CustTolakHMin1,CustKuotaPenuh,CustUploadBukti,CustTrackOrder,CustTolakBatal,CustFormRefund,CustTerimaPesanan,CustFormTestimoni,KaryawanDashboard,KaryawanManifes,KaryawanInputWalkin,KaryawanAntreanMasak,KaryawanTibaLokasi,KaryawanViewPaket,OwnerDashboard,OwnerListVerif,OwnerListRefund,OwnerUploadBuktiRefund,OwnerKelolaKategori,OwnerKelolaPaket,OwnerKelolaUser,OwnerOrderManual ioStyle;
+    class HashPass,KirimOTP,GenSession,CustAddToCart,CustCreateOrder,CustClearCart,CustBayarInstan,CustBayarManual,CustLogout,KaryawanProsesMasak,KaryawanQC,KaryawanDispatch,KaryawanLogout,OwnerSetujuBayar,OwnerTransferDana,OwnerLogout processStyle;
+    class SaveAkun,SaveNewPass,CustSaveOrder,CustSaveDetail,CustSaveBukti,CustSaveBayarInstan,CustSaveRefund,CustUpdateSelesai,CustSaveTestimoni,KaryawanSaveWalkin,KaryawanSaveMasak,KaryawanSaveKirim,KaryawanSaveSelesai,OwnerTolakBayar,OwnerSaveLunas,OwnerSaveRefund,OwnerSaveKategori,OwnerSavePaketDB,OwnerSaveUser,OwnerSaveManual dbStyle;
+    class NavPublik,AuthCheck,ValidasiReg,CekLupaPass,ValOTP,ValLogin,CheckRole,CustCekMinPorsi,CustCekCoverage,CustCekHMin1,CustCekKuota,CustPilihBayar,CustBatalCheck,CustCekCutoff,KaryawanPilihFitur,OwnerPilihAksi,OwnerCekBukti,OwnerCekRekening decisionStyle;
+    class Conn_Login,Conn_User,Conn_Karyawan,Conn_Owner,Conn_Track connectorStyle;

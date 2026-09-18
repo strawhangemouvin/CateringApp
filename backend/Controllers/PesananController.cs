@@ -1,6 +1,8 @@
 using CateringApp.Filters;
+using CateringApp.Helpers;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IO;
@@ -42,12 +44,7 @@ public class PesananController : Controller
         return View(pagedResult.Items);
     }
 
-    public IActionResult Create(int? paketId = null)
-    {
-        ViewBag.PaketId = new SelectList(_service.GetAllPaket(), "PaketId", "NamaPaket", paketId);
-        return View(new PemesananViewModel { PaketId = paketId ?? 0 });
-    }
-
+    [AllowAnonymous]
     public IActionResult Katalog(string? search, int? kategoriId, int page = 1)
     {
         var list = _service.GetAllPaket();
@@ -76,18 +73,101 @@ public class PesananController : Controller
         return View(pagedList);
     }
 
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult GetPaketDetail(int id)
+    {
+        var paket = _service.GetPaketById(id);
+        if (paket == null) return NotFound();
+
+        string categoryName = paket.Kategori?.NamaKategori ?? "Menu Pilihan";
+        string photoUrl = CateringApp.Helpers.MenuImageHelper.GetGambarUrl(paket.NamaPaket, paket.Gambar, categoryName);
+
+        return Json(new
+        {
+            paketId = paket.PaketId,
+            namaPaket = paket.NamaPaket,
+            kategori = categoryName,
+            harga = paket.Harga,
+            hargaFormat = "Rp " + paket.Harga.ToString("N0"),
+            deskripsi = paket.DeskripsiMenu ?? "Sajian istimewa kaya cita rasa tradisional khas Catering Mimi Saripah yang higienis, halal, dan lezat.",
+            gambar = photoUrl
+        });
+    }
+
+    [AllowAnonymous]
+    public IActionResult DetailMenu(int id)
+    {
+        var paket = _service.GetPaketById(id);
+        if (paket == null) return NotFound();
+
+        return View(paket);
+    }
+    [HttpGet]
+    [SessionAuthorize("Pemilik Toko", "Karyawan")]
+    public IActionResult Create(int? paketId = null)
+    {
+        var customers = _service.GetAllPengguna()
+            .Where(p => p.Peran?.NamaPeran == "User" || p.PeranId == 3)
+            .OrderBy(p => p.NamaLengkap)
+            .ToList();
+
+        ViewBag.CustomerList = new SelectList(customers, "PenggunaId", "NamaLengkap");
+        ViewBag.PaketList = new SelectList(_service.GetAllPaket(), "PaketId", "NamaPaket", paketId);
+
+        var model = new PemesananViewModel
+        {
+            PaketId = paketId ?? 0,
+            TanggalPengiriman = DateTime.Today.AddDays(2),
+            JamPengantaran = "10:00 - 12:00",
+            JumlahPorsi = 10
+        };
+
+        return View(model);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [SessionAuthorize("Pemilik Toko", "Karyawan")]
     public IActionResult Create(PemesananViewModel model)
     {
+        // Jika tidak ada pelanggan terdaftar dipilih, nama manual wajib diisi
+        bool isPelangganTerdaftar = model.PenggunaId.HasValue && model.PenggunaId.Value > 0;
+        if (!isPelangganTerdaftar && string.IsNullOrWhiteSpace(model.NamaPemesanManual))
+        {
+            ModelState.AddModelError("NamaPemesanManual", "Nama pemesan wajib diisi jika pelanggan belum punya akun (tamu / walk-in / WA).");
+        }
+
+        if (!isPelangganTerdaftar && !string.IsNullOrWhiteSpace(model.TeleponPemesanManual))
+        {
+            var (isPhoneValid, phoneErr) = ValidationHelper.ValidateNomorTelepon(model.TeleponPemesanManual, isRequired: false);
+            if (!isPhoneValid)
+            {
+                ModelState.AddModelError("TeleponPemesanManual", phoneErr!);
+            }
+        }
+
+        if (model.JumlahPorsi < 10)
+        {
+            ModelState.AddModelError("JumlahPorsi", "Minimal pemesanan paket katering adalah 10 porsi.");
+        }
+
         if (ModelState.IsValid)
         {
-            int userId = HttpContext.Session.GetInt32("UserId")!.Value;
-            int pesananId = _service.BuatPesanan(userId, model);
-            TempData["Success"] = "Pesanan berhasil dibuat. Silakan upload bukti pembayaran.";
-            return RedirectToAction("Bayar", new { id = pesananId });
+            int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            int pesananId = _service.BuatPesanan(currentUserId, model);
+            string namaPemesan = isPelangganTerdaftar ? "" : $" atas nama {model.NamaPemesanManual}";
+            TempData["Success"] = $"Pesanan manual{namaPemesan} berhasil dicatat (Nomor Pesanan #{pesananId})!";
+            return RedirectToAction("Details", new { id = pesananId });
         }
-        ViewBag.PaketId = new SelectList(_service.GetAllPaket(), "PaketId", "NamaPaket", model.PaketId);
+
+        var customers = _service.GetAllPengguna()
+            .Where(p => p.Peran?.NamaPeran == "User" || p.PeranId == 3)
+            .OrderBy(p => p.NamaLengkap)
+            .ToList();
+
+        ViewBag.CustomerList = new SelectList(customers, "PenggunaId", "NamaLengkap", model.PenggunaId);
+        ViewBag.PaketList = new SelectList(_service.GetAllPaket(), "PaketId", "NamaPaket", model.PaketId);
         return View(model);
     }
 
@@ -95,6 +175,16 @@ public class PesananController : Controller
     {
         var pesanan = _service.GetPesananById(id);
         if (pesanan == null) return NotFound();
+
+        string? role = HttpContext.Session.GetString("Role");
+        int? currentUserId = HttpContext.Session.GetInt32("UserId");
+
+        if (role == "User" && pesanan.PenggunaId != currentUserId)
+        {
+            TempData["Error"] = "Anda tidak memiliki izin untuk mengakses pesanan ini.";
+            return RedirectToAction("Index");
+        }
+
         return View(pesanan);
     }
 
@@ -102,6 +192,15 @@ public class PesananController : Controller
     {
         var pesanan = _service.GetPesananById(id);
         if (pesanan == null) return NotFound();
+
+        string? role = HttpContext.Session.GetString("Role");
+        int? currentUserId = HttpContext.Session.GetInt32("UserId");
+
+        if (role == "User" && pesanan.PenggunaId != currentUserId)
+        {
+            TempData["Error"] = "Anda tidak memiliki izin untuk mengakses pesanan ini.";
+            return RedirectToAction("Index");
+        }
 
         var model = new UploadPembayaranViewModel
         {
@@ -142,9 +241,42 @@ public class PesananController : Controller
         return View(model);
     }
 
-    [SessionAuthorize("Pemilik Toko", "Karyawan")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult KonfirmasiPembayaranOtomatis(int pesananId, string metodePembayaran)
+    {
+        var pesanan = _service.GetPesananById(pesananId);
+        if (pesanan == null) return NotFound();
+
+        string? role = HttpContext.Session.GetString("Role");
+        int? currentUserId = HttpContext.Session.GetInt32("UserId");
+
+        if (role == "User" && pesanan.PenggunaId != currentUserId)
+        {
+            TempData["Error"] = "Anda tidak memiliki izin untuk mengakses pesanan ini.";
+            return RedirectToAction("Index");
+        }
+
+        string method = string.IsNullOrWhiteSpace(metodePembayaran) ? "BCA Virtual Account" : metodePembayaran.Trim();
+
+        _service.KonfirmasiPembayaranOtomatis(pesananId, method);
+
+        TempData["Success"] = $"Pembayaran via {method} berhasil diverifikasi! Pesanan Anda telah lunas dan kini sedang diproses dapur.";
+        return RedirectToAction("Details", new { id = pesananId });
+    }
+
+    [SessionAuthorize("Pemilik Toko")]
     public IActionResult Verifikasi(int id, string status)
     {
+        var pesanan = _service.GetPesananById(id);
+        if (pesanan == null) return NotFound();
+
+        if (pesanan.StatusPesanan == "Dikirim" || pesanan.StatusPesanan == "Selesai")
+        {
+            TempData["Error"] = "Status verifikasi pembayaran tidak dapat diubah karena pesanan sudah dalam proses pengiriman kurir atau sudah selesai.";
+            return RedirectToAction("Details", new { id });
+        }
+
         _service.VerifikasiPembayaran(id, status);
         TempData["Success"] = $"Pembayaran berhasil diverifikasi sebagai '{status}'.";
         return RedirectToAction("Details", new { id });
@@ -158,6 +290,18 @@ public class PesananController : Controller
 
         string current = pesanan.StatusPesanan;
 
+        if (current == "Refund Selesai")
+        {
+            TempData["Error"] = "Pengembalian dana (Refund) untuk pesanan ini telah selesai dan transaksi ditutup. Status alur tidak dapat diubah lagi.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        if (current == "Menunggu Refund")
+        {
+            TempData["Error"] = "Pesanan sedang dalam proses pengajuan refund. Silakan proses transfer dan konfirmasi bukti transfer melalui kartu Pengembalian Dana.";
+            return RedirectToAction("Details", new { id });
+        }
+
         if (current == "Selesai")
         {
             TempData["Error"] = "Pesanan ini sudah SELESAI dan pesanan telah diterima pelanggan. Status tidak dapat diubah lagi.";
@@ -167,6 +311,12 @@ public class PesananController : Controller
         if (current == "Dibatalkan" || current == "Batal")
         {
             TempData["Error"] = "Pesanan ini sudah DIBATALKAN. Status tidak dapat diubah lagi.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        if (status == "Dibatalkan" && (current == "Dikirim" || current == "Selesai" || current == "Menunggu Refund" || current == "Refund Selesai"))
+        {
+            TempData["Error"] = "Pesanan yang sedang dalam alur refund, pengiriman kurir, atau sudah selesai tidak dapat dibatalkan.";
             return RedirectToAction("Details", new { id });
         }
 
@@ -198,6 +348,14 @@ public class PesananController : Controller
             return RedirectToAction("Details", new { id });
         }
 
+        if (status == "Dibatalkan" && pesanan.Pembayaran != null && pesanan.Pembayaran.StatusVerifikasi == "Valid")
+        {
+            status = "Menunggu Refund";
+            _service.UpdateStatusPesanan(id, status);
+            TempData["Warning"] = "Pesanan telah dibatalkan. Karena pembayaran pelanggan telah terverifikasi lunas, status otomatis dialihkan ke 'Menunggu Refund' agar Pemilik Toko (Owner) dapat memproses transfer pengembalian dana ke rekening pelanggan.";
+            return RedirectToAction("Details", new { id });
+        }
+
         _service.UpdateStatusPesanan(id, status);
         TempData["Success"] = $"Status pesanan berhasil diperbarui menjadi '{status}'.";
         return RedirectToAction("Details", new { id });
@@ -219,9 +377,11 @@ public class PesananController : Controller
             return RedirectToAction("Details", new { id = pesananId });
         }
 
-        if (pesanan.StatusPesanan == "Selesai" || pesanan.StatusPesanan == "Dibatalkan" || pesanan.StatusPesanan == "Refund Selesai")
+        // Cek kelayakan refund dan cutoff H-2
+        var (isAllowed, reason) = _service.CekKelayakanRefund(pesananId);
+        if (!isAllowed)
         {
-            TempData["Error"] = "Pesanan ini sudah selesai atau telah dibatalkan.";
+            TempData["Error"] = reason;
             return RedirectToAction("Details", new { id = pesananId });
         }
 
@@ -231,46 +391,134 @@ public class PesananController : Controller
             return RedirectToAction("Details", new { id = pesananId });
         }
 
-        _service.AjukanRefund(pesananId, namaBank.Trim(), noRekening.Trim(), atasNama.Trim());
-        TempData["Success"] = "Pengajuan pembatalan berhasil diajukan. Dana Anda sedang dalam antrean pengembalian (Refund).";
+        namaBank = namaBank.Trim();
+        noRekening = noRekening.Trim();
+        atasNama = atasNama.Trim();
+
+        if (namaBank.Length > 50)
+        {
+            TempData["Error"] = "Nama Bank / E-Wallet tidak boleh melebihi 50 karakter.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        if (noRekening.Length < 8 || noRekening.Length > 20 || !System.Text.RegularExpressions.Regex.IsMatch(noRekening, @"^[0-9]+$"))
+        {
+            TempData["Error"] = "Nomor Rekening / No. HP E-Wallet harus berupa 8 hingga 20 digit angka.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        if (atasNama.Length < 3 || atasNama.Length > 70)
+        {
+            TempData["Error"] = "Nama Pemilik Rekening harus antara 3 hingga 70 karakter.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        try
+        {
+            _service.AjukanRefund(pesananId, namaBank, noRekening, atasNama);
+            TempData["Success"] = "Pengajuan pembatalan berhasil diajukan. Dana Anda sedang dalam antrean pengembalian (Refund).";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Gagal memproses pengajuan refund: " + ex.Message;
+        }
+
         return RedirectToAction("Details", new { id = pesananId });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [SessionAuthorize("Pemilik Toko", "Karyawan")]
+    public IActionResult InputRekeningRefund(int pesananId, string namaBank, string noRekening, string atasNama)
+    {
+        var pesanan = _service.GetPesananById(pesananId);
+        if (pesanan == null) return NotFound();
+
+        string? role = HttpContext.Session.GetString("Role");
+        int? userId = HttpContext.Session.GetInt32("UserId");
+
+        if (role == "Karyawan")
+        {
+            TempData["Error"] = "Karyawan tidak memiliki wewenang untuk menginput atau mengubah rekening pengembalian dana.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        if (role == "User" && pesanan.PenggunaId != userId)
+        {
+            return Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(namaBank) || string.IsNullOrWhiteSpace(noRekening) || string.IsNullOrWhiteSpace(atasNama))
+        {
+            TempData["Error"] = "Mohon lengkapi seluruh informasi rekening untuk pengembalian dana (Refund).";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        namaBank = namaBank.Trim();
+        noRekening = noRekening.Trim();
+        atasNama = atasNama.Trim();
+
+        if (noRekening.Length < 8 || noRekening.Length > 20 || !System.Text.RegularExpressions.Regex.IsMatch(noRekening, @"^[0-9]+$"))
+        {
+            TempData["Error"] = "Nomor Rekening / No. HP E-Wallet harus berupa 8 hingga 20 digit angka.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
+
+        _service.InputRekeningRefund(pesananId, namaBank, noRekening, atasNama);
+        TempData["Success"] = "Data rekening pengembalian dana berhasil disimpan. Pemilik Toko (Owner) telah menerima notifikasi untuk memproses transfer dana.";
+        return RedirectToAction("Details", new { id = pesananId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [SessionAuthorize("Pemilik Toko")]
     public async Task<IActionResult> KonfirmasiRefund(int pesananId, IFormFile fileBuktiTf)
     {
         var pesanan = _service.GetPesananById(pesananId);
         if (pesanan == null) return NotFound();
 
-        if (fileBuktiTf != null && fileBuktiTf.Length > 0)
+        if (fileBuktiTf == null || fileBuktiTf.Length == 0)
         {
-            string ext = Path.GetExtension(fileBuktiTf.FileName).ToLower();
-            var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
-            if (allowedExt.Contains(ext))
-            {
-                string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "refund");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            TempData["Error"] = "Wajib mengunggah berkas bukti transfer pengembalian dana sebelum melakukan konfirmasi selesai.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
 
-                string uniqueFileName = $"REFUND_{pesananId}_{Guid.NewGuid()}{ext}";
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        if (fileBuktiTf.Length > 5 * 1024 * 1024)
+        {
+            TempData["Error"] = "Ukuran berkas bukti transfer terlalu besar. Maksimal ukuran berkas adalah 5 MB.";
+            return RedirectToAction("Details", new { id = pesananId });
+        }
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await fileBuktiTf.CopyToAsync(fileStream);
-                }
-
-                _service.KonfirmasiRefund(pesananId, $"/uploads/refund/{uniqueFileName}");
-                TempData["Success"] = "Pengembalian dana (Refund) berhasil dikonfirmasi dan bukti transfer telah tersimpan.";
-                return RedirectToAction("Details", new { id = pesananId });
-            }
+        string ext = Path.GetExtension(fileBuktiTf.FileName).ToLower();
+        var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+        if (!allowedExt.Contains(ext))
+        {
             TempData["Error"] = "Format berkas bukti transfer harus berupa Gambar (JPG, PNG, WEBP) atau PDF.";
             return RedirectToAction("Details", new { id = pesananId });
         }
 
-        TempData["Error"] = "Harap unggah berkas bukti transfer pengembalian dana.";
+        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "refund");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        string uniqueFileName = $"REFUND_{pesananId}_{Guid.NewGuid()}{ext}";
+        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await fileBuktiTf.CopyToAsync(fileStream);
+        }
+
+        _service.KonfirmasiRefund(pesananId, $"/uploads/refund/{uniqueFileName}");
+        TempData["Success"] = "Pengembalian dana (Refund) berhasil dikonfirmasi dan bukti transfer telah tersimpan.";
         return RedirectToAction("Details", new { id = pesananId });
+    }
+
+    [SessionAuthorize("Pemilik Toko", "Karyawan")]
+    public IActionResult ManifesDapur(DateTime? tanggal)
+    {
+        DateTime targetDate = tanggal ?? DateTime.Today.AddDays(1);
+        var model = _service.GetManifesDapur(targetDate);
+        ViewBag.SelectedDate = targetDate;
+        return View(model);
     }
 
     public IActionResult Delete(int id)
@@ -291,7 +539,13 @@ public class PesananController : Controller
         }
         else if (role == "Karyawan")
         {
-            TempData["Error"] = "Karyawan tidak memiliki wewenang untuk membatalkan pesanan.";
+            TempData["Error"] = "Karyawan tidak memiliki wewenang untuk membatalkan atau menghapus pesanan.";
+            return RedirectToAction("Details", new { id = id });
+        }
+
+        if (pesanan.StatusPesanan == "Dikirim" || pesanan.StatusPesanan == "Selesai" || pesanan.StatusPesanan == "Menunggu Refund" || pesanan.StatusPesanan == "Refund Selesai")
+        {
+            TempData["Error"] = "Pesanan yang sedang dalam proses pengiriman, sudah selesai, atau dalam alur pengembalian dana (refund) tidak dapat dibatalkan atau dihapus.";
             return RedirectToAction("Details", new { id = id });
         }
 

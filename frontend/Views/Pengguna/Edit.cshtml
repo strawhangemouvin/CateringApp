@@ -3,64 +3,97 @@
     ViewData["Title"] = "Ubah Pengguna";
 }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card card-warning">
-            <div class="card-header">
-                <h3 class="card-title text-white">Form Ubah Pengguna</h3>
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-gradient-warning text-dark py-3 px-4" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+                <div class="d-flex align-items-center justify-content-between text-white">
+                    <h5 class="card-title mb-0 font-weight-bold">
+                        <i class="fas fa-user-edit mr-2 me-2"></i> Form Ubah Data Pengguna
+                    </h5>
+                    <span class="badge badge-light text-dark font-weight-bold px-3 py-1">ID: #@Model.PenggunaId</span>
+                </div>
             </div>
+
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="PenggunaId" />
                 <input type="hidden" asp-for="CreatedAt" />
                 
-                <div class="card-body">
-                    <div class="form-group">
-                        <label asp-for="PeranId">Peran / Role</label>
-                        <select asp-for="PeranId" class="form-control" asp-items="ViewBag.PeranId">
+                <div class="card-body p-4">
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger rounded-3 shadow-sm mb-4 py-2 px-3 small d-flex align-items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            <div>
+                                <span class="fw-bold font-weight-bold">Terdapat kesalahan validasi data:</span>
+                                <ul class="mb-0 ps-3 pl-3 mt-1">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group mb-3">
+                        <label asp-for="PeranId" class="font-weight-bold text-dark small">Peran / Role <span class="text-danger">*</span></label>
+                        <select asp-for="PeranId" class="form-control custom-select-scroll" asp-items="ViewBag.PeranId" required>
                             <option value="">-- Pilih Peran --</option>
                         </select>
-                        <span asp-validation-for="PeranId" class="text-danger"></span>
+                        <span asp-validation-for="PeranId" class="text-danger small font-weight-bold"></span>
                     </div>
                     
-                    <div class="form-group">
-                        <label asp-for="NamaLengkap">Nama Lengkap</label>
-                        <input asp-for="NamaLengkap" class="form-control" placeholder="Masukkan nama lengkap" />
-                        <span asp-validation-for="NamaLengkap" class="text-danger"></span>
+                    <div class="form-group mb-3">
+                        <label asp-for="NamaLengkap" class="font-weight-bold text-dark small">Nama Lengkap <span class="text-danger">*</span></label>
+                        <input asp-for="NamaLengkap" class="form-control rounded-3" placeholder="Masukkan nama lengkap" required minlength="3" maxlength="100" />
+                        <span asp-validation-for="NamaLengkap" class="text-danger small font-weight-bold"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Username">Username</label>
-                        <input asp-for="Username" class="form-control" placeholder="Masukkan username" />
-                        <span asp-validation-for="Username" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="Username" class="font-weight-bold text-dark small">Username <span class="text-danger">*</span></label>
+                            <input asp-for="Username" class="form-control rounded-3" placeholder="Masukkan username" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9_.]+$" title="Hanya huruf, angka, titik, atau garis bawah (_)" />
+                            <span asp-validation-for="Username" class="text-danger small font-weight-bold"></span>
+                            <small class="form-text text-muted">Harus unik di seluruh sistem.</small>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="PasswordHash" class="font-weight-bold text-dark small">Ganti Password (Opsional)</label>
+                            <input asp-for="PasswordHash" type="password" class="form-control rounded-3" placeholder="Kosongkan jika tidak diubah" value="" autocomplete="new-password" minlength="6" />
+                            <span asp-validation-for="PasswordHash" class="text-danger small font-weight-bold"></span>
+                            <small class="form-text text-muted">Isi hanya jika ingin memperbarui kata sandi.</small>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="PasswordHash">Password Baru (Biarkan kosong jika tidak ingin diubah)</label>
-                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Masukkan password baru jika ingin mengubah" />
-                        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="Email" class="font-weight-bold text-dark small">Alamat Email <span class="text-danger">*</span></label>
+                            <input asp-for="Email" type="email" class="form-control rounded-3" placeholder="Contoh: user@gmail.com" required maxlength="100" />
+                            <span asp-validation-for="Email" class="text-danger small font-weight-bold"></span>
+                            <small class="form-text text-muted">Harus unik (1 email 1 akun).</small>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label asp-for="NomorTelepon" class="font-weight-bold text-dark small">Nomor Telepon (WhatsApp) <span class="text-danger">*</span></label>
+                            <input asp-for="NomorTelepon" class="form-control rounded-3" placeholder="Contoh: 081234567890" required pattern="^(08|628|\+628)[0-9]{7,11}$" maxlength="15" title="Awali 08, 628, atau +628 (10-13 digit angka)" oninput="this.value=this.value.replace(/[^0-9+]/g,'')" />
+                            <span asp-validation-for="NomorTelepon" class="text-danger small font-weight-bold"></span>
+                            <small class="form-text text-muted">Awali 08, 628, atau +628.</small>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Email">Email</label>
-                        <input asp-for="Email" type="email" class="form-control" placeholder="Masukkan email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label asp-for="NomorTelepon">Nomor Telepon</label>
-                        <input asp-for="NomorTelepon" class="form-control" placeholder="Masukkan nomor telepon" />
-                        <span asp-validation-for="NomorTelepon" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label asp-for="Alamat">Alamat Lengkap</label>
-                        <textarea asp-for="Alamat" class="form-control" rows="2" placeholder="Masukkan alamat lengkap"></textarea>
-                        <span asp-validation-for="Alamat" class="text-danger"></span>
+                    <div class="form-group mb-2">
+                        <label asp-for="Alamat" class="font-weight-bold text-dark small">Alamat Lengkap <span class="text-danger">*</span></label>
+                        <textarea asp-for="Alamat" class="form-control rounded-3" rows="3" placeholder="Masukkan alamat lengkap" required minlength="5" maxlength="300"></textarea>
+                        <span asp-validation-for="Alamat" class="text-danger small font-weight-bold"></span>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-warning text-white font-weight-bold">Simpan Perubahan</button>
-                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+
+                <div class="card-footer bg-light border-top px-3 px-sm-4 py-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary rounded-pill px-3 px-sm-4 py-2 font-weight-bold">
+                        <i class="fas fa-arrow-left mr-1 me-1"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-warning text-white rounded-pill px-3 px-sm-4 py-2 font-weight-bold shadow-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+                        <i class="fas fa-save mr-1 me-1"></i> Simpan Perubahan
+                    </button>
                 </div>
             </form>
         </div>

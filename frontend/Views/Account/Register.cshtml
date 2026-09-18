@@ -1,126 +1,136 @@
 @model CateringApp.Models.ViewModel.RegisterViewModel
 @{
-    Layout = "~/Views/Shared/_GuestLayout.cshtml";
-    ViewData["Title"] = "Daftar Akun Baru - CateringApp";
+    Layout = "~/frontend/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Daftar Akun Baru - Cateringku";
 }
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm rounded-lg" style="background-color: #ffffff;">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <div class="text-danger mb-2"><i class="fas fa-user-plus fa-3x"></i></div>
-                        <h3 class="font-weight-bold text-dark">Daftar Akun Baru</h3>
-                        <p class="text-muted">Buat akun untuk mulai memesan catering premium</p>
+        <div class="col-md-8 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <!-- Back to Home -->
+                <div class="mb-3">
+                    <a href="@Url.Action("Index", "Home")" class="text-secondary text-decoration-none small fw-bold">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali ke Beranda
+                    </a>
+                </div>
+
+                <div class="mb-3">
+                    <h4 class="fw-bold text-dark mb-1">Daftar Akun Baru</h4>
+                    <p class="text-muted small mb-2">Buat akun untuk mulai memesan hidangan katering istimewa.</p>
+                    <div class="alert alert-light border d-flex align-items-center py-2 px-3 rounded-3 mb-0" style="background-color: #f8fafc; font-size: 0.82rem; border-color: #e2e8f0 !important;">
+                        <i class="fas fa-shield-alt text-success me-2" style="font-size: 1.1rem;"></i>
+                        <span class="text-muted">Data akun Anda aman dan digunakan untuk kemudahan pemesanan, kuitansi digital, serta konfirmasi pengantaran katering.</span>
                     </div>
+                </div>
+
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small text-center"></div>
                     
-                    <form asp-action="Register" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small text-center"></div>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label asp-for="NamaLengkap" class="form-label small fw-bold text-dark">Nama Lengkap</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-id-card"></i></span>
+                                    <input asp-for="NamaLengkap" id="inputNamaLengkap" class="form-control border-start-0 bg-light" placeholder="Contoh: Nabila Moinica" />
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-info-circle me-1 text-danger"></i>Nama yang akan tercantum pada invoice pesanan.</small>
+                                <span asp-validation-for="NamaLengkap" class="text-danger small"></span>
+                            </div>
+                        </div>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="NamaLengkap" class="font-weight-bold">Nama Lengkap</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-id-card text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="NamaLengkap" class="form-control border-left-0 bg-light" placeholder="Nama Lengkap" />
-                                    </div>
-                                    <span asp-validation-for="NamaLengkap" class="text-danger small"></span>
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label asp-for="Username" class="form-label small fw-bold text-dark">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-user"></i></span>
+                                    <input asp-for="Username" id="inputUsername" class="form-control border-start-0 bg-light" placeholder="Contoh: nabilamoinica" />
                                 </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Username" class="font-weight-bold">Username</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-user text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="Username" class="form-control border-left-0 bg-light" placeholder="Username" />
-                                    </div>
-                                    <span asp-validation-for="Username" class="text-danger small"></span>
-                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-info-circle me-1 text-danger"></i>Gunakan huruf/angka tanpa spasi untuk login.</small>
+                                <span asp-validation-for="Username" class="text-danger small"></span>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Email" class="font-weight-bold">Email</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-envelope text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="Email" type="email" class="form-control border-left-0 bg-light" placeholder="Email" />
-                                    </div>
-                                    <span asp-validation-for="Email" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="NomorTelepon" class="font-weight-bold">Nomor Telepon</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-phone text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="NomorTelepon" class="form-control border-left-0 bg-light" placeholder="Nomor Telepon" />
-                                    </div>
-                                    <span asp-validation-for="NomorTelepon" class="text-danger small"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Alamat" class="font-weight-bold">Alamat Lengkap</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-map-marker-alt text-muted"></i></span>
-                                </div>
-                                <textarea asp-for="Alamat" class="form-control border-left-0 bg-light" placeholder="Alamat Lengkap Anda" rows="2"></textarea>
-                            </div>
-                            <span asp-validation-for="Alamat" class="text-danger small"></span>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Password" class="font-weight-bold">Password</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-lock text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="Password" type="password" class="form-control border-left-0 bg-light" placeholder="Password" />
-                                    </div>
-                                    <span asp-validation-for="Password" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-group mb-4">
-                                    <label asp-for="ConfirmPassword" class="font-weight-bold">Konfirmasi Password</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-lock text-muted"></i></span>
-                                        </div>
-                                        <input asp-for="ConfirmPassword" type="password" class="form-control border-left-0 bg-light" placeholder="Konfirmasi Password" />
-                                    </div>
-                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-brand-primary btn-block py-2 mb-3">Daftar Akun</button>
-                    </form>
-                    
-                    <div class="text-center mt-4">
-                        <p class="mb-0 small text-muted">
-                            Sudah punya akun? <a href="@Url.Action("Login", "Account")" class="text-danger font-weight-bold">Masuk di sini</a>
-                        </p>
                     </div>
+
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3 position-relative">
+                                <label asp-for="Email" class="form-label small fw-bold text-dark">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-envelope"></i></span>
+                                    <input asp-for="Email" type="email" id="inputEmail" class="form-control border-start-0 bg-light" placeholder="Contoh: nabila.pelanggan@gmail.com" autocomplete="off" />
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-envelope-open-text me-1 text-danger"></i>Kuitansi digital & update pesanan dikirim ke sini.</small>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label asp-for="NomorTelepon" class="form-label small fw-bold text-dark">Nomor Telepon (WhatsApp)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-phone"></i></span>
+                                    <input asp-for="NomorTelepon" type="tel" id="inputNomorTelepon" class="form-control border-start-0 bg-light" placeholder="Contoh: 081234567890" />
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fab fa-whatsapp me-1 text-success"></i>Kurir katering akan konfirmasi ke nomor ini.</small>
+                                <span asp-validation-for="NomorTelepon" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Alamat" class="form-label small fw-bold text-dark">Alamat Pengiriman Lengkap</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
+                            <textarea asp-for="Alamat" class="form-control border-start-0 bg-light" rows="2" placeholder="Contoh: Jl. Raya Kertasemaya No. 12, RT 03/RW 01, Desa Tenajar Lor, Kec. Kertasemaya, Indramayu (Dekat Balai Desa)"></textarea>
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-map-pin me-1 text-danger"></i>Alamat pengantaran catering beserta patokan atau nomor rumah.</small>
+                        <span asp-validation-for="Alamat" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label small fw-bold text-dark">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-lock"></i></span>
+                                    <input asp-for="Password" type="password" id="inputPassword" class="form-control border-start-0 border-end-0 bg-light" placeholder="Minimal 6 karakter" />
+                                    <button type="button" class="btn btn-light border border-start-0 text-muted toggle-password" data-target="#inputPassword" title="Lihat/Sembunyikan password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-shield-alt me-1 text-muted"></i>Gunakan kombinasi karakter yang aman.</small>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label asp-for="ConfirmPassword" class="form-label small fw-bold text-dark mb-0">Konfirmasi Password</label>
+                                    <span id="passMatchStatus" class="badge bg-secondary d-none" style="font-size: 0.72rem;">Belum Cocok</span>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-lock"></i></span>
+                                    <input asp-for="ConfirmPassword" type="password" id="inputConfirmPassword" class="form-control border-start-0 border-end-0 bg-light" placeholder="Ketik ulang password di atas" />
+                                    <button type="button" class="btn btn-light border border-start-0 text-muted toggle-password" data-target="#inputConfirmPassword" title="Lihat/Sembunyikan password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-check-double me-1 text-muted"></i>Pastikan sama dengan password di samping.</small>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitRegister" class="btn btn-brand-primary w-100 py-3 mb-3 shadow-sm fw-bold">Daftar Akun</button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p class="mb-0 small text-muted">
+                        Sudah punya akun? <a href="@Url.Action("Login", "Account")" class="text-danger fw-bold text-decoration-none">Masuk di sini</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -129,4 +139,210 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Nonaktifkan validasi langsung saat mengetik atau pindah fokus agar peringatan hanya muncul setelah klik tombol
+            if ($.validator) {
+                $.validator.setDefaults({
+                    onkeyup: false,
+                    onfocusout: false
+                });
+            }
+
+            const $phoneInput = $('#inputNomorTelepon');
+            const $emailInput = $('#inputEmail');
+            const atSign = '@@';
+            let isDeletingEmail = false;
+
+            // =========================================================================
+            // 1. VALIDASI ATURAN NOMOR TELEPON
+            // =========================================================================
+            function getPhoneValidationMessage() {
+                let val = $phoneInput.val().trim();
+                let digits = val.replace(/\D/g, '');
+                let count = digits.length;
+
+                if (count === 0) {
+                    return 'Nomor telepon wajib diisi!';
+                }
+                if (val.includes('-')) {
+                    return 'Nomor telepon tidak boleh mengandung tanda minus (-). Masukkan angka saja!';
+                }
+
+                // Cek nomor berulang / nomor palsu (contoh: 00642222222222 atau berulang terus-menerus)
+                let suffix = digits.startsWith('62') ? digits.substring(3) : (digits.startsWith('0') ? digits.substring(2) : digits);
+                let uniqueDigits = new Set(suffix.split(''));
+                if (/(\d)\1{4,}/.test(digits) || (suffix.length >= 6 && uniqueDigits.size <= 2)) {
+                    return 'Nomor telepon tidak boleh berulang karena bukan format nomor pada umumnya!';
+                }
+
+                if (!val.startsWith('08') && !val.startsWith('628') && !val.startsWith('+628')) {
+                    return 'Nomor kartu telepon harus diawali 08, 628, atau +628!';
+                }
+                if (count < 10) {
+                    return 'Nomor kartu seluler terlalu pendek (minimal 10 digit, saat ini ' + count + ' digit)!';
+                }
+                if (count > 13) {
+                    return 'Nomor kartu seluler tidak boleh lebih dari 13 digit pada umumnya (saat ini ' + count + ' digit)!';
+                }
+
+                return '';
+            }
+
+            // =========================================================================
+            // 2. AUTO-PRINT DOMAIN EMAIL (Ketik @@g -> langsung @@gmail.com)
+            // =========================================================================
+            $emailInput.on('keydown', function (e) {
+                isDeletingEmail = (e.key === 'Backspace' || e.key === 'Delete');
+            });
+
+            $emailInput.on('input', function () {
+                let val = $(this).val();
+
+                if (!isDeletingEmail && val.includes(atSign)) {
+                    let atIndex = val.indexOf(atSign);
+                    let username = val.substring(0, atIndex);
+                    let domainTyped = val.substring(atIndex + 1).toLowerCase();
+
+                    const domainMap = {
+                        'g': 'gmail.com',
+                        'gm': 'gmail.com',
+                        'gma': 'gmail.com',
+                        'gmai': 'gmail.com',
+                        'y': 'yahoo.com',
+                        'ya': 'yahoo.com',
+                        'yah': 'yahoo.com',
+                        'e': 'email.com',
+                        'em': 'email.com',
+                        'ema': 'email.com',
+                        'o': 'outlook.com',
+                        'ou': 'outlook.com',
+                        'out': 'outlook.com',
+                        'h': 'hotmail.com',
+                        'ho': 'hotmail.com',
+                        'hot': 'hotmail.com',
+                        'i': 'icloud.com',
+                        'ic': 'icloud.com'
+                    };
+
+                    if (username.length > 0 && domainMap[domainTyped]) {
+                        let completedDomain = domainMap[domainTyped];
+                        let fullEmail = username + atSign + completedDomain;
+                        $(this).val(fullEmail);
+
+                        // Seleksi bagian domain yang otomatis tercetak
+                        let selStart = atIndex + 1 + domainTyped.length;
+                        let selEnd = fullEmail.length;
+                        const el = document.getElementById('inputEmail');
+                        if (el && el.setSelectionRange) {
+                            el.setSelectionRange(selStart, selEnd);
+                        }
+                    }
+                }
+            });
+
+            // =========================================================================
+            // 3. TOGGLE VISIBILITAS PASSWORD & PENCOCOKAN
+            // =========================================================================
+            const $password = $('#inputPassword');
+            const $confirmPassword = $('#inputConfirmPassword');
+            const $matchBadge = $('#passMatchBadge');
+
+            $('.toggle-password').on('click', function () {
+                const targetId = $(this).data('target');
+                const $target = $(targetId);
+                const $icon = $(this).find('i');
+
+                if ($target.attr('type') === 'password') {
+                    $target.attr('type', 'text');
+                    $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    $target.attr('type', 'password');
+                    $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            function checkPasswordMatch() {
+                const p1 = $password.val();
+                const p2 = $confirmPassword.val();
+                if (!p1 && !p2) {
+                    $matchBadge.text('Cocokkan').removeClass('badge-success badge-danger').addClass('badge-light text-muted');
+                } else if (p1 === p2 && p1.length >= 6) {
+                    $matchBadge.text('✓ Cocok').removeClass('badge-light text-muted badge-danger').addClass('badge-success');
+                } else {
+                    $matchBadge.text('✗ Belum Cocok').removeClass('badge-light text-muted badge-success').addClass('badge-danger');
+                }
+            }
+
+            $password.on('input', checkPasswordMatch);
+            $confirmPassword.on('input', checkPasswordMatch);
+
+            // =========================================================================
+            // 4. PERINGATAN VALIDASI HANYA SETELAH KLIK TOMBOL DAFTAR (SUBMIT)
+            // =========================================================================
+            $('form').on('submit', function (e) {
+                let emailVal = $emailInput.val().trim();
+
+                // 1. Validasi Email
+                if (!emailVal) {
+                    e.preventDefault();
+                    $emailInput.focus();
+                    $('span[data-valmsg-for="Email"]').text('Email wajib diisi!');
+                    if (window.toastr) toastr.error('Email wajib diisi!', 'Pemberitahuan Email');
+                    return false;
+                }
+
+                if (!emailVal.includes(atSign)) {
+                    e.preventDefault();
+                    $emailInput.focus();
+                    $('span[data-valmsg-for="Email"]').text('Email wajib menggunakan tanda "@@"!');
+                    if (window.toastr) toastr.error('Email wajib menggunakan karakter "@@"! Contoh: bilaaa@@gmail.com', 'Pemberitahuan Email');
+                    return false;
+                }
+
+                let parts = emailVal.split(atSign);
+                let username = parts[0];
+                let domain = parts[1];
+
+                if (!username) {
+                    e.preventDefault();
+                    $emailInput.focus();
+                    $('span[data-valmsg-for="Email"]').text('Nama akun email sebelum "@@" tidak boleh kosong!');
+                    if (window.toastr) toastr.error('Nama akun email sebelum "@@" tidak boleh kosong!', 'Pemberitahuan Email');
+                    return false;
+                }
+
+                if (!domain || !domain.includes('.') || domain.endsWith('.')) {
+                    e.preventDefault();
+                    $emailInput.focus();
+                    $('span[data-valmsg-for="Email"]').text('Domain email belum lengkap (contoh: bilaaa@@gmail.com)!');
+                    if (window.toastr) toastr.error('Domain email belum lengkap (contoh: bilaaa@@gmail.com)!', 'Pemberitahuan Email');
+                    return false;
+                }
+
+                let emailRegex = /^[a-zA-Z0-9._%+-]+\x40[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(emailVal)) {
+                    e.preventDefault();
+                    $emailInput.focus();
+                    $('span[data-valmsg-for="Email"]').text('Format domain email tidak valid!');
+                    if (window.toastr) toastr.error('Format domain email tidak valid!', 'Pemberitahuan Email');
+                    return false;
+                }
+                $('span[data-valmsg-for="Email"]').text('');
+
+                // 2. Validasi Nomor Telepon
+                let phoneError = getPhoneValidationMessage();
+                if (phoneError) {
+                    e.preventDefault();
+                    $phoneInput.focus();
+                    $('span[data-valmsg-for="NomorTelepon"]').text(phoneError);
+                    if (window.toastr) {
+                        toastr.error(phoneError, 'Pemberitahuan Nomor Telepon');
+                    }
+                    return false;
+                }
+                $('span[data-valmsg-for="NomorTelepon"]').text('');
+            });
+        });
+    </script>
 }

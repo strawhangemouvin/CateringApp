@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\uploads\" />
+    <Folder Include="frontend\wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

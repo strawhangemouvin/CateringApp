@@ -1,13 +1,32 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    ViewData["Title"] = "422 - Validasi Data Gagal";
+    var session = HttpContextAccessor.HttpContext?.Session;
+    var role = session?.GetString("Role");
+    bool isGuest = string.IsNullOrEmpty(role);
+    Layout = isGuest ? "~/frontend/Views/Shared/_GuestLayout.cshtml" : "_Layout";
+    ViewData["Title"] = "422 - Validasi Gagal";
 }
-<div class="error-page mt-5">
-    <h2 class="headline text-warning">422</h2>
-    <div class="error-content">
-        <h3><i class="fas fa-exclamation-circle text-warning"></i> Kesalahan Validasi Data (Unprocessable Entity).</h3>
-        <p>
-            Data yang Anda kirimkan tidak dapat diproses karena gagal memenuhi aturan validasi sistem.
-            Silakan perbaiki isian formulir Anda atau kembali ke <a href="javascript:history.back()">Halaman Sebelumnya</a>.
-        </p>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 text-center">
+            <div class="py-4">
+                <div class="display-1 font-weight-bold text-warning mb-3 fw-bold">422</div>
+                <h3 class="font-weight-bold text-dark mb-3 fw-bold">
+                    <i class="fas fa-exclamation-circle text-warning me-2"></i> Validasi Data Gagal
+                </h3>
+                <p class="text-muted mb-4 lead" style="font-size: 1.05rem;">
+                    Data yang Anda kirimkan tidak dapat diproses karena tidak memenuhi ketentuan validasi sistem.
+                </p>
+                <div class="d-flex justify-content-center flex-wrap" style="gap: 12px;">
+                    <a href="javascript:history.back()" class="btn btn-danger px-4 py-2 rounded-pill font-weight-bold mx-2 my-1">
+                        <i class="fas fa-arrow-left me-1 mr-1"></i> Kembali & Perbaiki
+                    </a>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary px-4 py-2 rounded-pill mx-2 my-1">
+                        <i class="fas fa-home me-1 mr-1"></i> Ke Beranda
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

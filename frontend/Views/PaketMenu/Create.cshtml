@@ -3,49 +3,82 @@
     ViewData["Title"] = "Tambah Paket Menu";
 }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Form Tambah Paket</h3>
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-gradient-danger text-white py-3 px-4" style="background: linear-gradient(135deg, #e63946 0%, #c92a37 100%); border: none;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0 font-weight-bold">
+                        <i class="fas fa-plus-circle mr-2 me-2"></i> Form Tambah Paket Menu
+                    </h5>
+                    <span class="badge badge-light text-danger font-weight-bold px-3 py-1">Katalog Baru</span>
+                </div>
             </div>
+
             <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div class="card-body">
-                    <div class="form-group">
-                        <label asp-for="KategoriId">Kategori Menu</label>
-                        <select asp-for="KategoriId" class="form-control" asp-items="ViewBag.KategoriId">
+                <div class="card-body p-4">
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger rounded-3 shadow-sm mb-4 py-2 px-3 small d-flex align-items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            <div>
+                                <span class="fw-bold font-weight-bold">Terdapat kesalahan validasi:</span>
+                                <ul class="mb-0 ps-3 pl-3 mt-1">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group mb-3">
+                        <label asp-for="KategoriId" class="font-weight-bold text-dark small">Kategori Menu <span class="text-danger">*</span></label>
+                        <select asp-for="KategoriId" class="form-control custom-select-scroll" asp-items="ViewBag.KategoriId">
                             <option value="">-- Pilih Kategori --</option>
                         </select>
-                        <span asp-validation-for="KategoriId" class="text-danger"></span>
+                        <span asp-validation-for="KategoriId" class="text-danger small font-weight-bold"></span>
                     </div>
                     
-                    <div class="form-group">
-                        <label asp-for="NamaPaket">Nama Paket</label>
-                        <input asp-for="NamaPaket" class="form-control" placeholder="Masukkan nama paket menu" />
-                        <span asp-validation-for="NamaPaket" class="text-danger"></span>
+                    <div class="form-group mb-3">
+                        <label asp-for="NamaPaket" class="font-weight-bold text-dark small">Nama Paket <span class="text-danger">*</span></label>
+                        <input asp-for="NamaPaket" class="form-control rounded-3" placeholder="Contoh: Nasi Kotak Ayam Bakar Madu" required minlength="3" maxlength="100" data-val="true" data-val-required="Nama paket menu wajib diisi." data-val-length="Nama paket menu harus antara 3 hingga 100 karakter." />
+                        <span asp-validation-for="NamaPaket" class="text-danger small font-weight-bold"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="Harga">Harga (Rp)</label>
-                        <input asp-for="Harga" type="number" class="form-control" placeholder="Masukkan harga paket" />
-                        <span asp-validation-for="Harga" class="text-danger"></span>
+                    <div class="form-group mb-3">
+                        <label asp-for="Harga" class="font-weight-bold text-dark small">Harga per Porsi (Rp) <span class="text-danger">*</span></label>
+                        <input asp-for="Harga" asp-format="{0:0}" type="number" class="form-control rounded-3" placeholder="Contoh: 28000" min="1000" max="100000000" step="any" required data-val="true" data-val-required="Harga paket menu wajib diisi." data-val-number="Harga harus berupa angka yang valid." data-val-range="Harga paket menu minimal Rp 1.000 dan tidak boleh 0 atau minus." />
+                        <span asp-validation-for="Harga" class="text-danger small font-weight-bold"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label asp-for="DeskripsiMenu">Deskripsi / Detail Menu</label>
-                        <textarea asp-for="DeskripsiMenu" class="form-control" rows="3" placeholder="Contoh: Nasi, Ayam Goreng, Sambal, Kerupuk"></textarea>
-                        <span asp-validation-for="DeskripsiMenu" class="text-danger"></span>
+                    <div class="form-group mb-3">
+                        <label asp-for="DeskripsiMenu" class="font-weight-bold text-dark small">Deskripsi &amp; Komposisi Sajian <span class="text-muted font-weight-normal">(Opsional)</span></label>
+                        <textarea asp-for="DeskripsiMenu" class="form-control rounded-3" rows="3" placeholder="Rincian lauk, sayur, sambal, pelengkap, dan keunggulan sajian... (opsional)" maxlength="1000"></textarea>
+                        <span asp-validation-for="DeskripsiMenu" class="text-danger small font-weight-bold"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label for="FileGambar">Foto / Gambar Menu</label>
-                        <input type="file" name="FileGambar" id="FileGambar" class="form-control-file" accept="image/*" />
-                        <small class="form-text text-muted">Format: JPG, JPEG, PNG. Maksimal 2MB.</small>
+                    <div class="form-group mb-2">
+                        <label for="FileGambar" class="font-weight-bold text-dark small">Foto / Gambar Menu (Opsional)</label>
+                        <div id="containerPreview" class="mb-2" style="display: none;">
+                            <img id="previewGambarMenu" src="" referrerpolicy="no-referrer" class="rounded-3 shadow-xs border" style="max-height: 120px; object-fit: cover;" alt="Pratinjau Foto Menu" />
+                        </div>
+                        <input type="file" name="FileGambar" id="FileGambar" class="form-control-file" accept=".jpg,.jpeg,.png,.webp" />
+                        <small class="form-text text-muted d-block">Format: JPG, JPEG, PNG, WEBP. Maksimal 2MB.</small>
+                        <span id="errorFileGambar" class="text-danger small font-weight-bold d-block mt-1">
+                            @Html.ValidationMessage("FileGambar")
+                        </span>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                    <a href="@Url.Action("Index")" class="btn btn-default">Batal</a>
+
+                <div class="card-footer bg-light border-top px-3 px-sm-4 py-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary rounded-pill px-3 px-sm-4 py-2 font-weight-bold">
+                        <i class="fas fa-arrow-left mr-1 me-1"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-brand-primary rounded-pill px-3 px-sm-4 py-2 font-weight-bold text-white shadow-sm">
+                        <i class="fas fa-save mr-1 me-1"></i> Simpan Paket Menu
+                    </button>
                 </div>
             </form>
         </div>
@@ -54,4 +87,60 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var fileInput = document.getElementById('FileGambar');
+            var containerPreview = document.getElementById('containerPreview');
+            var previewImg = document.getElementById('previewGambarMenu');
+            var errorSpan = document.getElementById('errorFileGambar');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    var file = this.files && this.files[0];
+                    if (!file) {
+                        if (errorSpan) errorSpan.innerText = '';
+                        if (containerPreview) containerPreview.style.display = 'none';
+                        return;
+                    }
+
+                    // 1. Validasi Ukuran File (Maksimal 2MB)
+                    var maxBytes = 2 * 1024 * 1024;
+                    if (file.size > maxBytes) {
+                        var sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                        if (errorSpan) {
+                            errorSpan.innerText = 'Ukuran file gambar maksimal 2MB (ukuran file yang dipilih: ' + sizeMb + ' MB).';
+                        }
+                        if (containerPreview) containerPreview.style.display = 'none';
+                        this.value = '';
+                        return;
+                    }
+
+                    // 2. Validasi Format Ekstensi File
+                    var allowedExt = ['.jpg', '.jpeg', '.png', '.webp'];
+                    var fileName = file.name.toLowerCase();
+                    var isValid = allowedExt.some(function (ext) { return fileName.endsWith(ext); });
+
+                    if (!isValid) {
+                        if (errorSpan) {
+                            errorSpan.innerText = 'Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.';
+                        }
+                        if (containerPreview) containerPreview.style.display = 'none';
+                        this.value = '';
+                        return;
+                    }
+
+                    // File valid: bersihkan error dan tampilkan preview
+                    if (errorSpan) errorSpan.innerText = '';
+                    if (previewImg && containerPreview) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewImg.src = e.target.result;
+                            containerPreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 }

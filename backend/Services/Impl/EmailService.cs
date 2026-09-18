@@ -1,4 +1,4 @@
-﻿using CateringApp.Services.Interface;
+using CateringApp.Services.Interface;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -63,7 +63,7 @@ namespace CateringApp.Services.Impl
 
         public async Task<bool> SendOtpEmailAsync(string toEmail, string otpCode, string recipientName)
         {
-            var subject = $"[CateringApp] Kode Verifikasi OTP Reset Password: {otpCode}";
+            var subject = $"[Catering Mimi Saripah] Kode Verifikasi OTP Reset Password: {otpCode}";
 
             var body = $@"
 <!DOCTYPE html>
@@ -84,12 +84,12 @@ namespace CateringApp.Services.Impl
 <body>
     <div class='email-container'>
         <div class='header'>
-            <h1>🍽️ CateringApp</h1>
-            <p style='margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;'>Sistem Layanan Catering Premium</p>
+            <h1>🍽️ Catering Mimi Saripah</h1>
+            <p style='margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;'>Layanan Catering Khas Nusantara</p>
         </div>
         <div class='content'>
             <h3 style='margin-top: 0; color: #212529;'>Halo, {recipientName}!</h3>
-            <p style='line-height: 1.6;'>Kami menerima permintaan untuk mereset kata sandi akun CateringApp Anda. Gunakan kode verifikasi OTP di bawah ini untuk melanjutkan:</p>
+            <p style='line-height: 1.6;'>Kami menerima permintaan untuk mereset kata sandi akun Catering Mimi Saripah Anda. Gunakan kode verifikasi OTP di bawah ini untuk melanjutkan:</p>
             
             <div class='otp-box'>
                 <span style='font-size: 13px; text-transform: uppercase; color: #6c757d; display: block; margin-bottom: 5px;'>Kode Verifikasi OTP Anda</span>
@@ -98,12 +98,12 @@ namespace CateringApp.Services.Impl
             </div>
 
             <p style='line-height: 1.6; font-size: 13px; color: #666666;'>
-                <strong>Perhatian Keamanan:</strong> Jangan berikan kode verifikasi ini kepada siapapun termasuk pihak CateringApp. Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini dan akun Anda tetap aman.
+                <strong>Perhatian Keamanan:</strong> Jangan berikan kode verifikasi ini kepada siapapun termasuk pihak Catering Mimi Saripah. Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini dan akun Anda tetap aman.
             </p>
         </div>
         <div class='footer'>
-            &copy; {DateTime.Now.Year} CateringApp Indonesia. Seluruh hak cipta dilindungi.<br>
-            Email otomatis, mohon tidak membalas email ini.
+            &copy; {DateTime.Now.Year} Catering Mimi Saripah - Desa Tenajar Lor, Kertasemaya, Indramayu.<br>
+            Kontak: 083148448516 | Email: cateringmimisaripah@gmail.com
         </div>
     </div>
 </body>

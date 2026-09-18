@@ -1,0 +1,257 @@
+@model CateringApp.Models.ViewModel.ManifesDapurViewModel
+@{
+    ViewData["Title"] = "Manifes Produksi Dapur";
+    DateTime selectedDate = ViewBag.SelectedDate ?? Model.Tanggal;
+    int persentaseKapasitas = (int)Math.Min(100, Math.Round((double)Model.TotalPorsiKolektif / Model.KapasitasMaksimalDapur * 100));
+}
+
+<div class="container-fluid px-0">
+    <!-- Header Section with Date Navigator & Print -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 48px; height: 48px; font-size: 1.3rem;">
+                            <i class="fas fa-fire-burner"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-heading font-weight-bold text-dark mb-0">
+                                Manifes Produksi Dapur Kolektif
+                            </h4>
+                            <p class="text-muted small mb-0">
+                                Rekapitulasi jumlah porsi masakan dan jadwal persiapan dapur Mimi Saripah
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <form asp-action="ManifesDapur" method="get" class="d-flex flex-wrap align-items-center justify-content-lg-end" style="gap: 8px;">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="@Url.Action("ManifesDapur", new { tanggal = DateTime.Today.ToString("yyyy-MM-dd") })" class="btn @(selectedDate.Date == DateTime.Today ? "btn-danger font-weight-bold" : "btn-outline-secondary")">
+                                Hari Ini
+                            </a>
+                            <a href="@Url.Action("ManifesDapur", new { tanggal = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd") })" class="btn @(selectedDate.Date == DateTime.Today.AddDays(1) ? "btn-danger font-weight-bold" : "btn-outline-secondary")">
+                                Besok
+                            </a>
+                            <a href="@Url.Action("ManifesDapur", new { tanggal = DateTime.Today.AddDays(2).ToString("yyyy-MM-dd") })" class="btn @(selectedDate.Date == DateTime.Today.AddDays(2) ? "btn-danger font-weight-bold" : "btn-outline-secondary")">
+                                Lusa
+                            </a>
+                        </div>
+
+                        <input type="date" name="tanggal" class="form-control form-control-sm" value="@selectedDate.ToString("yyyy-MM-dd")" style="width: 155px; border-radius: 8px;" onchange="this.form.submit();" />
+
+                        <button type="button" class="btn btn-sm btn-outline-dark font-weight-bold d-none d-sm-inline-block" onclick="window.print();">
+                            <i class="fas fa-print mr-1"></i> Cetak Manifes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Metric Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #e63946 !important;">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="rounded p-3 mr-3" style="background-color: #fef2f2; color: #e63946; font-size: 1.4rem;">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Porsi Masakan</span>
+                        <h3 class="font-weight-bold text-dark mb-0">@Model.TotalPorsiKolektif <small class="text-muted" style="font-size: 0.9rem;">Porsi</small></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #0284c7 !important;">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="rounded p-3 mr-3" style="background-color: #f0f9ff; color: #0284c7; font-size: 1.4rem;">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Pesanan Acara</span>
+                        <h3 class="font-weight-bold text-dark mb-0">@Model.TotalPesanan <small class="text-muted" style="font-size: 0.9rem;">Pesanan</small></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #10b981 !important;">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Beban Kuota Dapur</span>
+                        <span class="badge badge-pill @(persentaseKapasitas >= 90 ? "badge-danger" : (persentaseKapasitas >= 70 ? "badge-warning" : "badge-success"))">
+                            @persentaseKapasitas% Terpakai
+                        </span>
+                    </div>
+                    <div class="progress mb-1" style="height: 8px; border-radius: 4px;">
+                        <div class="progress-bar @(persentaseKapasitas >= 90 ? "bg-danger" : (persentaseKapasitas >= 70 ? "bg-warning" : "bg-success"))" role="progressbar" style="width: @persentaseKapasitas%;" aria-valuenow="@persentaseKapasitas" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted font-weight-bold" style="font-size: 0.78rem;">
+                        Sisa Kapasitas: <span class="text-dark">@Model.SisaKapasitas</span> dari @Model.KapasitasMaksimalDapur porsi
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collective Production Summary (What Kitchen Needs to Cook) -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+            <h5 class="font-heading font-weight-bold text-dark mb-0">
+                <i class="fas fa-list-check text-danger mr-2"></i> Rekapitulasi Menu yang Wajib Dimasak (Tanggal @selectedDate.ToString("dd MMMM yyyy"))
+            </h5>
+            <span class="badge badge-light text-muted border px-3 py-1 font-weight-bold">@Model.Items.Count Menu Berbeda</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Items.Count == 0)
+            {
+                <div class="text-center py-5">
+                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                        <i class="fas fa-calendar-check fa-2x text-muted"></i>
+                    </div>
+                    <h6 class="font-weight-bold text-dark">Tidak Ada Jadwal Memasak</h6>
+                    <p class="text-muted small mb-0">Belum ada pesanan katering aktif untuk tanggal @selectedDate.ToString("dd MMMM yyyy").</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small font-weight-bold text-uppercase">
+                            <tr>
+                                <th class="pl-4 py-3 border-top-0" style="width: 45%;">Paket Menu Katering</th>
+                                <th class="py-3 border-top-0 text-center" style="width: 15%;">Kategori</th>
+                                <th class="py-3 border-top-0 text-center" style="width: 15%;">Jumlah Pesanan</th>
+                                <th class="pr-4 py-3 border-top-0 text-right" style="width: 25%;">Total Porsi Masak</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="pl-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.Gambar" class="rounded shadow-xs mr-3" referrerpolicy="no-referrer" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" alt="@item.NamaPaket" onerror="this.src='/images/menu_box.svg';" />
+                                            <div>
+                                                <div class="font-weight-bold text-dark font-heading">@item.NamaPaket</div>
+                                                @if (item.CatatanPesanan.Count > 0)
+                                                {
+                                                    <div class="mt-1">
+                                                        <span class="badge badge-warning text-dark font-weight-bold mr-1" style="font-size: 0.68rem;">Catatan Dapur:</span>
+                                                        <small class="text-secondary" style="font-size: 0.78rem;">
+                                                            @string.Join("; ", item.CatatanPesanan)
+                                                        </small>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <span class="badge badge-light border text-muted px-2 py-1">@item.Kategori</span>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <span class="font-weight-bold text-dark">@item.JumlahPesanan Nota</span>
+                                    </td>
+                                    <td class="pr-4 py-3 text-right">
+                                        <span class="badge badge-success px-3 py-2 font-weight-bold" style="font-size: 1.05rem; border-radius: 8px;">
+                                            @item.TotalPorsi Porsi
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <th colspan="3" class="pl-4 py-3 text-right font-weight-bold text-dark">
+                                    TOTAL SELURUH PORSI HARUS SELESAI DIMASAK:
+                                </th>
+                                <th class="pr-4 py-3 text-right">
+                                    <span class="badge badge-danger px-3 py-2 font-weight-bold" style="font-size: 1.15rem; border-radius: 8px;">
+                                        @Model.TotalPorsiKolektif Porsi
+                                    </span>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Dispatch Breakdown / Order Schedule for Drivers & Kitchen -->
+    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="font-heading font-weight-bold text-dark mb-0">
+                <i class="fas fa-truck-clock text-primary mr-2"></i> Jadwal Pengantaran Acara Per Pelanggan
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.DaftarPesananHariIni.Count == 0)
+            {
+                <div class="text-center py-4 text-muted small">
+                    Tidak ada jadwal pengiriman pesanan pada tanggal ini.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small font-weight-bold">
+                            <tr>
+                                <th class="pl-4 py-3 border-top-0">Jam Antar</th>
+                                <th class="py-3 border-top-0">Nomor &amp; Pemesan</th>
+                                <th class="py-3 border-top-0 text-center">Porsi</th>
+                                <th class="py-3 border-top-0">Alamat Acara</th>
+                                <th class="py-3 border-top-0 text-center">Status</th>
+                                <th class="pr-4 py-3 border-top-0 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pesanan in Model.DaftarPesananHariIni)
+                            {
+                                <tr>
+                                    <td class="pl-4 py-3 font-weight-bold text-danger" style="white-space: nowrap;">
+                                        <i class="fas fa-clock mr-1"></i> @pesanan.JamPengantaran
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="font-weight-bold text-dark d-block">@pesanan.NomorPesanan</span>
+                                        <small class="text-muted">@pesanan.NamaPelanggan (@pesanan.Telepon)</small>
+                                    </td>
+                                    <td class="py-3 text-center font-weight-bold text-dark">
+                                        @pesanan.TotalPorsi Porsi
+                                    </td>
+                                    <td class="py-3 small text-muted" style="max-width: 250px;">
+                                        @pesanan.AlamatPengiriman
+                                        @if (!string.IsNullOrEmpty(pesanan.Catatan))
+                                        {
+                                            <div class="text-warning font-weight-bold mt-1" style="font-size: 0.74rem;">
+                                                <i class="fas fa-sticky-note mr-1"></i> @pesanan.Catatan
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <span class="badge @(pesanan.StatusPesanan == "Diproses" ? "badge-info" : (pesanan.StatusPesanan == "Dikirim" ? "badge-primary" : (pesanan.StatusPesanan == "Selesai" ? "badge-success" : "badge-secondary"))) px-2 py-1 font-weight-bold">
+                                            @pesanan.StatusPesanan
+                                        </span>
+                                    </td>
+                                    <td class="pr-4 py-3 text-right">
+                                        <a href="@Url.Action("Details", new { id = pesanan.PesananId })" class="btn btn-sm btn-outline-secondary font-weight-bold">
+                                            <i class="fas fa-eye mr-1"></i> Buka Nota
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

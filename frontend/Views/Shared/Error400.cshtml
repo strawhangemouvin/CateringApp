@@ -1,13 +1,32 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
+    var session = HttpContextAccessor.HttpContext?.Session;
+    var role = session?.GetString("Role");
+    bool isGuest = string.IsNullOrEmpty(role);
+    Layout = isGuest ? "~/frontend/Views/Shared/_GuestLayout.cshtml" : "_Layout";
     ViewData["Title"] = "400 - Permintaan Tidak Valid";
 }
-<div class="error-page mt-5">
-    <h2 class="headline text-danger">400</h2>
-    <div class="error-content">
-        <h3><i class="fas fa-ban text-danger"></i> Permintaan Tidak Valid (Bad Request).</h3>
-        <p>
-            Permintaan Anda tidak dapat diproses oleh server karena format atau parameter yang dikirim tidak sesuai ketentuan.
-            Silakan periksa kembali isian Anda atau kembali ke <a href="@Url.Action("Index", "Home")">Halaman Utama</a>.
-        </p>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 text-center">
+            <div class="py-4">
+                <div class="display-1 font-weight-bold text-danger mb-3 fw-bold">400</div>
+                <h3 class="font-weight-bold text-dark mb-3 fw-bold">
+                    <i class="fas fa-ban text-danger me-2"></i> Permintaan Tidak Valid
+                </h3>
+                <p class="text-muted mb-4 lead" style="font-size: 1.05rem;">
+                    Permintaan Anda tidak dapat diproses karena format atau parameter data yang dikirim tidak sesuai ketentuan sistem.
+                </p>
+                <div class="d-flex justify-content-center flex-wrap" style="gap: 12px;">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-danger px-4 py-2 rounded-pill font-weight-bold mx-2 my-1">
+                        <i class="fas fa-home me-1 mr-1"></i> Kembali ke Beranda
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 rounded-pill mx-2 my-1">
+                        <i class="fas fa-arrow-left me-1 mr-1"></i> Kembali Sebelumnya
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

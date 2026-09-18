@@ -15,7 +15,7 @@
     
     <div class="card-body">
         <!-- Search and filters -->
-        <form method="get" class="row mb-3">
+        <form method="get" class="row mb-3 align-items-center">
             <div class="col-md-3 mb-2">
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="Cari nama/username..." value="@ViewBag.Search" />
@@ -26,12 +26,12 @@
             </div>
             
             <div class="col-md-3 mb-2">
-                <select name="peranId" class="form-control" onchange="this.form.submit()" asp-items="ViewBag.PeranId">
+                <select name="peranId" class="form-control custom-select-scroll" onchange="this.form.submit()" asp-items="ViewBag.PeranId">
                     <option value="">-- Semua Peran --</option>
                 </select>
             </div>
 
-            <div class="col-md-3 mb-2">
+            <div class="col-md-2 mb-2">
                 <select name="sort" class="form-control" onchange="this.form.submit()">
                     <option value="terbaru" selected="@(ViewBag.Sort == "terbaru")">Terbaru</option>
                     <option value="terlama" selected="@(ViewBag.Sort == "terlama")">Terlama</option>
@@ -46,6 +46,12 @@
                     <option value="10" selected="@(ViewBag.PageSize == 10)">10 per hal</option>
                     <option value="20" selected="@(ViewBag.PageSize == 20)">20 per hal</option>
                 </select>
+            </div>
+
+            <div class="col-md-2 mb-2">
+                <a href="@Url.Action("Index")" class="btn btn-default w-100" title="Reset filter pencarian">
+                    <i class="fas fa-undo mr-1"></i> Reset
+                </a>
             </div>
         </form>
 

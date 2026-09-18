@@ -1,4 +1,4 @@
-﻿using CateringApp.Models.DTO;
+using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Context;
 using Microsoft.AspNetCore.Identity;
@@ -176,14 +176,24 @@ namespace CateringApp.Controllers.Api
                     });
                 }
 
-                var roleExists = await _context.Perans.AnyAsync(p => p.PeranId == model.PeranId);
-                if (!roleExists)
+                var roleObj = await _context.Perans.FirstOrDefaultAsync(p => p.PeranId == model.PeranId);
+                if (roleObj == null)
                 {
                     return BadRequest(new
                     {
                         statusCode = 400,
                         status = "fail",
-                        message = $"Peran ID '{model.PeranId}' tidak valid. Pilihan: 1 (Admin/Pemilik Toko), 2 (Pelanggan)."
+                        message = $"Peran ID '{model.PeranId}' tidak valid."
+                    });
+                }
+
+                if (roleObj.NamaPeran == "Pemilik Toko" || model.PeranId == 1)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = "Peran Pemilik Toko hanya ada 1 akun utama dan tidak dapat ditambahkan."
                     });
                 }
 
@@ -274,14 +284,24 @@ namespace CateringApp.Controllers.Api
                     });
                 }
 
-                var roleExists = await _context.Perans.AnyAsync(p => p.PeranId == model.PeranId);
-                if (!roleExists)
+                var roleObj = await _context.Perans.FirstOrDefaultAsync(p => p.PeranId == model.PeranId);
+                if (roleObj == null)
                 {
                     return BadRequest(new
                     {
                         statusCode = 400,
                         status = "fail",
-                        message = $"Peran ID '{model.PeranId}' tidak valid. Pilihan: 1 (Admin/Pemilik Toko), 2 (Pelanggan)."
+                        message = $"Peran ID '{model.PeranId}' tidak valid."
+                    });
+                }
+
+                if (existingUser.PeranId != 1 && (model.PeranId == 1 || roleObj.NamaPeran == "Pemilik Toko"))
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = "Tidak dapat mengubah peran pengguna menjadi Pemilik Toko."
                     });
                 }
 

@@ -1,4 +1,5 @@
-﻿using CateringApp.Models.Entity;
+using CateringApp.Helpers;
+using CateringApp.Models.Entity;
 using CateringApp.Models.ViewModel;
 using CateringApp.Services.Context;
 using CateringApp.Services.Interface;
@@ -9,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Linq;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CateringApp.Controllers;
 
@@ -36,16 +39,36 @@ public class AccountController : Controller
 
     public IActionResult Login()
     {
+        if (HttpContext.Session.GetInt32("UserId") != null)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
         var token = Request.Cookies["JwtToken"];
         if (!string.IsNullOrEmpty(token))
         {
             try
             {
                 var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-                var role = jwtToken.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value 
-                           ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+                var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+                var jwtSettings = configuration.GetSection("Jwt");
+                var key = jwtSettings["Key"] ?? "CateringAppSuperSecretKeyForJwtAuthenticationServiceNet8";
+                var issuer = jwtSettings["Issuer"] ?? "CateringApp";
+                var audience = jwtSettings["Audience"] ?? "CateringAppUsers";
 
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                    ClockSkew = TimeSpan.FromMinutes(5)
+                };
+
+                tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
                 return RedirectToAction("Index", "Dashboard");
             }
             catch
@@ -72,7 +95,7 @@ public class AccountController : Controller
 
             if (user != null)
             {
-                var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, inputPassword);
+                var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash ?? string.Empty, inputPassword);
                 if (verificationResult == PasswordVerificationResult.Success)
                 {
                     
@@ -81,9 +104,9 @@ public class AccountController : Controller
                     Response.Cookies.Append("JwtToken", token, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTimeOffset.UtcNow.AddHours(2)
+                        Secure = Request.IsHttps,
+                        SameSite = SameSiteMode.Lax,
+                        Expires = DateTimeOffset.UtcNow.AddHours(4)
                     });
 
                     HttpContext.Session.SetInt32("UserId", user.PenggunaId);
@@ -109,7 +132,15 @@ public class AccountController : Controller
         return View(model);
     }
 
-    public IActionResult Register() => View();
+    public IActionResult Register()
+    {
+        if (HttpContext.Session.GetInt32("UserId") != null || !string.IsNullOrEmpty(Request.Cookies["JwtToken"]))
+        {
+            TempData["Info"] = "Anda sudah masuk ke sistem.";
+            return RedirectToAction("Index", "Dashboard");
+        }
+        return View();
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -117,6 +148,34 @@ public class AccountController : Controller
     {
         if (ModelState.IsValid)
         {
+            var (isUserValid, userErr) = ValidationHelper.ValidateUsername(model.Username);
+            if (!isUserValid)
+            {
+                ModelState.AddModelError("Username", userErr!);
+                return View(model);
+            }
+
+            var (isPassValid, passErr) = ValidationHelper.ValidatePassword(model.Password, isRequired: true);
+            if (!isPassValid)
+            {
+                ModelState.AddModelError("Password", passErr!);
+                return View(model);
+            }
+
+            var (isPhoneValid, phoneErr) = ValidationHelper.ValidateNomorTelepon(model.NomorTelepon, isRequired: true);
+            if (!isPhoneValid)
+            {
+                ModelState.AddModelError("NomorTelepon", phoneErr!);
+                return View(model);
+            }
+
+            var (isEmailValid, emailErr) = ValidationHelper.ValidateEmail(model.Email, isRequired: true);
+            if (!isEmailValid)
+            {
+                ModelState.AddModelError("Email", emailErr!);
+                return View(model);
+            }
+
             if (_context.Penggunas.Any(u => u.Username.ToLower() == model.Username.Trim().ToLower() && u.DeletedAt == null))
             {
                 ModelState.AddModelError("Username", "Username sudah digunakan.");
@@ -242,6 +301,7 @@ public class AccountController : Controller
 
     public IActionResult AccessDenied()
     {
-        return View();
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+        return View("Error403");
     }
 }

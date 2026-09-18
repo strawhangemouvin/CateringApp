@@ -8,42 +8,139 @@
 
 @if (role == "Pemilik Toko")
 {
-    <div class="row">
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-info">
-                <div class="inner"><h3>@Model.TotalPesanan</h3><p>Total Pesanan</p></div>
-                <div class="icon"><i class="fas fa-shopping-bag"></i></div>
+    @if (Model.PesananButuhRefund.Any())
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-lg mb-4" style="background-color: #fff1f2; border-left: 5px solid #e11d48 !important;">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <i class="fas fa-hand-holding-usd fa-2x text-danger mr-3"></i>
+                    <div>
+                        <h5 class="font-weight-bold text-danger mb-0">Perhatian Owner: @Model.PesananButuhRefund.Count Pesanan Menunggu Pengembalian Dana (Refund)</h5>
+                        <small class="text-muted">Ada pesanan yang telah dibatalkan padahal pembayaran telah lunas. Dana wajib segera ditransfer balik ke rekening pelanggan.</small>
+                    </div>
+                </div>
+                <span class="badge badge-danger px-3 py-2 font-weight-bold" style="font-size: 0.9rem;">
+                    Total Refund: Rp @Model.PesananButuhRefund.Sum(p => p.TotalBayar).ToString("N0")
+                </span>
+            </div>
+            <div class="table-responsive mt-3 bg-white rounded border">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>No. Pesanan</th>
+                            <th>Pelanggan</th>
+                            <th>Total Dana</th>
+                            <th>Data Rekening Pelanggan</th>
+                            <th>Status Transfer</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var refItem in Model.PesananButuhRefund)
+                        {
+                            <tr>
+                                <td class="font-weight-bold text-primary">@refItem.NomorPesanan</td>
+                                <td>@refItem.Pengguna?.NamaLengkap</td>
+                                <td class="font-weight-bold text-danger">Rp @refItem.TotalBayar.ToString("N0")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(refItem.RefundNamaBank))
+                                    {
+                                        <span class="badge badge-info text-white">@refItem.RefundNamaBank - @refItem.RefundNoRekening</span>
+                                        <small class="d-block text-muted">a.n. @refItem.RefundAtasNama</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning text-dark"><i class="fas fa-exclamation-triangle mr-1"></i> Belum ada data rekening</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge badge-warning px-2 py-1">Menunggu Transfer Owner</span>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Pesanan", new { id = refItem.PesananId })" class="btn btn-danger btn-sm font-weight-bold shadow-xs">
+                                        <i class="fas fa-money-bill-wave mr-1"></i> Proses Transfer Refund
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-success">
-                <div class="inner"><h3>Rp @Model.TotalPendapatan.ToString("N0")</h3><p>Omset Selesai</p></div>
-                <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+    }
+
+    <!-- Card Omset (Terpisah di atas sepanjang 3 card di bawahnya) -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card-modern p-4 border-0 shadow-sm d-flex flex-row align-items-center justify-content-between" style="border-left: 6px solid #10b981 !important;">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon-wrapper shadow-xs mr-3" style="width: 58px; height: 58px; border-radius: 14px; background: #ecfdf5; color: #10b981; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div>
+                        <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Omset Selesai</span>
+                        <h2 class="font-heading font-weight-bold text-success mt-1 mb-0" style="font-size: 2.1rem;">Rp @Model.TotalPendapatan.ToString("N0")</h2>
+                        <small class="text-muted"><i class="fas fa-check-circle mr-1 text-success"></i> Akumulasi dari seluruh pesanan yang telah sukses diselesaikan</small>
+                    </div>
+                </div>
+                <div class="d-none d-sm-block">
+                    <span class="badge badge-success px-3 py-2 font-weight-bold shadow-xs" style="font-size: 0.85rem; border-radius: var(--radius-pill);">
+                        <i class="fas fa-wallet mr-1"></i> Total Pendapatan
+                    </span>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-warning">
-                <div class="inner"><h3>@Model.PesananPending</h3><p>Pesanan Pending</p></div>
-                <div class="icon"><i class="fas fa-clock"></i></div>
+    </div>
+
+    <!-- Tiga Card Lainnya Berjajar di Bawahnya -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4 col-md-4 col-12 mb-3 mb-md-0">
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #0284c7 !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Total Pesanan</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2rem;">@Model.TotalPesanan</h2>
+                    <small class="text-muted"><i class="fas fa-receipt mr-1 text-info"></i> Seluruh transaksi</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 52px; height: 52px; border-radius: 14px; background: #e0f2fe; color: #0284c7; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-danger">
-                <div class="inner"><h3>@Model.TotalPelanggan</h3><p>Pelanggan Aktif</p></div>
-                <div class="icon"><i class="fas fa-users"></i></div>
+        <div class="col-lg-4 col-md-4 col-12 mb-3 mb-md-0">
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #f59e0b !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Pesanan Pending</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2rem;">@Model.PesananPending</h2>
+                    <small class="text-muted"><i class="far fa-clock mr-1 text-warning"></i> Perlu diproses</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 52px; height: 52px; border-radius: 14px; background: #fef3c7; color: #d97706; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-12 mb-3 mb-md-0">
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #ef4444 !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Pelanggan Aktif</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2rem;">@Model.TotalPelanggan</h2>
+                    <small class="text-muted"><i class="fas fa-users mr-1 text-danger"></i> Terdaftar</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 52px; height: 52px; border-radius: 14px; background: #fef2f2; color: #ef4444; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-users"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Chart Card -->
-    <div class="row">
-        <div class="col-12 col-md-12">
-            <div class="card card-outline card-success">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Grafik Omset & Pesanan (7 Hari Terakhir)</h3>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-outline card-success shadow-sm border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+                <div class="card-header bg-white py-3 px-4 border-bottom">
+                    <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-chart-line mr-2 text-success"></i> Grafik Omset &amp; Pesanan (7 Hari Terakhir)</h5>
                 </div>
-                <div class="card-body">
-                    <div class="position-relative mb-4">
+                <div class="card-body p-4">
+                    <div class="position-relative mb-2">
                         <canvas id="omsetChart" style="min-height: 280px; height: 280px; max-height: 280px; max-width: 100%;"></canvas>
                     </div>
                 </div>
@@ -51,152 +148,244 @@
         </div>
     </div>
 
-    <div class="card card-primary card-outline">
-        <div class="card-header"><h3 class="card-title">5 Pesanan Terbaru</h3></div>
+    <div class="card card-outline card-primary shadow-sm border-0 mb-4" style="border-radius: var(--radius-lg); overflow: hidden;">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <div class="d-flex align-items-center justify-content-between">
+                <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-receipt mr-2 text-primary"></i> 5 Pesanan Terbaru</h5>
+                <a href="@Url.Action("Index", "Pesanan")" class="btn btn-sm btn-outline-primary font-weight-bold px-3 py-1" style="border-radius: var(--radius-pill); font-size: 0.8rem;">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
         <div class="card-body p-0">
-            <table class="table table-striped table-valign-middle">
-                <thead>
-                    <tr>
-                        <th>No. Pesanan</th>
-                        <th>Pelanggan</th>
-                        <th>Tgl Kirim</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.PesananTerbaru)
-                    {
-                        <tr>
-                            <td>@item.NomorPesanan</td>
-                            <td>@item.Pengguna?.NamaLengkap</td>
-                            <td>@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
-                            <td>Rp @item.TotalBayar.ToString("N0")</td>
-                            <td>
-                                <span class="badge @(item.StatusPesanan == "Selesai" ? "badge-success" : (item.StatusPesanan == "Diproses" ? "badge-info" : "badge-warning"))">
-                                    @item.StatusPesanan
-                                </span>
-                            </td>
-                            <td>
-                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-default btn-xs">Detail</a>
-                            </td>
+            <div class="table-responsive mb-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="thead-light" style="background-color: #f8fafc;">
+                        <tr class="text-uppercase font-weight-bold" style="font-size: 0.76rem; letter-spacing: 0.6px; color: #64748b;">
+                            <th class="pl-4 py-3 text-nowrap">No. Pesanan</th>
+                            <th class="py-3">Pelanggan</th>
+                            <th class="py-3 text-nowrap">Tgl Kirim</th>
+                            <th class="py-3 text-nowrap">Total</th>
+                            <th class="py-3 text-nowrap">Status</th>
+                            <th class="pr-4 py-3 text-center text-nowrap">Aksi</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.PesananTerbaru)
+                        {
+                            <tr>
+                                <td class="pl-4 py-3 text-nowrap font-weight-bold text-primary font-monospace" style="font-size: 0.9rem;">
+                                    @item.NomorPesanan
+                                </td>
+                                <td class="py-3 font-weight-bold text-dark">@item.Pengguna?.NamaLengkap</td>
+                                <td class="py-3 text-nowrap text-muted small">@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
+                                <td class="py-3 text-nowrap font-weight-bold text-dark">Rp @item.TotalBayar.ToString("N0")</td>
+                                <td class="py-3 text-nowrap">
+                                    <span class="badge @(item.StatusPesanan == "Selesai" || item.StatusPesanan == "Refund Selesai" ? "badge-success" : (item.StatusPesanan == "Diproses" || item.StatusPesanan == "Dikirim" ? "badge-info" : (item.StatusPesanan == "Dibatalkan" || item.StatusPesanan == "Batal" ? "badge-danger" : "badge-warning")))" style="border-radius: var(--radius-pill); padding: 5px 12px; font-size: 0.78rem;">
+                                        @item.StatusPesanan
+                                    </span>
+                                </td>
+                                <td class="pr-4 py-3 text-center text-nowrap">
+                                    <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-outline-primary font-weight-bold px-3 py-1" style="border-radius: var(--radius-pill); font-size: 0.8rem;">
+                                        <i class="fas fa-eye mr-1"></i> Detail
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 }
 
 @if (role == "Karyawan")
 {
-    <div class="row">
-        <div class="col-lg-4 col-12">
-            <div class="small-box bg-warning">
-                <div class="inner"><h3>@Model.PesananPending</h3><p>Pesanan Pending (Belum Bayar/Verifikasi)</p></div>
-                <div class="icon"><i class="fas fa-clock"></i></div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-4 col-sm-6 mb-3 mb-lg-0">
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #f59e0b !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Pesanan Pending</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2.2rem;">@Model.PesananPending</h2>
+                    <small class="text-muted"><i class="far fa-clock mr-1 text-warning"></i> Menunggu diproses</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 56px; height: 56px; border-radius: 14px; background: #fef3c7; color: #d97706; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 mb-3 mb-lg-0">
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #0ea5e9 !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Antrean Dapur</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2.2rem;">@Model.PesananDiproses</h2>
+                    <small class="text-muted"><i class="fas fa-utensils mr-1 text-info"></i> Sedang dimasak</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 56px; height: 56px; border-radius: 14px; background: #e0f2fe; color: #0284c7; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-utensils"></i>
+                </div>
             </div>
         </div>
         <div class="col-lg-4 col-12">
-            <div class="small-box bg-info">
-                <div class="inner"><h3>@Model.PesananDiproses</h3><p>Antrean Dapur (Sedang Diproses)</p></div>
-                <div class="icon"><i class="fas fa-utensils"></i></div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-12">
-            <div class="small-box bg-primary">
-                <div class="inner"><h3>@Model.JadwalPengiriman.Count</h3><p>Jadwal Pengiriman Aktif</p></div>
-                <div class="icon"><i class="fas fa-truck"></i></div>
+            <div class="card-modern p-4 h-100 d-flex align-items-center justify-content-between border-0 shadow-sm" style="border-left: 5px solid #3b82f6 !important;">
+                <div>
+                    <span class="text-uppercase text-muted font-weight-bold small" style="letter-spacing: 0.5px;">Jadwal Pengiriman</span>
+                    <h2 class="font-heading font-weight-bold text-dark mt-1 mb-0" style="font-size: 2.2rem;">@Model.JadwalPengiriman.Count</h2>
+                    <small class="text-muted"><i class="fas fa-truck mr-1 text-primary"></i> Sedang disiapkan &amp; dikirim</small>
+                </div>
+                <div class="stat-icon-wrapper shadow-xs" style="width: 56px; height: 56px; border-radius: 14px; background: #dbeafe; color: #2563eb; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-truck"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Delivery Schedule -->
-        <div class="col-md-7">
-            <div class="card card-info card-outline">
-                <div class="card-header"><h3 class="card-title">Jadwal Antrean Pengiriman (Kitchen Queue)</h3></div>
+        <!-- Antrean Dapur & Pengiriman (Full / 8 cols) -->
+        <div class="col-xl-8 col-lg-7 col-12 mb-4">
+            <div class="card card-outline card-info shadow-sm border-0 h-100" style="border-radius: var(--radius-lg); overflow: hidden;">
+                <div class="card-header bg-white py-3 px-4 border-bottom">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <div>
+                            <h5 class="font-weight-bold text-dark mb-1">
+                                <i class="fas fa-truck-loading text-info mr-2"></i> Antrean Dapur &amp; Pengiriman
+                            </h5>
+                            <small class="text-muted">Menampilkan pesanan yang sedang dimasak di dapur (Diproses) dan yang sedang di jalan (Dikirim), diurutkan dari jadwal terdekat.</small>
+                        </div>
+                        <span class="badge badge-info px-3 py-2 font-weight-bold mt-2 mt-sm-0" style="border-radius: var(--radius-pill); font-size: 0.78rem;">
+                            @Model.JadwalPengiriman.Count Jadwal Aktif
+                        </span>
+                    </div>
+                </div>
                 <div class="card-body p-0">
-                    <table class="table table-hover table-striped table-valign-middle">
-                        <thead>
-                            <tr>
-                                <th>No. Pesanan</th>
-                                <th>Pelanggan</th>
-                                <th>Tgl Pengiriman</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.JadwalPengiriman.Any())
-                            {
-                                foreach (var item in Model.JadwalPengiriman)
+                    <div class="table-responsive mb-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="thead-light" style="background-color: #f8fafc;">
+                                <tr class="text-uppercase font-weight-bold" style="font-size: 0.76rem; letter-spacing: 0.6px; color: #64748b;">
+                                    <th class="pl-4 py-3 text-nowrap">No. Pesanan</th>
+                                    <th class="py-3">Pelanggan</th>
+                                    <th class="py-3 text-nowrap">Tgl Pengiriman</th>
+                                    <th class="py-3 text-nowrap">Tahapan</th>
+                                    <th class="pr-4 py-3 text-center text-nowrap">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.JadwalPengiriman.Any())
+                                {
+                                    foreach (var item in Model.JadwalPengiriman)
+                                    {
+                                        <tr>
+                                            <td class="pl-4 py-3 text-nowrap font-weight-bold text-primary font-monospace" style="font-size: 0.9rem;">
+                                                @item.NomorPesanan
+                                            </td>
+                                            <td class="py-3 font-weight-bold text-dark">
+                                                @(item.Pengguna?.NamaLengkap ?? "Pelanggan")
+                                            </td>
+                                            <td class="py-3 text-nowrap text-muted small">
+                                                <i class="far fa-calendar-alt mr-1 text-secondary"></i>
+                                                @item.TanggalPengiriman.ToString("dd MMM yyyy")
+                                            </td>
+                                            <td class="py-3 text-nowrap">
+                                                @if (item.StatusPesanan == "Dikirim")
+                                                {
+                                                    <span class="badge badge-primary px-3 py-2 font-weight-bold" style="border-radius: var(--radius-pill); font-size: 0.78rem;">
+                                                        <i class="fas fa-truck mr-1"></i> Sedang Dikirim
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-info px-3 py-2 font-weight-bold" style="border-radius: var(--radius-pill); font-size: 0.78rem;">
+                                                        <i class="fas fa-utensils mr-1"></i> Sedang Dimasak
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="pr-4 py-3 text-center text-nowrap">
+                                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-sm btn-outline-primary px-3 py-1 font-weight-bold text-nowrap" style="border-radius: var(--radius-pill); font-size: 0.8rem;">
+                                                    <i class="fas fa-eye mr-1"></i> Detail / Update
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@item.NomorPesanan</td>
-                                        <td>@item.Pengguna?.NamaLengkap</td>
-                                        <td>@item.TanggalPengiriman.ToString("dd MMM yyyy")</td>
-                                        <td>
-                                            <span class="badge @(item.StatusPesanan == "Dikirim" ? "badge-primary" : "badge-info")">
-                                                @item.StatusPesanan
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-default btn-xs">Detail / Update</a>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="fas fa-inbox fa-3x mb-3 text-muted" style="opacity: 0.4;"></i>
+                                            <p class="font-weight-bold mb-0">Tidak ada jadwal antrean dapur atau pengiriman saat ini.</p>
                                         </td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center">Tidak ada jadwal pengiriman aktif.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Verification Pending -->
-        <div class="col-md-5">
-            <div class="card card-warning card-outline">
-                <div class="card-header"><h3 class="card-title">Butuh Verifikasi Pembayaran</h3></div>
-                <div class="card-body p-0">
-                    <table class="table table-hover table-valign-middle">
-                        <thead>
-                            <tr>
-                                <th>No. Pesanan</th>
-                                <th>Pelanggan</th>
-                                <th>Metode</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.PesananButuhVerifikasi.Any())
-                            {
-                                foreach (var item in Model.PesananButuhVerifikasi)
-                                {
-                                    <tr>
-                                        <td>@item.NomorPesanan</td>
-                                        <td>@item.Pengguna?.NamaLengkap</td>
-                                        <td>@item.Pembayaran?.MetodePembayaran</td>
-                                        <td>
-                                            <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-warning btn-xs text-bold">Verifikasi</a>
-                                        </td>
+        <!-- Verification Pending (4 cols) -->
+        <div class="col-xl-4 col-lg-5 col-12 mb-4">
+            <div class="card card-outline card-warning shadow-sm border-0 h-100" style="border-radius: var(--radius-lg); overflow: hidden;">
+                <div class="card-header bg-white py-3 px-4 border-bottom">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="font-weight-bold text-dark mb-0">
+                            <i class="fas fa-receipt text-warning mr-2"></i> Butuh Verifikasi
+                        </h5>
+                        @if (Model.PesananButuhVerifikasi.Any())
+                        {
+                            <span class="badge badge-warning font-weight-bold px-2 py-1" style="font-size: 0.75rem;">
+                                @Model.PesananButuhVerifikasi.Count Menunggu
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="card-body p-0 d-flex flex-column justify-content-center">
+                    @if (Model.PesananButuhVerifikasi.Any())
+                    {
+                        <div class="table-responsive mb-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="thead-light" style="background-color: #f8fafc;">
+                                    <tr class="text-uppercase font-weight-bold" style="font-size: 0.76rem; letter-spacing: 0.6px; color: #64748b;">
+                                        <th class="pl-4 py-3 text-nowrap">No. Pesanan</th>
+                                        <th class="py-3">Pelanggan</th>
+                                        <th class="py-3 text-nowrap">Metode</th>
+                                        <th class="pr-4 py-3 text-center text-nowrap">Aksi</th>
                                     </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="4" class="text-center">Semua pembayaran telah diverifikasi.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.PesananButuhVerifikasi)
+                                    {
+                                        <tr>
+                                            <td class="pl-4 py-3 text-nowrap font-weight-bold text-primary font-monospace small">
+                                                @item.NomorPesanan
+                                            </td>
+                                            <td class="py-3 font-weight-bold text-dark small text-truncate" style="max-width: 100px;">
+                                                @item.Pengguna?.NamaLengkap
+                                            </td>
+                                            <td class="py-3 text-nowrap small text-muted">
+                                                @item.Pembayaran?.MetodePembayaran
+                                            </td>
+                                            <td class="pr-4 py-3 text-center text-nowrap">
+                                                <a href="@Url.Action("Details", "Pesanan", new { id = item.PesananId })" class="btn btn-warning btn-sm font-weight-bold text-dark px-3 py-1 shadow-xs" style="border-radius: var(--radius-pill); font-size: 0.78rem;">
+                                                    <i class="fas fa-search mr-1"></i> Periksa
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center my-auto">
+                            <div class="stat-icon-wrapper mx-auto mb-2" style="width: 52px; height: 52px; background: #ecfdf5; color: #10b981; border-radius: 50%; font-size: 1.4rem; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h6 class="font-weight-bold text-dark mb-1">Semua Pembayaran Telah Diverifikasi</h6>
+                            <p class="text-muted small mb-0">Tidak ada bukti transfer yang menunggu verifikasi saat ini.</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -244,15 +433,22 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
                         scales: {
                             y: {
                                 type: 'linear',
                                 display: true,
                                 position: 'left',
                                 beginAtZero: true,
-                                min: 0,
+                                suggestedMin: 0,
+                                suggestedMax: 1000000,
                                 ticks: {
+                                    precision: 0,
                                     callback: function(value) {
+                                        if (value % 1 !== 0) return '';
                                         return 'Rp ' + Number(value).toLocaleString('id-ID');
                                     }
                                 }
@@ -263,12 +459,26 @@
                                 position: 'right',
                                 beginAtZero: true,
                                 min: 0,
+                                suggestedMax: 5,
                                 grid: {
                                     drawOnChartArea: false
                                 },
                                 ticks: {
                                     stepSize: 1,
                                     precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var label = context.dataset.label || '';
+                                        if (context.dataset.yAxisID === 'y') {
+                                            return label + ': Rp ' + Number(context.raw).toLocaleString('id-ID');
+                                        }
+                                        return label + ': ' + context.raw + ' pesanan';
+                                    }
                                 }
                             }
                         }

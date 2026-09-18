@@ -1,19 +1,30 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace CateringApp.Models.ViewModel;
 
 public class PemesananViewModel
 {
+    public int? PenggunaId { get; set; }
+
+    [Display(Name = "Nama Pemesan (Walk-in / WA)")]
+    public string? NamaPemesanManual { get; set; }
+
+    [Display(Name = "No. Telepon / WhatsApp")]
+    public string? TeleponPemesanManual { get; set; }
+
     [Required(ErrorMessage = "Pilih paket menu")]
     public int PaketId { get; set; }
 
     [Required(ErrorMessage = "Tentukan jumlah porsi")]
-    [Range(1, 1000, ErrorMessage = "Minimal pemesanan 1 porsi")]
-    public int JumlahPorsi { get; set; }
+    [Range(10, 2000, ErrorMessage = "Minimal pemesanan paket katering adalah 10 porsi")]
+    public int JumlahPorsi { get; set; } = 10;
 
     [Required(ErrorMessage = "Tentukan tanggal kirim")]
     [DataType(DataType.Date)]
     public DateTime TanggalPengiriman { get; set; } = DateTime.Today.AddDays(2);
+
+    [Required(ErrorMessage = "Pilih slot jam pengantaran")]
+    public string JamPengantaran { get; set; } = "10:00 - 12:00";
 
     [Required(ErrorMessage = "Alamat pengiriman wajib diisi")]
     public string AlamatPengiriman { get; set; } = string.Empty;

@@ -1,4 +1,5 @@
-﻿using CateringApp.Filters;
+using CateringApp.Filters;
+using CateringApp.Helpers;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -75,37 +76,79 @@ namespace CateringApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PaketMenu model, IFormFile? FileGambar)
         {
+            // Validasi Kategori
+            if (model.KategoriId <= 0)
+            {
+                ModelState.AddModelError("KategoriId", "Kategori menu wajib dipilih.");
+            }
+
+            // Validasi Nama Paket
+            var (isNamaValid, namaErr) = ValidationHelper.ValidateNamaPaket(model.NamaPaket);
+            if (!isNamaValid)
+            {
+                ModelState.AddModelError("NamaPaket", namaErr!);
+            }
+
+            // Validasi Harga (Tidak boleh 0, tidak boleh minus)
+            var (isHargaValid, hargaErr) = ValidationHelper.ValidateHargaMenu(model.Harga);
+            if (!isHargaValid)
+            {
+                ModelState.AddModelError("Harga", hargaErr!);
+            }
+
+            // Validasi Deskripsi Menu (Opsional)
+            var (isDescValid, descErr) = ValidationHelper.ValidateDeskripsiMenu(model.DeskripsiMenu, isRequired: false);
+            if (!isDescValid)
+            {
+                ModelState.AddModelError("DeskripsiMenu", descErr!);
+            }
+
+            // Validasi File Gambar
+            if (FileGambar != null && FileGambar.Length > 0)
+            {
+                if (FileGambar.Length > 2 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("FileGambar", "Ukuran file gambar maksimal 2MB.");
+                }
+
+                string ext = Path.GetExtension(FileGambar.FileName).ToLower();
+                var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                if (!allowedExt.Contains(ext))
+                {
+                    ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                model.NamaPaket = model.NamaPaket.Trim();
+                model.DeskripsiMenu = model.DeskripsiMenu?.Trim();
+
                 if (FileGambar != null && FileGambar.Length > 0)
                 {
                     string ext = Path.GetExtension(FileGambar.FileName).ToLower();
-                    var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                    if (allowedExt.Contains(ext))
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
+                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = $"MENU_{Guid.NewGuid()}{ext}";
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
-                        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                        string uniqueFileName = $"MENU_{Guid.NewGuid()}{ext}";
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await FileGambar.CopyToAsync(fileStream);
-                        }
-
-                        model.Gambar = $"/uploads/menu/{uniqueFileName}";
+                        await FileGambar.CopyToAsync(fileStream);
                     }
-                    else
-                    {
-                        ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
-                        ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
-                        return View(model);
-                    }
+
+                    model.Gambar = $"/uploads/menu/{uniqueFileName}";
+                }
+                else if (string.IsNullOrEmpty(model.Gambar))
+                {
+                    var allKat = _service.GetAllKategori();
+                    var cat = allKat.FirstOrDefault(k => k.KategoriId == model.KategoriId);
+                    model.Gambar = MenuImageHelper.GetGambarUrl(model.NamaPaket, null, cat?.NamaKategori);
                 }
 
                 _service.CreatePaket(model);
-                TempData["Success"] = "Paket menu berhasil ditambahkan.";
+                TempData["Success"] = $"Paket menu '{model.NamaPaket}' berhasil ditambahkan.";
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
@@ -116,6 +159,15 @@ namespace CateringApp.Controllers
         {
             var data = _service.GetPaketById(id);
             if (data == null) return NotFound();
+
+            if (string.IsNullOrEmpty(data.Gambar))
+            {
+                var allKat = _service.GetAllKategori();
+                var cat = allKat.FirstOrDefault(k => k.KategoriId == data.KategoriId);
+                data.Gambar = MenuImageHelper.GetGambarUrl(data.NamaPaket, null, cat?.NamaKategori);
+                _service.UpdatePaket(data);
+            }
+
             ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", data.KategoriId);
             return View(data);
         }
@@ -124,39 +176,85 @@ namespace CateringApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PaketMenu model, IFormFile? FileGambar)
         {
+            // Validasi Kategori
+            if (model.KategoriId <= 0)
+            {
+                ModelState.AddModelError("KategoriId", "Kategori menu wajib dipilih.");
+            }
+
+            // Validasi Nama Paket
+            var (isNamaValid, namaErr) = ValidationHelper.ValidateNamaPaket(model.NamaPaket);
+            if (!isNamaValid)
+            {
+                ModelState.AddModelError("NamaPaket", namaErr!);
+            }
+
+            // Validasi Harga (Tidak boleh 0, tidak boleh minus)
+            var (isHargaValid, hargaErr) = ValidationHelper.ValidateHargaMenu(model.Harga);
+            if (!isHargaValid)
+            {
+                ModelState.AddModelError("Harga", hargaErr!);
+            }
+
+            // Validasi Deskripsi Menu (Opsional)
+            var (isDescValid, descErr) = ValidationHelper.ValidateDeskripsiMenu(model.DeskripsiMenu, isRequired: false);
+            if (!isDescValid)
+            {
+                ModelState.AddModelError("DeskripsiMenu", descErr!);
+            }
+
+            // Validasi File Gambar
+            if (FileGambar != null && FileGambar.Length > 0)
+            {
+                if (FileGambar.Length > 2 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("FileGambar", "Ukuran file gambar maksimal 2MB.");
+                }
+
+                string ext = Path.GetExtension(FileGambar.FileName).ToLower();
+                var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                if (!allowedExt.Contains(ext))
+                {
+                    ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                model.NamaPaket = model.NamaPaket.Trim();
+                model.DeskripsiMenu = model.DeskripsiMenu?.Trim();
+
                 if (FileGambar != null && FileGambar.Length > 0)
                 {
                     string ext = Path.GetExtension(FileGambar.FileName).ToLower();
-                    var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                    if (allowedExt.Contains(ext))
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
+                    if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = $"MENU_{Guid.NewGuid()}{ext}";
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu");
-                        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                        string uniqueFileName = $"MENU_{Guid.NewGuid()}{ext}";
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await FileGambar.CopyToAsync(fileStream);
-                        }
-
-                        model.Gambar = $"/uploads/menu/{uniqueFileName}";
+                        await FileGambar.CopyToAsync(fileStream);
                     }
-                    else
-                    {
-                        ModelState.AddModelError("FileGambar", "Format gambar harus berupa JPG, JPEG, PNG, atau WEBP.");
-                        ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
-                        return View(model);
-                    }
+
+                    model.Gambar = $"/uploads/menu/{uniqueFileName}";
                 }
 
                 _service.UpdatePaket(model);
-                TempData["Success"] = "Paket menu berhasil diubah.";
+                TempData["Success"] = $"Paket menu '{model.NamaPaket}' berhasil diperbarui.";
                 return RedirectToAction(nameof(Index));
             }
+
+            if (string.IsNullOrEmpty(model.Gambar))
+            {
+                var existing = _service.GetPaketById(model.PaketId);
+                if (existing != null && !string.IsNullOrEmpty(existing.Gambar))
+                {
+                    model.Gambar = existing.Gambar;
+                }
+            }
+
             ViewBag.KategoriId = new SelectList(_service.GetAllKategori(), "KategoriId", "NamaKategori", model.KategoriId);
             return View(model);
         }
