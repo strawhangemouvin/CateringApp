@@ -152,6 +152,17 @@ public class PesananController : Controller
             ModelState.AddModelError("JumlahPorsi", "Minimal pemesanan paket katering adalah 10 porsi.");
         }
 
+        // Validasi batas jangkauan pengiriman katering (Catering Mimi Saripah - Tenajar Lor, Kertasemaya)
+        if (!string.IsNullOrWhiteSpace(model.AlamatPengiriman))
+        {
+            var cekWilayah = OngkirHelper.CekWilayah(model.AlamatPengiriman);
+            if (!cekWilayah.IsCovered)
+            {
+                ModelState.AddModelError("AlamatPengiriman", 
+                    "Mohon maaf, lokasi pengiriman berada di luar jangkauan kurir katering Mimi Saripah (Maksimal pengantaran area Indramayu, Cirebon, Majalengka, dan Subang perbatasan).");
+            }
+        }
+
         if (ModelState.IsValid)
         {
             int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;

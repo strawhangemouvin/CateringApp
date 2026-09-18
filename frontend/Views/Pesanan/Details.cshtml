@@ -33,7 +33,7 @@
         }
     }
 
-    string? customerPhone = (!string.IsNullOrEmpty(walkInTelp) && walkInTelp != "-") ? walkInTelp : Model.Pengguna?.Telepon;
+    string? customerPhone = (!string.IsNullOrEmpty(walkInTelp) && walkInTelp != "-") ? walkInTelp : Model.Pengguna?.NomorTelepon;
     string customerDisplayName = walkInNama ?? Model.Pengguna?.NamaLengkap ?? "Pelanggan";
     string cleanPhone = "";
     string waUrl = "#";

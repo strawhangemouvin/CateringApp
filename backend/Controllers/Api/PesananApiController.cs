@@ -1,6 +1,7 @@
 using CateringApp.Models.DTO;
 using CateringApp.Models.Entity;
 using CateringApp.Services.Context;
+using CateringApp.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -220,6 +221,17 @@ namespace CateringApp.Controllers.Api
                         statusCode = 400,
                         status = "fail",
                         message = $"Pengguna dengan ID {model.PenggunaId} tidak ditemukan."
+                    });
+                }
+
+                var cekWilayah = OngkirHelper.CekWilayah(model.AlamatPengiriman);
+                if (!cekWilayah.IsCovered)
+                {
+                    return BadRequest(new
+                    {
+                        statusCode = 400,
+                        status = "fail",
+                        message = "Mohon maaf, lokasi pengiriman berada di luar jangkauan kurir katering Mimi Saripah (Maksimal pengantaran area Indramayu, Cirebon, Majalengka, dan Subang perbatasan)."
                     });
                 }
 
