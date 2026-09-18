@@ -28,10 +28,10 @@
                         <td>@Model.Email</td>
                     </tr>
                     <tr>
-                        <th>Peran / Role</th>
+                        <th>Peran Pengguna</th>
                         <td>
                              <span class="badge @(Model.Peran?.NamaPeran == "Pemilik Toko" ? "badge-danger" : (Model.Peran?.NamaPeran == "Karyawan" ? "badge-warning" : "badge-success"))">
-                                 @Model.Peran?.NamaPeran
+                                 @(Model.Peran?.NamaPeran == "User" ? "Pelanggan" : Model.Peran?.NamaPeran)
                              </span>
                         </td>
                     </tr>

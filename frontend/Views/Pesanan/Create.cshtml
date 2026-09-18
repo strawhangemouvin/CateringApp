@@ -9,9 +9,9 @@
             <div class="card-header bg-gradient-danger text-white py-3" style="border-radius: 12px 12px 0 0; background: linear-gradient(135deg, #e63946 0%, #c92a37 100%);">
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0 font-weight-bold">
-                        <i class="fas fa-cash-register mr-2"></i> Pesanan Manual (Walk-in / WhatsApp)
+                        <i class="fas fa-cash-register mr-2"></i> Pesanan Manual (Pesan Langsung / WhatsApp)
                     </h5>
-                    <span class="badge badge-light text-danger font-weight-bold px-3 py-1">Khusus Staf &amp; Owner</span>
+                    <span class="badge badge-light text-danger font-weight-bold px-3 py-1">Khusus Karyawan &amp; Pemilik Toko</span>
                 </div>
             </div>
 
@@ -20,7 +20,7 @@
                     <div class="alert alert-info border-0 rounded-lg shadow-xs mb-4" style="background-color: #f0fdf4; border-left: 4px solid #10b981 !important;">
                         <i class="fas fa-info-circle text-success mr-2"></i>
                         <span class="text-dark small">
-                            Formulir ini digunakan oleh <strong>Karyawan &amp; Pemilik Toko</strong> untuk mencatat pesanan katering dari pelanggan yang datang langsung (walk-in) atau memesan lewat panggilan telepon/WhatsApp.
+                            Formulir ini digunakan oleh <strong>Karyawan &amp; Pemilik Toko</strong> untuk mencatat pesanan katering dari pelanggan yang datang langsung atau memesan lewat panggilan telepon/WhatsApp.
                         </span>
                     </div>
 
@@ -31,7 +31,7 @@
                     <div class="form-group mb-3">
                         <label asp-for="PenggunaId" class="font-weight-bold text-dark small">Pilih Pelanggan Terdaftar (Jika Ada)</label>
                         <select id="selectPengguna" asp-for="PenggunaId" class="form-control custom-select-scroll" asp-items="ViewBag.CustomerList">
-                            <option value="">-- Tamu Walk-in / Pelanggan Baru (Belum Punya Akun) --</option>
+                            <option value="">-- Pelanggan Langsung / Pemesan Baru (Belum Punya Akun) --</option>
                         </select>
                         <small class="form-text text-muted">Pilih akun jika pelanggan sudah pernah mendaftar di sistem web.</small>
                     </div>
@@ -39,7 +39,7 @@
                     <!-- Panel tamu: muncul jika belum pilih pelanggan terdaftar -->
                     <div id="panelTamu" class="p-3 mb-3 rounded" style="background: #fff8e1; border: 1.5px dashed #f59e0b; display:none;">
                         <p class="small font-weight-bold text-warning mb-2">
-                            <i class="fas fa-user-tag mr-1"></i> Data Tamu / Pelanggan Baru (Wajib Diisi)
+                            <i class="fas fa-user-tag mr-1"></i> Data Pemesan Langsung / Pelanggan Baru (Wajib Diisi)
                         </p>
                         <div class="row">
                             <div class="col-md-6 form-group mb-2">
@@ -123,6 +123,15 @@
                         <label asp-for="Catatan" class="font-weight-bold text-dark small">Catatan Khusus Pesanan</label>
                         <textarea asp-for="Catatan" class="form-control" rows="2" placeholder="Contoh: Sambal dipisah, minta sendok garpu lebih, dll."></textarea>
                         <span asp-validation-for="Catatan" class="text-danger small"></span>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-lg shadow-xs mt-3 mb-2" style="background-color: #eff6ff; border-left: 4px solid #3b82f6 !important;">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle text-primary mr-2 mt-1"></i>
+                            <small class="text-dark">
+                                <strong>Alur Pembayaran &amp; Proses Dapur:</strong> Setelah pesanan disimpan, Anda akan langsung diarahkan ke halaman detail pesanan. Di sana Anda dapat langsung mengklik tombol <strong>"Konfirmasi Lunas &amp; Mulai Masak"</strong> jika pelanggan telah membayar tunai/transfer di kasir, membuka layar QRIS untuk di-scan, atau mengirimkan tagihan via WhatsApp.
+                            </small>
+                        </div>
                     </div>
                 </div>
 

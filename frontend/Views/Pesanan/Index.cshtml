@@ -55,7 +55,7 @@
                     <label class="font-weight-bold text-muted small mb-1">Status Pesanan</label>
                     <select name="status" class="form-control custom-select custom-select-scroll" style="border-radius: var(--radius-sm);">
                         <option value="">-- Semua Status --</option>
-                        <option value="Pending" selected="@(ViewBag.Status == "Pending")">Pending</option>
+                        <option value="Pending" selected="@(ViewBag.Status == "Pending")">Menunggu Bayar</option>
                         <option value="Diproses" selected="@(ViewBag.Status == "Diproses")">Diproses</option>
                         <option value="Dikirim" selected="@(ViewBag.Status == "Dikirim")">Dikirim</option>
                         <option value="Selesai" selected="@(ViewBag.Status == "Selesai")">Selesai</option>
@@ -181,7 +181,7 @@
                                     else
                                     {
                                         <span class="badge-modern badge-modern-warning">
-                                            <i class="fas fa-clock"></i> Pending
+                                            <i class="fas fa-clock"></i> Menunggu Bayar
                                         </span>
                                     }
                                 </td>
@@ -194,8 +194,8 @@
                                     }
                                     else if (item.StatusPesanan == "Menunggu Refund")
                                     {
-                                        <span class="badge-modern badge-modern-warning" title="Sedang menunggu proses transfer refund dari owner">
-                                            <i class="fas fa-clock mr-1"></i> Proses Refund
+                                        <span class="badge-modern badge-modern-warning" title="Sedang menunggu proses transfer pengembalian dana dari pemilik toko">
+                                            <i class="fas fa-clock mr-1"></i> Proses Pengembalian Dana
                                         </span>
                                     }
                                     else if (item.Pembayaran != null)

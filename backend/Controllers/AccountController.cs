@@ -207,7 +207,7 @@ public class AccountController : Controller
             _context.Penggunas.Add(user);
             _context.SaveChanges();
 
-            TempData["Success"] = "Pendaftaran akun berhasil! Silakan login.";
+            TempData["Success"] = "Pendaftaran akun berhasil! Silakan masuk.";
             return RedirectToAction("Login");
         }
         return View(model);
@@ -217,7 +217,7 @@ public class AccountController : Controller
     {
         Response.Cookies.Delete("JwtToken");
         HttpContext.Session.Clear();
-        TempData["Success"] = "Anda telah berhasil logout.";
+        TempData["Success"] = "Anda telah berhasil keluar dari sesi.";
         return RedirectToAction("Login");
     }
 
@@ -291,7 +291,7 @@ public class AccountController : Controller
 
                 _cache.Remove(cacheKey);
 
-                TempData["Success"] = "Password baru berhasil disimpan. Silakan login kembali.";
+                TempData["Success"] = "Kata sandi baru berhasil disimpan. Silakan masuk kembali.";
                 return RedirectToAction("Login");
             }
             ModelState.AddModelError("", "Akun dengan email tersebut tidak ditemukan.");

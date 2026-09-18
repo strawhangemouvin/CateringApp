@@ -26,10 +26,12 @@ namespace CateringApp.Helpers
             string name = (namaMenu ?? string.Empty).ToLowerInvariant();
             string cat = (kategori ?? string.Empty).ToLowerInvariant();
 
-            // 1. Nasi Tumpeng (Wajib foto tumpeng asli bertingkat / kerucut kuning komplit)
+            // 1. Nasi Tumpeng (Wajib foto kerucut tumpeng kuning komplit asli)
             if (name.Contains("tumpeng") || cat.Contains("tumpeng"))
             {
-                return "https://images.unsplash.com/photo-1626074353765-517a681e40be?q=80&w=700&auto=format&fit=crop";
+                if (name.Contains("mini"))
+                    return "/uploads/menu/tumpeng_mini_selamatan.jpg";
+                return "/uploads/menu/tumpeng_kuning_komplit.jpg";
             }
 
             // 2. Rendang Daging Sapi Minang Otentik
@@ -41,42 +43,54 @@ namespace CateringApp.Helpers
             // 3. Sate Ayam Madura
             if (name.Contains("sate"))
             {
-                return "https://images.unsplash.com/photo-1529563021893-cc83c914d73e?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/sate_ayam_madura.jpg";
             }
 
             // 4. Bakso Sapi Malang
             if (name.Contains("bakso"))
             {
-                return "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/MENU_afddf944-9c88-43f0-b499-63f9afdfea7b.jpg";
             }
 
             // 5. Soto Betawi Daging Sapi Kuah Santan/Susu
             if (name.Contains("soto"))
             {
-                return "https://images.unsplash.com/photo-1572656631137-7935297eff55?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/soto_betawi_daging.jpg";
             }
 
             // 6. Nasi Liwet Solo Komplit
             if (name.Contains("liwet"))
             {
-                return "https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/MENU_1f768aa2-8523-48e8-87b1-a3b9f8af1050.jpeg";
             }
 
-            // 7. Ayam Bakar Spesial Bumbu Madu/Kecap
-            if (name.Contains("bakar") && (name.Contains("ayam") || name.Contains("ikan")))
+            // 7. Ayam Bakar / Ikan Bakar Spesial
+            if (name.Contains("bakar") && (name.Contains("ayam") || name.Contains("ikan") || name.Contains("nila")))
             {
-                if (name.Contains("ikan"))
-                    return "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=700&auto=format&fit=crop";
-                return "https://images.unsplash.com/photo-1598514983318-2f64f8f4796c?q=80&w=700&auto=format&fit=crop";
+                if (name.Contains("ikan") || name.Contains("nila"))
+                    return "/uploads/menu/ikan_nila_bakar.jpg";
+                return "/uploads/menu/nasi_kotak_ayam_bakar.jpg";
             }
 
             // 8. Ayam Goreng Lengkuas / Serundeng
             if (name.Contains("lengkuas") || name.Contains("serundeng") || (name.Contains("ayam") && name.Contains("goreng")))
             {
-                return "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/nasi_kotak_ayam_lengkuas.jpg";
             }
 
-            // 9. Prasmanan / Buffet Pernikahan & Hajatan
+            // 9. Puding Sutra Mangga
+            if (name.Contains("puding") || name.Contains("mangga"))
+            {
+                return "/uploads/menu/puding_sutra_mangga.jpg";
+            }
+
+            // 10. Bolu Gulung Red Velvet & Keju
+            if (name.Contains("bolu") || name.Contains("velvet"))
+            {
+                return "/uploads/menu/bolu_gulung_red_velvet.jpg";
+            }
+
+            // 11. Prasmanan / Buffet Pernikahan & Hajatan
             if (name.Contains("prasmanan") || cat.Contains("prasmanan") || cat.Contains("hajatan"))
             {
                 if (name.Contains("pernikahan") || name.Contains("wedding"))
@@ -84,38 +98,40 @@ namespace CateringApp.Helpers
                 return "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=700&auto=format&fit=crop";
             }
 
-            // 10. Snack Box & Aneka Kue Tradisional
+            // 12. Snack Box & Aneka Kue Tradisional
             if (name.Contains("snack") || name.Contains("kue") || cat.Contains("snack"))
             {
-                return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=700&auto=format&fit=crop";
+                if (name.Contains("tradisional") || name.Contains("manis"))
+                    return "/uploads/menu/snack_box_tradisional.jpg";
+                return "/uploads/menu/snack_box_rapat.jpg";
             }
 
-            // 11. Minuman Segar / Es Teler / Es Campur
+            // 13. Minuman Segar / Es Teler / Es Campur
             if (name.Contains("es") || name.Contains("teler") || name.Contains("campur") || cat.Contains("minuman"))
             {
-                return "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/es_campur_nusantara.jpg";
             }
 
-            // 12. Nasi Kebuli Kambing
+            // 14. Nasi Kebuli Kambing / Aqiqah
             if (name.Contains("kebuli") || name.Contains("kambing") || name.Contains("aqiqah"))
             {
-                return "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?q=80&w=700&auto=format&fit=crop";
+                return "/uploads/menu/nasi_kebuli_kambing.jpg";
             }
 
-            // 13. Coffee Break & Pastry
+            // 15. Coffee Break & Pastry
             if (name.Contains("coffee") || name.Contains("pastry"))
             {
                 return "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?q=80&w=700&auto=format&fit=crop";
             }
 
-            // 14. Menu Rumahan / Harian / Diet
+            // 16. Menu Rumahan / Harian / Diet
             if (name.Contains("harian") || name.Contains("keluarga") || name.Contains("diet"))
             {
                 return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=700&auto=format&fit=crop";
             }
 
-            // Fallback: Nasi Kotak Tradisional
-            return "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=700&auto=format&fit=crop";
+            // Fallback: Nasi Kotak Ayam Bakar Tradisional
+            return "/uploads/menu/nasi_kotak_ayam_bakar.jpg";
         }
     }
 }

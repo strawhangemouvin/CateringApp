@@ -323,6 +323,7 @@ namespace CateringApp.Services.Context
                     if (dummyUser != null && i <= realCustomers.Count)
                     {
                         var realData = realCustomers[i - 1];
+                        dummyUser.Username = realData.Username;
                         dummyUser.NamaLengkap = realData.Nama;
                         dummyUser.Email = realData.Email;
                         dummyUser.NomorTelepon = realData.Telepon;

@@ -772,7 +772,7 @@ public class CateringService : ICateringService
                 list.Add(new NotifikasiItemViewModel
                 {
                     Judul = "Verifikasi Bukti Transfer!",
-                    Pesan = $"Pelanggan {u.Pengguna?.NamaLengkap ?? "User"} mengunggah bukti bayar untuk {u.NomorPesanan}.",
+                    Pesan = $"Pelanggan {u.Pengguna?.NamaLengkap ?? "Pelanggan"} mengunggah bukti bayar untuk {u.NomorPesanan}.",
                     Url = $"/Pesanan/Details/{u.PesananId}",
                     Waktu = u.Pembayaran != null ? u.Pembayaran.TanggalBayar.ToString("dd MMM HH:mm") : "Hari ini",
                     Tipe = "warning",

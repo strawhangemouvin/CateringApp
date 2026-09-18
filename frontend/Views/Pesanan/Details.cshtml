@@ -16,6 +16,39 @@
     };
     bool isCancelled = Model.StatusPesanan == "Dibatalkan" || Model.StatusPesanan == "Batal";
     bool isOverdue = Model.StatusPesanan != "Selesai" && Model.StatusPesanan != "Refund Selesai" && Model.StatusPesanan != "Menunggu Refund" && !isCancelled && Model.TanggalPengiriman.Date < DateTime.Today;
+
+    // Cek apakah pesanan dicatat manual / walk-in / WhatsApp
+    string? walkInNama = null;
+    string? walkInTelp = null;
+    var catatanDetail = Model.DetailPesanans.FirstOrDefault()?.Catatan ?? "";
+    if (catatanDetail.StartsWith("[Pesanan Walk-in / WA:") || catatanDetail.StartsWith("[Pesanan Langsung / WA:"))
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(
+            catatanDetail, 
+            @"\[Pesanan (?:Walk-in|Langsung) / WA: (.+?) \((.+?)\)");
+        if (match.Success)
+        {
+            walkInNama = match.Groups[1].Value.Trim();
+            walkInTelp = match.Groups[2].Value.Trim();
+        }
+    }
+
+    string? customerPhone = (!string.IsNullOrEmpty(walkInTelp) && walkInTelp != "-") ? walkInTelp : Model.Pengguna?.Telepon;
+    string customerDisplayName = walkInNama ?? Model.Pengguna?.NamaLengkap ?? "Pelanggan";
+    string cleanPhone = "";
+    string waUrl = "#";
+    if (!string.IsNullOrEmpty(customerPhone) && customerPhone != "-")
+    {
+        cleanPhone = customerPhone.Trim().Replace(" ", "").Replace("-", "").Replace("+", "");
+        if (cleanPhone.StartsWith("0"))
+        {
+            cleanPhone = "62" + cleanPhone.Substring(1);
+        }
+        string appBaseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+        string paymentUrl = $"{appBaseUrl}/Pesanan/Bayar/{Model.PesananId}";
+        string waText = Uri.EscapeDataString($"Halo Kak {customerDisplayName}, pesanan katering Anda #{Model.NomorPesanan} senilai Rp {Model.TotalBayar:N0} di Catering Mimi Saripah telah kami catat.\n\nUntuk rincian pesanan serta pembayaran (BCA / Mandiri / QRIS), silakan buka tautan berikut:\n{paymentUrl}\n\nTerima kasih!");
+        waUrl = $"https://wa.me/{cleanPhone}?text={waText}";
+    }
 }
 
 <!-- Overdue Warning Banner -->
@@ -45,6 +78,45 @@
             </div>
         </div>
     }
+}
+
+<!-- Banner Cepat: Konfirmasi Pembayaran Kasir / WhatsApp untuk Karyawan & Pemilik Toko -->
+@if ((role == "Pemilik Toko" || role == "Karyawan") && !isPaymentValid && Model.StatusPesanan == "Pending")
+{
+    <div class="alert alert-warning border-0 shadow-sm mb-4" style="background: #fffbeb; border-left: 5px solid #f59e0b !important; border-radius: var(--radius-md); padding: 18px 22px;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+            <div class="d-flex align-items-center mb-3 mb-md-0" style="max-width: 680px;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width: 48px; height: 48px; background: #fef3c7; color: #d97706; font-size: 1.3rem;">
+                    <i class="fas fa-cash-register"></i>
+                </div>
+                <div>
+                    <h6 class="font-weight-bold text-dark mb-1">Pesanan Menunggu Pembayaran / Pelunasan Kasir</h6>
+                    <small class="text-muted d-block" style="line-height: 1.4;">
+                        Pesanan ini dibuat manual oleh staf atau pelanggan belum membayar. Jika pelanggan sudah membayar (tunai di toko / transfer bank langsung / sepakat COD), klik tombol di samping agar pesanan <strong>langsung lunas dan masuk proses antrean dapur</strong>.
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                <form asp-action="KonfirmasiPembayaranOtomatis" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="pesananId" value="@Model.PesananId" />
+                    <input type="hidden" name="metodePembayaran" value="Tunai di Kasir (Lunas)" />
+                    <button type="submit" class="btn btn-success btn-sm font-weight-bold shadow-xs px-3 py-2" onclick="return confirm('Konfirmasi bahwa pesanan ini telah LUNAS (Tunai/Kasir) dan langsung mulai diproses memasak di dapur?');">
+                        <i class="fas fa-check-circle mr-1"></i> Konfirmasi Lunas &amp; Mulai Masak
+                    </button>
+                </form>
+                @if (!string.IsNullOrEmpty(cleanPhone))
+                {
+                    <a href="@waUrl" target="_blank" class="btn btn-outline-success btn-sm font-weight-bold px-3 py-2" title="Kirim link pembayaran resmi ke nomor WhatsApp pemesan">
+                        <i class="fab fa-whatsapp mr-1"></i> Tagih via WA
+                    </a>
+                }
+                <a href="@Url.Action("Bayar", new { id = Model.PesananId })" class="btn btn-outline-primary btn-sm font-weight-bold px-3 py-2" title="Buka layar pembayaran dengan kode QRIS untuk di-scan pelanggan di tempat">
+                    <i class="fas fa-qrcode mr-1"></i> Buka Layar QRIS
+                </a>
+            </div>
+        </div>
+    </div>
 }
 
 <!-- Modern Order Stepper Timeline -->
@@ -172,35 +244,17 @@
                     </div>
                     <div class="col-sm-6">
                         <small class="text-muted font-weight-bold text-uppercase d-block mb-1">Nama Pemesan</small>
-                        @{
-                            // Cek apakah pesanan walk-in (nama manual tersimpan di catatan detail)
-                            string? walkInNama = null;
-                            string? walkInTelp = null;
-                            var catatanDetail = Model.DetailPesanans.FirstOrDefault()?.Catatan ?? "";
-                            if (catatanDetail.StartsWith("[Pesanan Walk-in / WA:"))
-                            {
-                                // Format: [Pesanan Walk-in / WA: Nama (Telp) - Jam Antar: ...]
-                                var match = System.Text.RegularExpressions.Regex.Match(
-                                    catatanDetail, 
-                                    @"\[Pesanan Walk-in / WA: (.+?) \((.+?)\)");
-                                if (match.Success)
-                                {
-                                    walkInNama = match.Groups[1].Value.Trim();
-                                    walkInTelp = match.Groups[2].Value.Trim();
-                                }
-                            }
-                        }
                         @if (walkInNama != null)
                         {
                             <span class="font-weight-bold text-dark">
-                                <i class="fas fa-user-tag text-warning mr-1" title="Tamu Walk-in / WA"></i>
+                                <i class="fas fa-user-tag text-warning mr-1" title="Pesanan Langsung / WhatsApp"></i>
                                 @walkInNama
                                 @if (walkInTelp != null && walkInTelp != "-")
                                 {
                                     <small class="text-muted ml-1">(@walkInTelp)</small>
                                 }
                             </span>
-                            <small class="d-block text-warning mt-1" style="font-size:0.75rem;"><i class="fas fa-info-circle mr-1"></i>Tamu / Walk-in (Tanpa Akun)</small>
+                            <small class="d-block text-warning mt-1" style="font-size:0.75rem;"><i class="fas fa-info-circle mr-1"></i>Pesanan Langsung / Tamu (Tanpa Akun)</small>
                         }
                         else
                         {
@@ -417,19 +471,60 @@
                 }
                 else
                 {
-                    <div class="text-center py-4">
-                        <div class="stat-icon-wrapper mx-auto mb-2" style="background: var(--warning-light); color: var(--warning); width: 48px; height: 48px;">
-                            <i class="fas fa-exclamation-triangle"></i>
+                    <div class="p-3 bg-light rounded-lg border mb-3 text-center">
+                        <div class="stat-icon-wrapper mx-auto mb-2" style="background: #fef3c7; color: #d97706; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-hourglass-half"></i>
                         </div>
                         <h6 class="font-weight-bold text-dark mb-1">Belum Ada Pembayaran</h6>
-                        <p class="text-muted small mb-3">Pesanan ini belum memiliki catatan bukti transfer pembayaran.</p>
-                        @if (role == "User")
-                        {
-                            <a href="@Url.Action("Bayar", new { id = Model.PesananId })" class="btn btn-modern-primary w-100 font-weight-bold py-2 shadow-sm">
-                                <i class="fas fa-credit-card mr-2"></i> Bayar Sekarang (Virtual Account / QRIS)
-                            </a>
-                        }
+                        <p class="text-muted small mb-0" style="font-size: 0.78rem;">Pesanan belum memiliki catatan pembayaran lunas.</p>
                     </div>
+
+                    @if (role == "Pemilik Toko" || role == "Karyawan")
+                    {
+                        <!-- Panel Pelunasan Langsung di Toko/Kasir -->
+                        <div class="p-3 rounded-lg border mb-3" style="background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                            <span class="text-success font-weight-bold small d-block mb-1">
+                                <i class="fas fa-cash-register mr-1"></i> Pelunasan di Tempat (Kasir / Staf)
+                            </span>
+                            <p class="text-muted small mb-2" style="font-size: 0.75rem; line-height: 1.35;">
+                                Jika pelanggan telah bayar tunai di toko, transfer langsung, atau sepakat bayar saat pesanan sampai (COD):
+                            </p>
+                            <form asp-action="KonfirmasiPembayaranOtomatis" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="pesananId" value="@Model.PesananId" />
+                                <div class="form-group mb-2">
+                                    <select name="metodePembayaran" class="form-control form-control-sm font-weight-bold custom-select" style="font-size: 0.8rem;">
+                                        <option value="Tunai di Kasir (Lunas)" selected>Tunai di Kasir / Toko (Lunas)</option>
+                                        <option value="Transfer Bank Mandiri (Lunas)">Transfer Bank Langsung (Lunas)</option>
+                                        <option value="QRIS di Toko (Lunas)">QRIS / E-Wallet di Toko (Lunas)</option>
+                                        <option value="Bayar di Tempat (COD)">Bayar di Tempat / COD (Disetujui Staf)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-sm w-100 font-weight-bold shadow-xs py-2" onclick="return confirm('Konfirmasi bahwa pesanan ini telah LUNAS dan langsung mulai proses masak di dapur?');">
+                                    <i class="fas fa-check-circle mr-1"></i> Catat Lunas &amp; Mulai Masak
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Opsi Buka Layar QRIS / WhatsApp -->
+                        <div class="d-flex flex-column" style="gap: 6px;">
+                            @if (!string.IsNullOrEmpty(cleanPhone))
+                            {
+                                <a href="@waUrl" target="_blank" class="btn btn-outline-success btn-sm font-weight-bold text-left py-2" style="border-radius: var(--radius-md);" title="Buka WhatsApp untuk mengirimkan link pembayaran resmi ke nomor HP pemesan">
+                                    <i class="fab fa-whatsapp mr-2 text-success"></i> Kirim Tagihan ke WhatsApp Pelanggan
+                                </a>
+                            }
+                            <a href="@Url.Action("Bayar", new { id = Model.PesananId })" class="btn btn-outline-primary btn-sm font-weight-bold text-left py-2" style="border-radius: var(--radius-md);" title="Tampilkan kode QRIS dinamis dan nomor Virtual Account di layar kasir">
+                                <i class="fas fa-qrcode mr-2 text-primary"></i> Buka Layar QRIS / Bayar Online
+                            </a>
+                        </div>
+                    }
+                    else if (role == "User")
+                    {
+                        <a href="@Url.Action("Bayar", new { id = Model.PesananId })" class="btn btn-modern-primary w-100 font-weight-bold py-2 shadow-sm">
+                            <i class="fas fa-credit-card mr-2"></i> Bayar Sekarang (Virtual Account / QRIS)
+                        </a>
+                    }
                 }
             </div>
         </div>
@@ -467,7 +562,7 @@
                             else
                             {
                                 <div class="alert alert-warning p-2 small mb-0" style="border-radius: var(--radius-md);">
-                                    <i class="fas fa-shield-alt mr-1"></i> <strong>Pemisahan Tugas:</strong> Verifikasi bukti transfer bank merupakan wewenang <strong>Pemilik Toko (Owner)</strong> untuk mencegah fraud internal.
+                                    <i class="fas fa-shield-alt mr-1"></i> <strong>Pemisahan Tugas:</strong> Verifikasi bukti transfer bank merupakan wewenang <strong>Pemilik Toko</strong> untuk mencegah penipuan internal.
                                 </div>
                             }
                         </div>
@@ -520,10 +615,24 @@
                     }
                     else
                     {
-                        if (!isPaymentValid)
+                        if (!isPaymentValid && Model.StatusPesanan == "Pending")
+                        {
+                            <div class="alert alert-warning p-2 small mb-2" style="border-radius: var(--radius-md);">
+                                <i class="fas fa-exclamation-triangle mr-1"></i> <strong>Pembayaran Belum Tercatat</strong>: Tombol proses terkunci sebelum ada konfirmasi bayar.
+                            </div>
+                            <form asp-action="KonfirmasiPembayaranOtomatis" method="post" class="mb-3">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="pesananId" value="@Model.PesananId" />
+                                <input type="hidden" name="metodePembayaran" value="Tunai di Kasir (Lunas)" />
+                                <button type="submit" class="btn btn-warning btn-sm w-100 font-weight-bold py-2 shadow-xs" onclick="return confirm('Konfirmasi bahwa pesanan ini telah DIBAYAR LUNAS (Kasir/Tunai/Transfer/COD) dan langsung mulai diproses memasak?');">
+                                    <i class="fas fa-unlock-alt mr-1"></i> Buka Kunci: Catat Lunas &amp; Mulai Masak
+                                </button>
+                            </form>
+                        }
+                        else if (!isPaymentValid)
                         {
                             <div class="alert alert-warning p-2 small mb-3" style="border-radius: var(--radius-md);">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> Pembayaran belum valid. Tombol proses & selesai dikunci.
+                                <i class="fas fa-exclamation-triangle mr-1"></i> Pembayaran belum valid. Tombol proses &amp; selesai dikunci.
                             </div>
                         }
 
@@ -630,10 +739,10 @@
                         {
                             <div class="alert alert-warning border-0 rounded-lg p-3 mb-0" style="background-color: #fffbeb; border-left: 4px solid #f59e0b !important;">
                                 <div class="d-flex align-items-center mb-1 font-weight-bold text-warning">
-                                    <i class="fas fa-shield-alt mr-2"></i> Wewenang Keuangan Khusus Owner &amp; Pelanggan
+                                    <i class="fas fa-shield-alt mr-2"></i> Wewenang Keuangan Khusus Pemilik Toko &amp; Pelanggan
                                 </div>
                                 <p class="small text-muted mb-0">
-                                    Pesanan ini telah dibatalkan dengan pembayaran lunas (<strong>Rp @Model.TotalBayar.ToString("N0")</strong>). Pengisian nomor rekening serta eksekusi pengembalian dana (refund) sepenuhnya ditangani oleh <strong>Pelanggan</strong> dan <strong>Pemilik Toko (Owner)</strong>. Karyawan tidak memiliki akses manipulasi rekening.
+                                    Pesanan ini telah dibatalkan dengan pembayaran lunas (<strong>Rp @Model.TotalBayar.ToString("N0")</strong>). Pengisian nomor rekening serta eksekusi pengembalian dana (refund) sepenuhnya ditangani oleh <strong>Pelanggan</strong> dan <strong>Pemilik Toko</strong>. Karyawan tidak memiliki akses manipulasi rekening.
                                 </p>
                             </div>
                         }
@@ -647,11 +756,11 @@
                                     Pesanan ini telah dibatalkan namun pembayaran telah diverifikasi lunas (<strong>Rp @Model.TotalBayar.ToString("N0")</strong>). 
                                     @if (role == "User")
                                     {
-                                        <span>Silakan isi formulir di bawah ini dengan nomor rekening atau nomor HP e-wallet Anda agar Pemilik Toko (Owner) dapat mentransfer balik dana Anda.</span>
+                                        <span>Silakan isi formulir di bawah ini dengan nomor rekening atau nomor HP e-wallet Anda agar Pemilik Toko dapat mentransfer balik dana Anda.</span>
                                     }
                                     else
                                     {
-                                        <span>Nomor rekening pelanggan belum diisi oleh pelanggan. Anda (Owner) dapat mengisikan data rekening pelanggan di bawah jika menerima konfirmasi langsung via WhatsApp/Telepon.</span>
+                                        <span>Nomor rekening pelanggan belum diisi oleh pelanggan. Anda (Pemilik Toko) dapat mengisikan data rekening pelanggan di bawah jika menerima konfirmasi langsung via WhatsApp/Telepon.</span>
                                     }
                                 </p>
                             </div>
@@ -660,7 +769,7 @@
                             <div class="p-3 bg-white border rounded mb-3">
                                 <h6 class="font-weight-bold text-dark mb-3">
                                     <i class="fas fa-edit text-primary mr-1"></i> 
-                                    @(role == "Pemilik Toko" ? "Bantu Input Rekening Pelanggan (Khusus Owner)" : "Masukkan Rekening Pengembalian Dana Anda")
+                                    @(role == "Pemilik Toko" ? "Bantu Input Rekening Pelanggan (Khusus Pemilik Toko)" : "Masukkan Rekening Pengembalian Dana Anda")
                                 </h6>
                                 <form asp-action="InputRekeningRefund" method="post">
                                     @Html.AntiForgeryToken()
@@ -706,7 +815,7 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="pesananId" value="@Model.PesananId" />
                                 <div class="d-flex align-items-center mb-2">
-                                    <span class="badge badge-danger mr-2 px-2 py-1">Tindakan Wajib Owner</span>
+                                    <span class="badge badge-danger mr-2 px-2 py-1">Tindakan Wajib Pemilik Toko</span>
                                     <strong class="text-dark small">Transfer Pengembalian Dana: Rp @Model.TotalBayar.ToString("N0")</strong>
                                 </div>
                                 <p class="text-muted small mb-2">
@@ -738,7 +847,7 @@
                         else if (role == "Karyawan")
                         {
                             <div class="alert alert-warning small mb-0 mt-2 border-0">
-                                <i class="fas fa-clock mr-1"></i> Data rekening pelanggan telah tersimpan. Pengajuan refund sedang menunggu transfer dan konfirmasi oleh <strong>Pemilik Toko (Owner)</strong>.
+                                <i class="fas fa-clock mr-1"></i> Data rekening pelanggan telah tersimpan. Pengajuan refund sedang menunggu transfer dan konfirmasi oleh <strong>Pemilik Toko</strong>.
                             </div>
                         }
                         else

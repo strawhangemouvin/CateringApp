@@ -43,7 +43,11 @@ namespace CateringApp.Controllers
             var pagedList = list.Skip((page - 1) * size).Take(size).ToList();
 
             ViewBag.Search = search;
-            ViewBag.PeranId = new SelectList(_service.GetAllPeran(), "PeranId", "NamaPeran", peranId);
+            var perans = _service.GetAllPeran().Select(p => new {
+                p.PeranId,
+                NamaPeran = p.NamaPeran == "User" ? "Pelanggan" : p.NamaPeran
+            }).ToList();
+            ViewBag.PeranId = new SelectList(perans, "PeranId", "NamaPeran", peranId);
             ViewBag.SelectedPeran = peranId;
             ViewBag.Sort = sort;
             ViewBag.CurrentPage = page;
@@ -59,6 +63,10 @@ namespace CateringApp.Controllers
             // Pemilik Toko hanya ada 1 akun utama dan tidak boleh ditambahkan lagi
             var availableRoles = _service.GetAllPeran()
                 .Where(p => p.NamaPeran != "Pemilik Toko" && p.PeranId != 1)
+                .Select(p => new {
+                    p.PeranId,
+                    NamaPeran = p.NamaPeran == "User" ? "Pelanggan" : p.NamaPeran
+                })
                 .ToList();
             ViewBag.PeranId = new SelectList(availableRoles, "PeranId", "NamaPeran");
             return View();
@@ -146,6 +154,10 @@ namespace CateringApp.Controllers
 
             var availableRoles = _service.GetAllPeran()
                 .Where(p => p.NamaPeran != "Pemilik Toko" && p.PeranId != 1)
+                .Select(p => new {
+                    p.PeranId,
+                    NamaPeran = p.NamaPeran == "User" ? "Pelanggan" : p.NamaPeran
+                })
                 .ToList();
             ViewBag.PeranId = new SelectList(availableRoles, "PeranId", "NamaPeran", model.PeranId);
             return View(model);
@@ -162,7 +174,11 @@ namespace CateringApp.Controllers
             {
                 roles = roles.Where(p => p.NamaPeran != "Pemilik Toko" && p.PeranId != 1).ToList();
             }
-            ViewBag.PeranId = new SelectList(roles, "PeranId", "NamaPeran", data.PeranId);
+            var mappedRoles = roles.Select(p => new {
+                p.PeranId,
+                NamaPeran = p.NamaPeran == "User" ? "Pelanggan" : p.NamaPeran
+            }).ToList();
+            ViewBag.PeranId = new SelectList(mappedRoles, "PeranId", "NamaPeran", data.PeranId);
             return View(data);
         }
 
@@ -261,7 +277,11 @@ namespace CateringApp.Controllers
             {
                 roles = roles.Where(p => p.NamaPeran != "Pemilik Toko" && p.PeranId != 1).ToList();
             }
-            ViewBag.PeranId = new SelectList(roles, "PeranId", "NamaPeran", model.PeranId);
+            var mappedRoles = roles.Select(p => new {
+                p.PeranId,
+                NamaPeran = p.NamaPeran == "User" ? "Pelanggan" : p.NamaPeran
+            }).ToList();
+            ViewBag.PeranId = new SelectList(mappedRoles, "PeranId", "NamaPeran", model.PeranId);
             return View(model);
         }
 

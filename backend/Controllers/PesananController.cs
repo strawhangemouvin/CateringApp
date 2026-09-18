@@ -464,7 +464,7 @@ public class PesananController : Controller
         }
 
         _service.InputRekeningRefund(pesananId, namaBank, noRekening, atasNama);
-        TempData["Success"] = "Data rekening pengembalian dana berhasil disimpan. Pemilik Toko (Owner) telah menerima notifikasi untuk memproses transfer dana.";
+        TempData["Success"] = "Data rekening pengembalian dana berhasil disimpan. Pemilik Toko telah menerima notifikasi untuk memproses transfer dana.";
         return RedirectToAction("Details", new { id = pesananId });
     }
 

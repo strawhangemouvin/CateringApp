@@ -95,13 +95,13 @@
         <!-- Pagination Footer -->
         <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
             <div>
-                Showing @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) to @Math.Min((int)ViewBag.CurrentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalRecords) of @ViewBag.TotalRecords entries
+                Menampilkan @(((ViewBag.CurrentPage - 1) * ViewBag.PageSize) + 1) s.d. @Math.Min((int)ViewBag.CurrentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalRecords) dari @ViewBag.TotalRecords kategori
             </div>
             
             <nav>
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, sort = ViewBag.Sort, page = ViewBag.CurrentPage - 1, size = ViewBag.PageSize })">Prev</a>
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, sort = ViewBag.Sort, page = ViewBag.CurrentPage - 1, size = ViewBag.PageSize })">Sebelumnya</a>
                     </li>
                     @for (int i = 1; i <= ViewBag.TotalPages; i++)
                     {
@@ -110,7 +110,7 @@
                         </li>
                     }
                     <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages || ViewBag.TotalPages == 0 ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, sort = ViewBag.Sort, page = ViewBag.CurrentPage + 1, size = ViewBag.PageSize })">Next</a>
+                        <a class="page-link" href="@Url.Action("Index", new { search = ViewBag.Search, sort = ViewBag.Sort, page = ViewBag.CurrentPage + 1, size = ViewBag.PageSize })">Selanjutnya</a>
                     </li>
                 </ul>
             </nav>

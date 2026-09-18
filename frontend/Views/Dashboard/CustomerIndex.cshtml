@@ -3,7 +3,7 @@
 @{
     var session = HttpContextAccessor.HttpContext?.Session;
     string userFullName = session?.GetString("Nama") ?? "Pelanggan";
-    ViewData["Title"] = "Dashboard Pelanggan";
+    ViewData["Title"] = "Dasbor Pelanggan";
 }
 
 <!-- Modern Greeting Banner -->
@@ -139,7 +139,7 @@
                     </div>
                     <div>
                         <div class="font-weight-bold mb-0" style="font-size: 0.95rem;">Keranjang Belanja</div>
-                        <small class="text-muted">Periksa item dan checkout</small>
+                        <small class="text-muted">Periksa keranjang &amp; selesaikan pesanan</small>
                     </div>
                     <i class="fas fa-arrow-right ml-auto text-muted small"></i>
                 </a>
@@ -229,7 +229,7 @@
                                             else
                                             {
                                                 <span class="badge-modern badge-modern-warning">
-                                                    <i class="fas fa-clock"></i> Pending
+                                                    <i class="fas fa-clock"></i> Menunggu Bayar
                                                 </span>
                                             }
                                         </td>

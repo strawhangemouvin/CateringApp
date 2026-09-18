@@ -30,7 +30,7 @@
                 notifikasiList.Add(new NotifikasiItemViewModel
                 {
                     Judul = "Verifikasi Bukti Transfer!",
-                    Pesan = $"Pelanggan {unv.Pengguna?.NamaLengkap ?? "User"} mengunggah bukti bayar untuk {unv.NomorPesanan}.",
+                    Pesan = $"Pelanggan {unv.Pengguna?.NamaLengkap ?? "Pelanggan"} mengunggah bukti bayar untuk {unv.NomorPesanan}.",
                     Url = $"/Pesanan/Details/{unv.PesananId}",
                     Waktu = unv.Pembayaran != null ? unv.Pembayaran.TanggalBayar.ToString("dd MMM HH:mm") : "Hari ini",
                     Tipe = "warning",
@@ -179,7 +179,7 @@
             <!-- Left Side Navbar -->
             <ul class="navbar-nav align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link text-dark p-2" data-widget="pushmenu" href="#" role="button" title="Toggle Sidebar" style="font-size: 1.15rem;">
+                    <a class="nav-link text-dark p-2" data-widget="pushmenu" href="#" role="button" title="Buka/Tutup Menu" style="font-size: 1.15rem;">
                         <i class="fas fa-bars-staggered text-danger"></i>
                     </a>
                 </li>
@@ -204,7 +204,7 @@
                     </li>
                 }
 
-                <li class="nav-item d-none d-md-inline-block">
+                <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="btn btn-sm btn-modern-outline" style="padding: 6px 14px; font-size: 0.85rem; border-radius: var(--radius-pill);">
                         <i class="fas fa-store mr-1"></i> Beranda Toko
                     </a>
@@ -221,17 +221,20 @@
                     <div class="dropdown-menu dropdown-menu-right mt-2 shadow-lg border-0" style="border-radius: var(--radius-md); min-width: 200px;">
                         <div class="px-3 py-2 border-bottom">
                             <div class="font-weight-bold text-dark text-truncate">@nama</div>
-                            <span class="badge-role-pastel">@role</span>
+                            <span class="badge-role-pastel">@(role == "User" ? "Pelanggan" : (role == "Pemilik Toko" ? "Pemilik Toko" : role))</span>
                         </div>
-                        <a class="dropdown-item mt-1" href="@Url.Action("Index", "Dashboard")">
-                            <i class="fas fa-tachometer-alt mr-2 text-primary"></i> Dashboard
+                        <a class="dropdown-item mt-1" href="@Url.Action("Index", "Home")">
+                            <i class="fas fa-store mr-2 text-warning"></i> Beranda Toko
+                        </a>
+                        <a class="dropdown-item" href="@Url.Action("Index", "Dashboard")">
+                            <i class="fas fa-tachometer-alt mr-2 text-primary"></i> Dasbor
                         </a>
                         <a class="dropdown-item" href="@Url.Action("Index", "Pesanan")">
                             <i class="fas fa-receipt mr-2 text-success"></i> @(role == "User" ? "Pesanan Saya" : "Daftar Pesanan")
                         </a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item text-danger font-weight-bold" href="@Url.Action("Logout", "Account")" onclick="return confirm('Apakah Anda yakin ingin keluar dari sesi?');">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Keluar (Logout)
+                            <i class="fas fa-sign-out-alt mr-2"></i> Keluar
                         </a>
                     </div>
                 </li>
@@ -295,13 +298,13 @@
                                 @if (role == "Pemilik Toko")
                                 {
                                     <a href="@Url.Action("Index", "Dashboard")" class="small text-primary font-weight-bold">
-                                        <i class="fas fa-tachometer-alt mr-1"></i> Buka Dashboard Owner
+                                        <i class="fas fa-tachometer-alt mr-1"></i> Buka Dasbor Pemilik
                                     </a>
                                 }
                                 else if (role == "Karyawan")
                                 {
                                     <a href="@Url.Action("Index", "Dashboard")" class="small text-primary font-weight-bold">
-                                        <i class="fas fa-tachometer-alt mr-1"></i> Buka Dashboard Operasional
+                                        <i class="fas fa-tachometer-alt mr-1"></i> Buka Dasbor Operasional
                                     </a>
                                 }
                                 else
@@ -343,7 +346,7 @@
                     </div>
                     <div class="text-truncate">
                         <span class="d-block text-white font-weight-bold text-truncate" style="font-size: 0.9rem;">@nama</span>
-                        <span class="badge-role-sidebar">@role</span>
+                        <span class="badge-role-sidebar">@(role == "User" ? "Pelanggan" : (role == "Pemilik Toko" ? "Pemilik Toko" : role))</span>
                     </div>
                 </div>
 
@@ -354,19 +357,11 @@
                             Menu Utama
                         </li>
 
-                        <!-- Beranda Toko -->
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "Home")" class="nav-link @(currentController == "Home" ? "active" : "")">
-                                <i class="nav-icon fas fa-home"></i>
-                                <p>Beranda</p>
-                            </a>
-                        </li>
-
-                        <!-- Dashboard -->
+                        <!-- Dasbor -->
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "Dashboard")" class="nav-link @(currentController == "Dashboard" ? "active" : "")">
                                 <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>@(role == "Pemilik Toko" ? "Dashboard Owner" : (role == "Karyawan" ? "Dashboard Operasional" : "Dashboard Pelanggan"))</p>
+                                <p>@(role == "Pemilik Toko" ? "Dasbor Pemilik" : (role == "Karyawan" ? "Dasbor Operasional" : "Dasbor Pelanggan"))</p>
                             </a>
                         </li>
 
@@ -436,7 +431,7 @@
                         @if (role == "Pemilik Toko")
                         {
                             <li class="nav-header text-uppercase text-muted font-weight-bold px-3 mt-3 mb-1" style="font-size: 0.72rem; letter-spacing: 0.8px;">
-                                Pengaturan Owner
+                                Pengaturan Pemilik Toko
                             </li>
 
                             <li class="nav-item">
@@ -458,7 +453,7 @@
                         <li class="nav-item mt-4 pt-2 border-top border-secondary">
                             <a href="@Url.Action("Logout", "Account")" class="nav-link text-danger" onclick="return confirm('Apakah Anda yakin ingin keluar dari sesi?');">
                                 <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
-                                <p>Keluar (Logout)</p>
+                                <p>Keluar</p>
                             </a>
                         </li>
                     </ul>

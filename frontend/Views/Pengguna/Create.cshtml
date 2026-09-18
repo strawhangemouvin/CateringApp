@@ -36,12 +36,12 @@
                     <div class="alert alert-info border-0 rounded-3 mb-4 py-2 px-3 small" style="background-color: #f0fdf4; border-left: 4px solid #10b981 !important;">
                         <i class="fas fa-info-circle text-success mr-2 me-1"></i>
                         <span class="text-dark">
-                            Akun <strong>Pemilik Toko (Owner)</strong> hanya ada 1 utama. Formulir ini digunakan untuk mendaftarkan akun staf <strong>Karyawan</strong> operasional atau akun <strong>Pelanggan (User)</strong> baru.
+                            Akun <strong>Pemilik Toko</strong> hanya ada 1 akun utama. Formulir ini digunakan untuk mendaftarkan akun <strong>Karyawan</strong> operasional atau akun <strong>Pelanggan</strong> baru.
                         </span>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="PeranId" class="font-weight-bold text-dark small">Peran / Role <span class="text-danger">*</span></label>
+                        <label asp-for="PeranId" class="font-weight-bold text-dark small">Peran Pengguna <span class="text-danger">*</span></label>
                         <select asp-for="PeranId" class="form-control custom-select-scroll" asp-items="ViewBag.PeranId" required>
                             <option value="">-- Pilih Peran Pengguna --</option>
                         </select>
